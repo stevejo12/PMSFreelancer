@@ -41,5 +41,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
+      security:
+      - ApiKeyAuth: []
       summary: Register new user using email and password
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

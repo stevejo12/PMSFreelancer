@@ -1,9 +1,9 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 
+	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/controller"
 
 	"github.com/gin-gonic/gin"
@@ -13,8 +13,6 @@ import (
 	_ "github.com/stevejo12/PMSFreelancer/docs"
 )
 
-// DB => Store DB Connection upon initialization
-var DB *sql.DB
 var err error
 
 type loginInfo struct {
@@ -23,7 +21,8 @@ type loginInfo struct {
 }
 
 func init() {
-	controller.ConnectToDB()
+	config.ConnectToDB()
+	config.LoadConfig()
 }
 
 // @title Swagger API
@@ -44,8 +43,12 @@ func main() {
 
 	v1 := r.Group("/v1")
 	{
+		// v1.Use(auth())
 		// registration
-		v1.POST("/register", controller.RegisterNewUserViaEmailPassword)
+		v1.POST("/register", controller.RegisterUserWithPassword)
+		v1.POST("/login", controller.LoginUserWithPassword)
+		// v1.GET("/getBoardTrello", controller.GetUserTrelloBoard)
+		v1.POST("/createBoardTrello", controller.CreateNewBoard)
 	}
 	// r.POST("/register/google", controller.registerNewUserUsingGoogle)
 
@@ -69,3 +72,19 @@ func Cors() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// func auth() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		authHeader := c.GetHeader("Authorization")
+// 		if len(authHeader) == 0 {
+// 			httputil.NewError(c, http.StatusUnauthorized, errors.New("Authorization is required Header"))
+// 			c.Abort()
+// 		}
+// 		fmt.Println("sample answer", config.Config.APIKey)
+// 		if authHeader != config.Config.APIKey {
+// 			httputil.NewError(c, http.StatusUnauthorized, fmt.Errorf("this user isn't authorized to this operation: api_key=%s", authHeader))
+// 			c.Abort()
+// 		}
+// 		c.Next()
+// 	}
+// }
