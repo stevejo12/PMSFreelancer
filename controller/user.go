@@ -9,12 +9,21 @@ import (
 
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/helpers"
+	"github.com/stevejo12/PMSFreelancer/models"
+
+	// "PMSFreelancer/config"
+	// "PMSFreelancer/helpers"
+	// "PMSFreelancer/models"
+
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
 var err error
+
+var jwtKey = []byte("key_spirits")
 
 type userPassword struct {
 	Email    string
@@ -172,7 +181,33 @@ func LoginUserWithPassword(c *gin.Context) {
 		return
 	}
 
+	// setting token expiration
+	expirationTime := time.Now().Add(5 * time.Minute)
+	claims := &models.TokenClaims{
+		Username: user.Email,
+		StandardClaims: jwt.StandardClaims{
+			// In JWT, the expiry time is expressed as unix milliseconds
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := jwtToken.SignedString(jwtKey)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		c.Abort()
+	}
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:    "token",
+		Value:   tokenString,
+		Expires: expirationTime,
+	})
+
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusText(http.StatusOK),
-		"message": "Login information is correct"})
+		"message": "Login information is correct",
+		"token":   jwtToken})
 }

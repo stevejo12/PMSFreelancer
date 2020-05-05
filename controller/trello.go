@@ -14,9 +14,10 @@ import (
 // key token pribadi
 var key = "d8370c65b1067ab8f964c7102544080f"
 
-// var token = "1761f2e9417b6855adf4f50dc00d4721086d6fad6c079a966b673f6c8e927432"
+var token = "1761f2e9417b6855adf4f50dc00d4721086d6fad6c079a966b673f6c8e927432"
+
 // token pinjeman
-var token = "51ee616bd00d17e7615e2aca0dc0d849211863855567446935478143a96c4115"
+// var token = "51ee616bd00d17e7615e2aca0dc0d849211863855567446935478143a96c4115"
 var client = trello.NewClient(key, token)
 
 // CreateNewBoard godoc
@@ -25,7 +26,7 @@ var client = trello.NewClient(key, token)
 func CreateNewBoard(c *gin.Context) {
 	client := trello.NewClient(key, token)
 
-	boardName := "testing 1 2 3"
+	boardName := "testing with auth"
 
 	board := trello.NewBoard(boardName)
 

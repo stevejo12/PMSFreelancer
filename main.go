@@ -2,9 +2,18 @@ package main
 
 import (
 	"log"
+	"net/http"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/controller"
+	"github.com/stevejo12/PMSFreelancer/models"
+
+	// for development
+	// "PMSFreelancer/config"
+	// "PMSFreelancer/controller"
+	// "PMSFreelancer/models"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -14,6 +23,8 @@ import (
 )
 
 var err error
+
+var jwtKey = []byte("key_spirits")
 
 type loginInfo struct {
 	username string
@@ -43,14 +54,11 @@ func main() {
 
 	v1 := r.Group("/v1")
 	{
-		// v1.Use(auth())
 		// registration
 		v1.POST("/register", controller.RegisterUserWithPassword)
 		v1.POST("/login", controller.LoginUserWithPassword)
-		// v1.GET("/getBoardTrello", controller.GetUserTrelloBoard)
-		v1.POST("/createBoardTrello", controller.CreateNewBoard)
+		v1.POST("/createBoardTrello", auth, controller.CreateNewBoard)
 	}
-	// r.POST("/register/google", controller.registerNewUserUsingGoogle)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -73,18 +81,77 @@ func Cors() gin.HandlerFunc {
 	}
 }
 
-// func auth() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		authHeader := c.GetHeader("Authorization")
-// 		if len(authHeader) == 0 {
-// 			httputil.NewError(c, http.StatusUnauthorized, errors.New("Authorization is required Header"))
-// 			c.Abort()
+// func auth(c *gin.Context) {
+// 	tokenString := c.Request.Header.Get("Authorization")
+// 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+// 		if jwt.GetSigningMethod("HS256") != token.Method {
+// 			return nil, fmt.Errorf("Unexpected signging method: %v", token.Header)
 // 		}
-// 		fmt.Println("sample answer", config.Config.APIKey)
-// 		if authHeader != config.Config.APIKey {
-// 			httputil.NewError(c, http.StatusUnauthorized, fmt.Errorf("this user isn't authorized to this operation: api_key=%s", authHeader))
-// 			c.Abort()
+
+// 		return []byte("secret"), nil
+// 	})
+
+// 	if token != nil && err == nil {
+// 		fmt.Println("token verified")
+// 	} else {
+// 		result := gin.H{
+// 			"message": "Token not authorized",
+// 			"error":   err.Error(),
 // 		}
-// 		c.Next()
+
+// 		c.JSON(http.StatusUnauthorized, result)
+// 		c.Abort()
 // 	}
 // }
+
+func auth(c *gin.Context) {
+	cookie, err := c.Request.Cookie("token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+		}
+
+		// For any other type of error, return a bad request status
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		c.Abort()
+	}
+
+	// Get the JWT string from the cookie
+	tknStr := cookie.Value
+
+	// Initialize a new instance of `Claims`
+	claims := &models.TokenClaims{}
+
+	// Parse the JWT string and store the result in `claims`.
+	// Note that we are passing the key in this method as well. This method will return an error
+	// if the token is invalid (if it has expired according to the expiry time we set on sign in),
+	// or if the signature does not match
+	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+		}
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		c.Abort()
+	}
+	if !tkn.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": err.Error(),
+		})
+		c.Abort()
+	}
+}
