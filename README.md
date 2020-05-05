@@ -12,3 +12,4 @@ Dependencies needed:(using go get [dependencies])
     github.com/alecthomas/template
     github.com/go-sql-driver/mysql
     github.com/adlio/trello
+    github.com/dgrijalva/jwt-go
