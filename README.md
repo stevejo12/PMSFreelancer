@@ -13,3 +13,4 @@ Dependencies needed:(using go get [dependencies])
     github.com/go-sql-driver/mysql
     github.com/adlio/trello
     github.com/dgrijalva/jwt-go
+    golang.org/x/oauth2
