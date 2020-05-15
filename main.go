@@ -1,10 +1,14 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/controller"
@@ -23,6 +27,18 @@ import (
 )
 
 var err error
+
+var (
+	googleOauthConfig = &oauth2.Config{
+		RedirectURL:  "http://localhost:8080/v1/signin-callback",
+		ClientID:     "776281301027-aincdrlljhjdmu39lfq2aunqeofn1hi8.apps.googleusercontent.com",
+		ClientSecret: "5q_niwCvO1dAFEzT2QkcQkok",
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Endpoint:     google.Endpoint,
+	}
+	// TO DO: randomize it
+	randomState = "random"
+)
 
 var jwtKey = []byte("key_spirits")
 
@@ -50,14 +66,14 @@ func main() {
 	r.Use(gin.Logger())
 	r.Use(Cors())
 
-	// url := ginSwagger.URL("http://localhost:8080/swagger/doc.json")
-
 	v1 := r.Group("/v1")
 	{
-		// registration
+		v1.GET("/", handleHome)
 		v1.POST("/register", controller.RegisterUserWithPassword)
 		v1.POST("/login", controller.LoginUserWithPassword)
 		v1.POST("/createBoardTrello", auth, controller.CreateNewBoard)
+		v1.GET("/googleLogin", handleLoginGoogle)
+		v1.GET("/signin-callback", handleCallback)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -73,6 +89,63 @@ func main() {
 	}
 }
 
+// handleHome, handleLoginGoogle, handleCallback might change later
+// this functions work for google sign in will be getting the google_id for the email
+func handleHome(c *gin.Context) {
+	fmt.Println("test 1 2 3 4")
+	fmt.Println(c.Request.URL.Path)
+	if c.Request.URL.Path != "/v1/" {
+		fmt.Println("error wrong path")
+		return
+	}
+
+	const html = `<html><body><a href="/v1/googleLogin"> Google Log In</a></body></html>`
+	c.Writer.Write([]byte(html))
+}
+
+func handleLoginGoogle(c *gin.Context) {
+	url := googleOauthConfig.AuthCodeURL(randomState)
+	c.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+func handleCallback(c *gin.Context) {
+	if c.Request.FormValue("state") != randomState {
+		fmt.Println("State is not valid")
+		c.Redirect(http.StatusTemporaryRedirect, "/v1")
+		c.Abort()
+	}
+
+	token, err := googleOauthConfig.Exchange(oauth2.NoContext, c.Request.FormValue("code"))
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		c.Abort()
+	}
+
+	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		c.Abort()
+	}
+
+	defer resp.Body.Close()
+
+	content, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		c.Abort()
+	}
+
+	fmt.Fprintf(c.Writer, "Response: %s", content)
+}
+
 // Cors => allow access to non origin
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -81,29 +154,7 @@ func Cors() gin.HandlerFunc {
 	}
 }
 
-// func auth(c *gin.Context) {
-// 	tokenString := c.Request.Header.Get("Authorization")
-// 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-// 		if jwt.GetSigningMethod("HS256") != token.Method {
-// 			return nil, fmt.Errorf("Unexpected signging method: %v", token.Header)
-// 		}
-
-// 		return []byte("secret"), nil
-// 	})
-
-// 	if token != nil && err == nil {
-// 		fmt.Println("token verified")
-// 	} else {
-// 		result := gin.H{
-// 			"message": "Token not authorized",
-// 			"error":   err.Error(),
-// 		}
-
-// 		c.JSON(http.StatusUnauthorized, result)
-// 		c.Abort()
-// 	}
-// }
-
+// auth => authentication to get a token for login into SPIRITS
 func auth(c *gin.Context) {
 	cookie, err := c.Request.Cookie("token")
 	if err != nil {
