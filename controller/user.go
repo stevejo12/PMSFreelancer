@@ -197,7 +197,7 @@ func LoginUserWithPassword(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
-		c.Abort()
+		return
 	}
 
 	http.SetCookie(c.Writer, &http.Cookie{
@@ -210,4 +210,62 @@ func LoginUserWithPassword(c *gin.Context) {
 		"code":    http.StatusText(http.StatusOK),
 		"message": "Login information is correct",
 		"token":   jwtToken})
+}
+
+// ChangeUserPassword => Changing user password
+func ChangeUserPassword(c *gin.Context) {
+	var data models.ChangePassword
+	var databaseEmail string
+	var databasePassword string
+
+	err := c.Bind(&data)
+
+	// checking empty body data
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusText(http.StatusBadRequest),
+			"message": "Data format is not as expected"})
+		return
+	}
+
+	err = config.DB.QueryRow("SELECT email, password FROM login WHERE email=?", data.Email).Scan(&databaseEmail, &databasePassword)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server unable to find the user email"})
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(databasePassword), []byte(data.OldPassword))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusText(http.StatusBadRequest),
+			"message": "Old password is incorrect"})
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.NewPassword), bcrypt.DefaultCost)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server generate hashed password"})
+		return
+	}
+
+	_, err = config.DB.Exec("UPDATE login SET password=? WHERE email=?", hashedPassword, data.Email)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server unable to execute query to database"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusText(http.StatusOK),
+		"message": "Password has been successfully updated"})
 }
