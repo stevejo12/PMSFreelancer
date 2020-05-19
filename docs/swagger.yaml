@@ -1,10 +1,28 @@
 basePath: /v1
 definitions:
-  controller.newUserPasswordRegistration:
+  controller.userPassword:
     properties:
       email:
         type: string
       password:
+        type: string
+    type: object
+  models.ChangePassword:
+    properties:
+      email:
+        type: string
+      newPassword:
+        type: string
+      oldPassword:
+        type: string
+    type: object
+  models.ResponseLoginWithToken:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+      token:
         type: string
     type: object
   models.ResponseWithNoBody:
@@ -23,6 +41,56 @@ info:
   title: Swagger API
   version: "1.0"
 paths:
+  /change-password:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Information needed to change password
+        in: body
+        name: Info
+        required: true
+        schema:
+          $ref: '#/definitions/models.ChangePassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Register new user using email and password
+  /login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Account
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/controller.userPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseLoginWithToken'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Login user using email and password
   /register:
     post:
       consumes:
@@ -33,7 +101,7 @@ paths:
         name: account
         required: true
         schema:
-          $ref: '#/definitions/controller.newUserPasswordRegistration'
+          $ref: '#/definitions/controller.userPassword'
       produces:
       - application/json
       responses:
@@ -41,12 +109,9 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
-      security:
-      - ApiKeyAuth: []
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
       summary: Register new user using email and password
-securityDefinitions:
-  ApiKeyAuth:
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"

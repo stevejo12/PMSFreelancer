@@ -9,18 +9,20 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
-	"github.com/stevejo12/PMSFreelancer/config"
-	"github.com/stevejo12/PMSFreelancer/controller"
+	// "github.com/stevejo12/PMSFreelancer/config"
+	// "github.com/stevejo12/PMSFreelancer/controller"
 
 	// for development
-	// "PMSFreelancer/config"
-	// "PMSFreelancer/controller"
+	"PMSFreelancer/config"
+	"PMSFreelancer/controller"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	_ "github.com/stevejo12/PMSFreelancer/docs"
+	// _ "github.com/stevejo12/PMSFreelancer/docs"
+
+	_ "PMSFreelancer/docs"
 )
 
 var err error
@@ -63,15 +65,19 @@ func main() {
 	r.Use(gin.Logger())
 	r.Use(Cors())
 
+	r.GET("/", handleHome)
+
 	v1 := r.Group("/v1")
 	{
-		v1.GET("/", handleHome)
+		// v1.GET("/", handleHome)
 		v1.POST("/register", controller.RegisterUserWithPassword)
 		v1.POST("/login", controller.LoginUserWithPassword)
+		v1.POST("/logout", controller.HandleLogout)
 		v1.POST("/createBoardTrello", controller.AuthenticationToken, controller.CreateNewBoard)
 		v1.GET("/googleLogin", handleLoginGoogle)
 		v1.GET("/signin-callback", handleCallback)
 		v1.PUT("/change-password", controller.AuthenticationToken, controller.ChangeUserPassword)
+		v1.POST("/resetPassword", controller.ResetPassword)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

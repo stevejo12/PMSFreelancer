@@ -7,21 +7,28 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/stevejo12/PMSFreelancer/config"
-	"github.com/stevejo12/PMSFreelancer/helpers"
-	"github.com/stevejo12/PMSFreelancer/models"
+	// "github.com/stevejo12/PMSFreelancer/config"
+	// "github.com/stevejo12/PMSFreelancer/helpers"
+	// "github.com/stevejo12/PMSFreelancer/models"
 
-	// "PMSFreelancer/config"
-	// "PMSFreelancer/helpers"
-	// "PMSFreelancer/models"
+	"PMSFreelancer/config"
+	"PMSFreelancer/helpers"
+	"PMSFreelancer/models"
 
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/gomail.v2"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
 var err error
+
+// CONFIG_SMTP_HOST => config hosting to send email
+const CONFIG_SMTP_HOST = "smtp.gmail.com"
+const CONFIG_SMTP_PORT = 587
+const CONFIG_EMAIL = "spirits.project.thesis@gmail.com"
+const CONFIG_PASSWORD = "kevindjoni123"
 
 var jwtKey = []byte("key_spirits")
 
@@ -30,17 +37,13 @@ type userPassword struct {
 	Password string
 }
 
-type userGoogle struct {
-	email    string
-	googleID string
-}
-
 // RegisterUserWithPassword godoc
 // @Summary Register new user using email and password
 // @Produce json
 // @Accept  json
 // @Param account body userPassword true "Account"
 // @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
 // @Router /register [post]
 func RegisterUserWithPassword(c *gin.Context) {
 	var newUser userPassword
@@ -105,14 +108,10 @@ func RegisterUserWithPassword(c *gin.Context) {
 
 		selDB, err := config.DB.Prepare("INSERT INTO login(email, password, created_at, status) VALUES(?,?,?,?)")
 
-		fmt.Println(err)
-
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusText(http.StatusInternalServerError),
-				"message": "Error preparing add user",
-				"data":    []userPassword{}})
-
+				"message": "Error preparing add user"})
 			return
 		}
 
@@ -135,8 +134,6 @@ func RegisterUserWithPassword(c *gin.Context) {
 			"code":    http.StatusText(http.StatusBadRequest),
 			"message": "Email exists in the database"})
 	} else {
-		fmt.Println(err)
-
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusText(http.StatusInternalServerError),
 			"message": "Server unable to create your account"})
@@ -145,6 +142,13 @@ func RegisterUserWithPassword(c *gin.Context) {
 }
 
 // LoginUserWithPassword godoc
+// @Summary Login user using email and password
+// @Produce json
+// @Accept  json
+// @Param account body userPassword true "Account"
+// @Success 200 {object} models.ResponseLoginWithToken
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /login [post]
 func LoginUserWithPassword(c *gin.Context) {
 	var user userPassword
 
@@ -213,6 +217,15 @@ func LoginUserWithPassword(c *gin.Context) {
 }
 
 // ChangeUserPassword => Changing user password
+// ChangeUserPassword godoc
+// @Summary Register new user using email and password
+// @Produce json
+// @Accept  json
+// @Param Info body models.ChangePassword true "Information needed to change password"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /change-password [put]
 func ChangeUserPassword(c *gin.Context) {
 	var data models.ChangePassword
 	var databaseEmail string
@@ -231,7 +244,6 @@ func ChangeUserPassword(c *gin.Context) {
 	err = config.DB.QueryRow("SELECT email, password FROM login WHERE email=?", data.Email).Scan(&databaseEmail, &databasePassword)
 
 	if err != nil {
-		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusText(http.StatusInternalServerError),
 			"message": "Server unable to find the user email"})
@@ -268,4 +280,83 @@ func ChangeUserPassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusText(http.StatusOK),
 		"message": "Password has been successfully updated"})
+}
+
+// HandleLogout => Log out from SPIRITS
+func HandleLogout(c *gin.Context) {
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:   "token",
+		Value:  "",
+		MaxAge: -1,
+	})
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusText(http.StatusOK),
+		"message": "Successfully logged out"})
+}
+
+// ResetPassword => Sending email feature to reset password
+func ResetPassword(c *gin.Context) {
+	var data models.ResetPassword
+	var mail string
+
+	err := c.Bind(&data)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusText(http.StatusBadRequest),
+			"message": "Data format is not as expected"})
+		return
+	}
+
+	err = config.DB.QueryRow("SELECT email FROM login WHERE email=?", data.Email).Scan(&mail)
+
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusText(http.StatusBadRequest),
+			"message": "Email is not registered in our database"})
+		return
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusBadRequest),
+			"message": "Server unable to get information from database"})
+		return
+	}
+
+	// generate link to the reset password
+	// TO DO: make a generated link
+	link := "https://localhost:8080/home"
+
+	msg := fmt.Sprintf(`<html>
+	<body>
+	<p>Dear, asdf</p>
+	<br>
+	<p>You have requested a reset password for SPIRITS application</p>
+	<p>This is the link to reset your password: %s</p>
+	<p>Note: This link expires in 30 minutes after this email is recieved</p>
+	<br>
+	<p>Best Regards,</p>
+	SPIRITS Team
+	</body>
+	</html>`, link)
+
+	// setting up the content for the email
+	m := gomail.NewMessage()
+	m.SetHeader("From", CONFIG_EMAIL)
+	m.SetHeader("To", mail)
+	m.SetHeader("Subject", "You have requested to reset password")
+	m.SetBody("text/html", msg)
+
+	// Send the email to user
+	d := gomail.NewPlainDialer(CONFIG_SMTP_HOST, CONFIG_SMTP_PORT, CONFIG_EMAIL, CONFIG_PASSWORD)
+	if err := d.DialAndSend(m); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server unable to send email to user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusText(http.StatusOK),
+		"message": "Email has been send"})
 }
