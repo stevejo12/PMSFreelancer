@@ -9,20 +9,14 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
-	// "github.com/stevejo12/PMSFreelancer/config"
-	// "github.com/stevejo12/PMSFreelancer/controller"
-
-	// for development
-	"PMSFreelancer/config"
-	"PMSFreelancer/controller"
+	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/controller"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	// _ "github.com/stevejo12/PMSFreelancer/docs"
-
-	_ "PMSFreelancer/docs"
+	_ "github.com/stevejo12/PMSFreelancer/docs"
 )
 
 var err error
