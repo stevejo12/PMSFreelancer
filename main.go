@@ -59,11 +59,9 @@ func main() {
 	r.Use(gin.Logger())
 	r.Use(Cors())
 
-	r.GET("/", handleHome)
-
 	v1 := r.Group("/v1")
 	{
-		// v1.GET("/", handleHome)
+		v1.GET("/", handleHome)
 		v1.POST("/register", controller.RegisterUserWithPassword)
 		v1.POST("/login", controller.LoginUserWithPassword)
 		v1.POST("/logout", controller.HandleLogout)
