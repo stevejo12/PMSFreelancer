@@ -7,13 +7,13 @@ import (
 	"reflect"
 	"time"
 
-	// "github.com/stevejo12/PMSFreelancer/config"
-	// "github.com/stevejo12/PMSFreelancer/helpers"
-	// "github.com/stevejo12/PMSFreelancer/models"
+	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/helpers"
+	"github.com/stevejo12/PMSFreelancer/models"
 
-	"PMSFreelancer/config"
-	"PMSFreelancer/helpers"
-	"PMSFreelancer/models"
+	// "PMSFreelancer/config"
+	// "PMSFreelancer/helpers"
+	// "PMSFreelancer/models"
 
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
