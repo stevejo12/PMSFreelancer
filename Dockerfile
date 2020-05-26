@@ -29,10 +29,6 @@ RUN go get github.com/dgrijalva/jwt-go
 RUN go get golang.org/x/oauth2
 RUN go get cloud.google.com/go
 
-ENV PORT 5000
-
 RUN go build -o main .
-
-EXPOSE $PORT
 
 CMD ["/app/main"]
