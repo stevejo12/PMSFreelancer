@@ -11,12 +11,15 @@ import (
 
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/controller"
+	_ "github.com/stevejo12/PMSFreelancer/docs"
+
+	// "PMSFreelancer/config"
+	// "PMSFreelancer/controller"
+	// "PMSFreelancer/docs"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
-	_ "github.com/stevejo12/PMSFreelancer/docs"
 )
 
 var err error
@@ -69,6 +72,8 @@ func main() {
 		v1.GET("/googleLogin", handleLoginGoogle)
 		v1.GET("/signin-callback", handleCallback)
 		v1.PUT("/change-password", controller.AuthenticationToken, controller.ChangeUserPassword)
+		v1.GET("/allSkills", controller.AuthenticationToken, controller.GetAllSkills)
+		v1.POST("/updateSkills/:id", controller.AuthenticationToken, controller.UpdateUserSkills)
 		v1.POST("/resetPassword", controller.ResetPassword)
 	}
 

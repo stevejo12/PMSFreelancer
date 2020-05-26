@@ -1,6 +1,9 @@
 package helpers
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // IsEmpty => checking if string data is empty or not
 func IsEmpty(data string) bool {
@@ -15,4 +18,15 @@ func ConvertToString(val interface{}) string {
 	str := fmt.Sprintf("%v", val)
 
 	return str
+}
+
+// SplitComma => split string value separated by comma
+func SplitComma(val string) []string {
+	split := strings.Split(val, ",")
+
+	if len(split) <= 0 {
+		return []string{}
+	} else {
+		return split
+	}
 }

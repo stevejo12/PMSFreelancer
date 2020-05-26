@@ -360,3 +360,144 @@ func ResetPassword(c *gin.Context) {
 		"code":    http.StatusText(http.StatusOK),
 		"message": "Email has been send"})
 }
+
+// GetAllSkills => Retrieved all the possible skill options available for users
+func GetAllSkills(c *gin.Context) {
+	data, err := config.DB.Query("SELECT * FROM skills")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server unable to execute query to database"})
+		return
+	}
+
+	var allData []models.UserSkills
+
+	for data.Next() {
+		// Scan one customer record
+		var skills models.UserSkills
+		if err := data.Scan(&skills.ID, &skills.Name, &skills.Created_at, &skills.Updated_at); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusText(http.StatusInternalServerError),
+				"message": "Something is wrong with the database data"})
+			return
+		}
+		allData = append(allData, skills)
+	}
+	if data.Err() != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Something is wrong with the data retrieved"})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server unable to execute query"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusText(http.StatusOK),
+		"message": "All Skills data have been successfully retrieved",
+		"data":    allData})
+}
+
+func UpdateUserSkills(c *gin.Context) {
+	id := c.Param("id")
+
+	var data models.UpdateSkills
+
+	err = c.Bind(&data)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusText(http.StatusBadRequest),
+			"message": "Data format is invalid"})
+		return
+	}
+
+	var totalSkills int
+	var count int
+
+	err = config.DB.QueryRow("SELECT COUNT(*) FROM login WHERE id=?", id).Scan(&count)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server unable to execute query to database"})
+		return
+	} else if count != 1 {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusOK),
+			"message": "Data is not exactly 1"})
+		return
+	}
+
+	err = config.DB.QueryRow("SELECT COUNT(*) FROM skills").Scan(&totalSkills)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server unable to execute query to database"})
+		return
+	}
+
+	splittedData := helpers.SplitComma(data.Skills)
+	// var errMessage error
+
+	var allSkills []string
+
+	rows, err := config.DB.Query("SELECT id from skills")
+
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server unable to execute query to database"})
+		return
+	}
+
+	var skillid string
+	for rows.Next() {
+		err := rows.Scan(&skillid)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusText(http.StatusInternalServerError),
+				"message": "Server has issue to scan the database value"})
+			return
+		}
+
+		allSkills = append(allSkills, skillid)
+	}
+
+	fmt.Println(splittedData)
+	fmt.Println(allSkills)
+
+	for i := 0; i < len(splittedData); i++ {
+		exist := helpers.Contains(allSkills, splittedData[i])
+
+		if !exist {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusText(http.StatusBadRequest),
+				"message": "There is a value that does not exist in the database id"})
+			return
+		}
+	}
+
+	_, err = config.DB.Exec("UPDATE login SET skill=? WHERE id=?", data.Skills, id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server has execute query to the database"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusText(http.StatusOK),
+		"message": "All Skills data have been successfully updated"})
+}

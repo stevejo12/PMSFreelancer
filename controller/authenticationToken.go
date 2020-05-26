@@ -17,6 +17,7 @@ func AuthenticationToken(c *gin.Context) {
 				"message": err.Error(),
 			})
 			c.Abort()
+			return
 		}
 
 		// For any other type of error, return a bad request status
@@ -24,6 +25,7 @@ func AuthenticationToken(c *gin.Context) {
 			"message": err.Error(),
 		})
 		c.Abort()
+		return
 	}
 
 	// Get the JWT string from the cookie
@@ -46,17 +48,20 @@ func AuthenticationToken(c *gin.Context) {
 				"message": err.Error(),
 			})
 			c.Abort()
+			return
 		}
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		c.Abort()
+		return
 	}
 	if !tkn.Valid {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": err.Error(),
 		})
 		c.Abort()
+		return
 	}
 }
