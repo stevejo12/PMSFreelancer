@@ -68,7 +68,7 @@ func main() {
 		v1.POST("/register", controller.RegisterUserWithPassword)
 		v1.POST("/login", controller.LoginUserWithPassword)
 		v1.POST("/logout", controller.HandleLogout)
-		v1.POST("/createBoardTrello", controller.AuthenticationToken, controller.CreateNewBoard)
+		v1.POST("/createBoardTrello/:id", controller.AuthenticationToken, controller.CreateNewBoard)
 		v1.GET("/googleLogin", handleLoginGoogle)
 		v1.GET("/signin-callback", handleCallback)
 		v1.PUT("/change-password", controller.AuthenticationToken, controller.ChangeUserPassword)
