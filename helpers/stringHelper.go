@@ -30,3 +30,14 @@ func SplitComma(val string) []string {
 		return split
 	}
 }
+
+// SplitComma => split string value separated by space bar " "
+func SplitSpace(val string) []string {
+	split := strings.Split(val, " ")
+
+	if len(split) <= 0 {
+		return []string{}
+	} else {
+		return split
+	}
+}

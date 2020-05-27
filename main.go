@@ -15,7 +15,7 @@ import (
 
 	// "PMSFreelancer/config"
 	// "PMSFreelancer/controller"
-	// "PMSFreelancer/docs"
+	// _ "PMSFreelancer/docs"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"

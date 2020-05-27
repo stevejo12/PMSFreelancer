@@ -2,6 +2,7 @@ package controller
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -32,11 +33,6 @@ const CONFIG_PASSWORD = "kevindjoni123"
 
 var jwtKey = []byte("key_spirits")
 
-type userPassword struct {
-	Email    string
-	Password string
-}
-
 // RegisterUserWithPassword godoc
 // @Summary Register new user using email and password
 // @Produce json
@@ -46,7 +42,7 @@ type userPassword struct {
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /register [post]
 func RegisterUserWithPassword(c *gin.Context) {
-	var newUser userPassword
+	var newUser models.RegistrationUserUsingPassword
 	var multipleError []string
 
 	err = c.Bind(&newUser)
@@ -100,13 +96,58 @@ func RegisterUserWithPassword(c *gin.Context) {
 			return
 		}
 
+		// checking full name
+		// splitting into first name and last name
+		firstname, lastname, err := helpers.SplittingFullname(newUser.Fullname)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "Fullname is empty"})
+			return
+		}
+
+		// checking the skills list provided
+		err = helpers.SkillList(newUser.Skills)
+
+		if err != nil {
+			if err == errors.New("not exist") {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"code":    http.StatusBadRequest,
+					"message": "There is a value that does not exist in the database id"})
+				return
+			}
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusText(http.StatusInternalServerError),
+				"message": "Server is unable execute query to the database"})
+			return
+		}
+
+		// checking location (expect the country id)
+		err = helpers.CountryList(newUser.Location)
+
+		if err != nil {
+			if err == errors.New("not exist") {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"code":    http.StatusBadRequest,
+					"message": "Country ID does not exist in the database"})
+				return
+			}
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusText(http.StatusInternalServerError),
+				"message": "Server is unable execute query to the database"})
+			return
+		}
+
 		// setting up data for inserting into database
 		locationIndonesia, _ := time.LoadLocation("Asia/Jakarta")
 		timeIndonesia := time.Now().In(locationIndonesia)
 
 		formattedDate := fmt.Sprintf("%d-%02d-%02d", timeIndonesia.Year(), timeIndonesia.Month(), timeIndonesia.Day())
 
-		selDB, err := config.DB.Prepare("INSERT INTO login(email, password, created_at, status) VALUES(?,?,?,?)")
+		selDB, err := config.DB.Prepare("INSERT INTO login(email, password, created_at, status, username, description,first_name, last_name, location, skill) VALUES(?,?,?,?,?,?,?,?,?,?)")
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -116,7 +157,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 		}
 
 		// status at first created should be active
-		_, err = selDB.Exec(newUser.Email, hashedPassword, formattedDate, "active")
+		_, err = selDB.Exec(newUser.Email, hashedPassword, formattedDate, "active", newUser.Username, newUser.Description, firstname, lastname, newUser.Location, newUser.Skills)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -150,7 +191,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /login [post]
 func LoginUserWithPassword(c *gin.Context) {
-	var user userPassword
+	var user models.LoginUserPassword
 
 	err = c.Bind(&user)
 
@@ -361,50 +402,6 @@ func ResetPassword(c *gin.Context) {
 		"message": "Email has been send"})
 }
 
-// GetAllSkills => Retrieved all the possible skill options available for users
-func GetAllSkills(c *gin.Context) {
-	data, err := config.DB.Query("SELECT * FROM skills")
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
-			"message": "Server unable to execute query to database"})
-		return
-	}
-
-	var allData []models.UserSkills
-
-	for data.Next() {
-		// Scan one customer record
-		var skills models.UserSkills
-		if err := data.Scan(&skills.ID, &skills.Name, &skills.Created_at, &skills.Updated_at); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusText(http.StatusInternalServerError),
-				"message": "Something is wrong with the database data"})
-			return
-		}
-		allData = append(allData, skills)
-	}
-	if data.Err() != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
-			"message": "Something is wrong with the data retrieved"})
-		return
-	}
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
-			"message": "Server unable to execute query"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusText(http.StatusOK),
-		"message": "All Skills data have been successfully retrieved",
-		"data":    allData})
-}
-
 func UpdateUserSkills(c *gin.Context) {
 	id := c.Param("id")
 
@@ -445,47 +442,20 @@ func UpdateUserSkills(c *gin.Context) {
 		return
 	}
 
-	splittedData := helpers.SplitComma(data.Skills)
-	// var errMessage error
-
-	var allSkills []string
-
-	rows, err := config.DB.Query("SELECT id from skills")
+	err = helpers.SkillList(data.Skills)
 
 	if err != nil {
-		fmt.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
-			"message": "Server unable to execute query to database"})
-		return
-	}
-
-	var skillid string
-	for rows.Next() {
-		err := rows.Scan(&skillid)
-
-		if err != nil {
+		if err == errors.New("not exist") {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusText(http.StatusInternalServerError),
-				"message": "Server has issue to scan the database value"})
-			return
-		}
-
-		allSkills = append(allSkills, skillid)
-	}
-
-	fmt.Println(splittedData)
-	fmt.Println(allSkills)
-
-	for i := 0; i < len(splittedData); i++ {
-		exist := helpers.Contains(allSkills, splittedData[i])
-
-		if !exist {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    http.StatusText(http.StatusBadRequest),
+				"code":    http.StatusBadRequest,
 				"message": "There is a value that does not exist in the database id"})
 			return
 		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusText(http.StatusInternalServerError),
+			"message": "Server is unable execute query to the database"})
+		return
 	}
 
 	_, err = config.DB.Exec("UPDATE login SET skill=? WHERE id=?", data.Skills, id)
@@ -493,7 +463,7 @@ func UpdateUserSkills(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusText(http.StatusInternalServerError),
-			"message": "Server has execute query to the database"})
+			"message": "Server is unable execute query to the database"})
 		return
 	}
 

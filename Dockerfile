@@ -29,6 +29,6 @@ RUN go get github.com/dgrijalva/jwt-go
 RUN go get golang.org/x/oauth2
 RUN go get cloud.google.com/go
 
-RUN go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 CMD ["/app/main"]
