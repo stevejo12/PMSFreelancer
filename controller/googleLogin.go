@@ -1,7 +1,8 @@
 package controller
 
 import (
-	"PMSFreelancer/models"
+	"github.com/stevejo12/PMSFreelancer/models"
+	// "PMSFreelancer/models"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

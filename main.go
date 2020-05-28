@@ -44,6 +44,7 @@ type loginInfo struct {
 func init() {
 	config.ConnectToDB()
 	config.LoadConfig()
+	config.ConnectToCloudinary()
 }
 
 // @title Swagger API
@@ -73,6 +74,7 @@ func main() {
 		v1.GET("/allSkills", controller.AuthenticationToken, controller.GetAllSkills)
 		v1.POST("/updateSkills/:id", controller.AuthenticationToken, controller.UpdateUserSkills)
 		v1.POST("/resetPassword", controller.ResetPassword)
+		v1.POST("/uploadImage", controller.UploadImage)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -96,7 +98,11 @@ func handleHome(c *gin.Context) {
 		return
 	}
 
-	const html = `<html><body><a href="/v1/googleLogin"> Google Log In</a></body></html>`
+	const html = `<html><body><a href="/v1/googleLogin"> Google Log In</a>
+	<form enctype="multipart/form-data" action="http://localhost:8080/v1/uploadImage" method="post">
+    <input type="file" name="myFile" />
+    <input type="submit" value="upload" />
+  </form></body></html>`
 	c.Writer.Write([]byte(html))
 }
 
