@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -69,8 +67,8 @@ func main() {
 		v1.POST("/login", controller.LoginUserWithPassword)
 		v1.POST("/logout", controller.HandleLogout)
 		v1.POST("/createBoardTrello/:id", controller.AuthenticationToken, controller.CreateNewBoard)
-		v1.GET("/googleLogin", handleLoginGoogle)
-		v1.GET("/signin-callback", handleCallback)
+		v1.GET("/googleLogin", controller.HandleLoginGoogle)
+		v1.GET("/signin-callback", controller.HandleCallbackGoogle)
 		v1.PUT("/change-password", controller.AuthenticationToken, controller.ChangeUserPassword)
 		v1.GET("/allSkills", controller.AuthenticationToken, controller.GetAllSkills)
 		v1.POST("/updateSkills/:id", controller.AuthenticationToken, controller.UpdateUserSkills)
@@ -100,49 +98,6 @@ func handleHome(c *gin.Context) {
 
 	const html = `<html><body><a href="/v1/googleLogin"> Google Log In</a></body></html>`
 	c.Writer.Write([]byte(html))
-}
-
-func handleLoginGoogle(c *gin.Context) {
-	url := googleOauthConfig.AuthCodeURL(randomState)
-	c.Redirect(http.StatusTemporaryRedirect, url)
-}
-
-func handleCallback(c *gin.Context) {
-	if c.Request.FormValue("state") != randomState {
-		fmt.Println("State is not valid")
-		c.Redirect(http.StatusTemporaryRedirect, "/v1")
-		c.Abort()
-	}
-
-	token, err := googleOauthConfig.Exchange(oauth2.NoContext, c.Request.FormValue("code"))
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
-		c.Abort()
-	}
-
-	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
-		c.Abort()
-	}
-
-	defer resp.Body.Close()
-
-	content, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
-		c.Abort()
-	}
-
-	fmt.Fprintf(c.Writer, "Response: %s", content)
 }
 
 // Cors => allow access to non origin

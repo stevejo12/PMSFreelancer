@@ -15,3 +15,10 @@ type LoginUserPassword struct {
 	Email    string
 	Password string
 }
+
+type GoogleResponse struct {
+	ID             string
+	Email          string
+	Verified_email bool
+	Picture        string
+}
