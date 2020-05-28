@@ -1,7 +1,8 @@
 package controller
 
 import (
-	"PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/config"
+	// "PMSFreelancer/config"
 	"io/ioutil"
 	"net/http"
 	"os"

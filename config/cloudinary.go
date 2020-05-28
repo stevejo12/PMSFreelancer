@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/stevejo12/go-cloudinary"
 )
 
@@ -20,8 +18,6 @@ func ConnectToCloudinary() {
 	uri := "cloudinary://" + apiKey + ":" + apiSecret + "@" + cloudName
 
 	CloudinaryService, err = cloudinary.Dial(uri)
-
-	fmt.Println(CloudinaryService)
 
 	if err != nil {
 		panic(err.Error())
