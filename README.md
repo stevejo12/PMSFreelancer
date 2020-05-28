@@ -14,3 +14,4 @@ Dependencies needed:(using go get [dependencies])
     github.com/adlio/trello
     github.com/dgrijalva/jwt-go
     golang.org/x/oauth2
+    github.com/stevejo12/go-cloudinary
