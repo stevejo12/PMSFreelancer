@@ -1,7 +1,8 @@
 package helpers
 
 import (
-	"PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/config"
+	// "PMSFreelancer/config"
 	"errors"
 )
 
