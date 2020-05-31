@@ -75,6 +75,7 @@ func main() {
 		v1.POST("/updateSkills/:id", controller.AuthenticationToken, controller.UpdateUserSkills)
 		v1.POST("/resetPassword", controller.ResetPassword)
 		v1.POST("/uploadImage", controller.UploadImage)
+		v1.POST("/uploadFile", controller.UploadFile)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -100,6 +101,10 @@ func handleHome(c *gin.Context) {
 
 	const html = `<html><body><a href="/v1/googleLogin"> Google Log In</a>
 	<form enctype="multipart/form-data" action="http://localhost:8080/v1/uploadImage" method="post">
+    <input type="file" name="myFile" />
+		<input type="submit" value="upload" />
+	</form>
+	<form enctype="multipart/form-data" action="http://localhost:8080/v1/uploadFile" method="post">
     <input type="file" name="myFile" />
     <input type="submit" value="upload" />
   </form></body></html>`

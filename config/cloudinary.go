@@ -11,9 +11,9 @@ var CloudinaryService *cloudinary.Service
 func ConnectToCloudinary() {
 	var err error
 
-	apiKey := "477787745735813"
-	apiSecret := "Nac4woUWVnBOttHOSsSiaI5PdFc"
-	cloudName := "drrd7ai50"
+	apiKey := "645723149374711"
+	apiSecret := "nr7-pjsZYMnZxawJIFcUNTonh8g"
+	cloudName := "dvah7jvpa"
 
 	uri := "cloudinary://" + apiKey + ":" + apiSecret + "@" + cloudName
 

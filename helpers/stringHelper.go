@@ -41,3 +41,14 @@ func SplitSpace(val string) []string {
 		return split
 	}
 }
+
+// SplitDot => split string value separated by dot "."
+func SplitDot(val string) []string {
+	split := strings.Split(val, ".")
+
+	if len(split) <= 0 {
+		return []string{}
+	} else {
+		return split
+	}
+}
