@@ -12,10 +12,10 @@ import (
 	// "PMSFreelancer/models"
 )
 
-func UserEducation(c *gin.Context) {
+func UserExperience(c *gin.Context) {
 	id := c.Param("id")
 
-	resp, err := config.DB.Query("SELECT * FROM education WHERE user_id=?", id)
+	resp, err := config.DB.Query("SELECT * FROM experience WHERE user_id=?", id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -24,22 +24,22 @@ func UserEducation(c *gin.Context) {
 		return
 	}
 
-	var allData []models.EducationReturnValue
+	var allData []models.ExperienceReturnValue
 
 	for resp.Next() {
-		var databaseData models.EducationTableResponse
-		if err := resp.Scan(&databaseData.ID, &databaseData.Name, &databaseData.StartYear, &databaseData.EndYear, &databaseData.UserID); err != nil {
-			fmt.Println(err)
+		var databaseData models.ExperienceTableResponse
+		if err := resp.Scan(&databaseData.ID, &databaseData.Place, &databaseData.Position, &databaseData.StartYear, &databaseData.EndYear, &databaseData.UserID); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
 				"message": "Something is wrong with the database data"})
 			return
 		}
 
-		var returnValue models.EducationReturnValue
+		var returnValue models.ExperienceReturnValue
 
 		returnValue.ID = databaseData.ID
-		returnValue.Name = databaseData.Name
+		returnValue.Position = databaseData.Position
+		returnValue.Place = databaseData.Place
 		returnValue.StartYear = databaseData.StartYear
 		returnValue.EndYear = databaseData.EndYear
 
@@ -55,28 +55,30 @@ func UserEducation(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
-		"message": "All User Education data have been retrieved",
+		"message": "All User Experience data have been retrieved",
 		"data":    allData})
 }
 
-func AddEducation(c *gin.Context) {
+func AddExperience(c *gin.Context) {
 	id := c.Param("id")
 
 	// sample data
-	// education: [
+	// experience: [
 	// 	{
-	// 		Name
+	// 		Place
+	//		Position
 	// 		StartYear
 	// 		EndYear
 	// 	},
 	// 	{
-	// 		Name
+	// 		Place
+	//		Position
 	// 		StartYear
 	// 		EndYear
 	// 	}
 	// ]
 
-	var data models.AddEducationParameter
+	var data models.AddExperienceParameter
 
 	err = c.Bind(&data)
 
@@ -87,14 +89,15 @@ func AddEducation(c *gin.Context) {
 		return
 	}
 
-	education := data.Education
+	experience := data.Experience
 
-	query := "INSERT INTO education(name, starting_year, ending_year, user_id) VALUES"
-	for i := 0; i < len(education); i++ {
-		name := education[i].Name
-		startingYear := education[i].StartYear
-		endYear := education[i].EndYear
-		query = query + "(\"" + name + "\", " + strconv.Itoa(startingYear) + ", " + strconv.Itoa(endYear) + ", " + id + "),"
+	query := "INSERT INTO experience(place, position, starting_year, ending_year, user_id) VALUES"
+	for i := 0; i < len(experience); i++ {
+		place := experience[i].Place
+		position := experience[i].Position
+		startingYear := experience[i].StartYear
+		endYear := experience[i].EndYear
+		query = query + "(\"" + place + "\", \"" + position + "\"," + strconv.Itoa(startingYear) + ", " + strconv.Itoa(endYear) + ", " + id + "),"
 	}
 
 	if last := len(query) - 1; last >= 0 && query[last] == ',' {
@@ -114,5 +117,5 @@ func AddEducation(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
-		"message": "Successfully Added Education"})
+		"message": "Successfully Added Experience"})
 }
