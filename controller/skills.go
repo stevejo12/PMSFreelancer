@@ -1,11 +1,15 @@
 package controller
 
 import (
+	"errors"
+
 	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/helpers"
 	"github.com/stevejo12/PMSFreelancer/models"
 
 	// "PMSFreelancer/config"
 	// "PMSFreelancer/models"
+	// "PMSFreelancer/helpers"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -53,4 +57,39 @@ func GetAllSkills(c *gin.Context) {
 		"code":    http.StatusText(http.StatusOK),
 		"message": "All Skills data have been successfully retrieved",
 		"data":    allData})
+}
+
+func getSkillNames(param string) ([]string, error) {
+	var result []string
+	initialQuery, err := helpers.SettingInQueryWithID("skills", param)
+
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := config.DB.Query(initialQuery)
+
+	if err != nil {
+		return result, errors.New("Server unable to execute query to database")
+	}
+
+	for data.Next() {
+		// Scan one customer record
+		var skills models.UserSkills
+		if err := data.Scan(&skills.ID, &skills.Name, &skills.Created_at, &skills.Updated_at); err != nil {
+			return []string{}, errors.New("Something is wrong with the database data")
+		}
+		result = append(result, skills.Name)
+		// var name string
+		// if err := data.Scan(&name); err != nil {
+		// 	return []string{}, errors.New("Something is wrong with the database data")
+		// }
+		// fmt.Println(name)
+		// result = append(result, name)
+	}
+	if data.Err() != nil {
+		return []string{}, errors.New("Something is wrong with the data retrieved")
+	}
+
+	return result, nil
 }

@@ -76,6 +76,7 @@ func main() {
 		v1.POST("/resetPassword", controller.ResetPassword)
 		v1.POST("/uploadImage", controller.UploadImage)
 		v1.POST("/uploadFile", controller.UploadFile)
+		v1.GET("/searchProject", controller.SearchProject)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
