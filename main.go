@@ -77,6 +77,8 @@ func main() {
 		v1.POST("/uploadImage", controller.UploadImage)
 		v1.POST("/uploadFile", controller.UploadFile)
 		v1.GET("/searchProject", controller.SearchProject)
+		v1.POST("/userEducation/:id", controller.AuthenticationToken, controller.UserEducation)
+		v1.POST("/addEducation/:id", controller.AuthenticationToken, controller.AddEducation)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
