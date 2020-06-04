@@ -81,6 +81,9 @@ func main() {
 		v1.POST("/addEducation/:id", controller.AuthenticationToken, controller.AddEducation)
 		v1.GET("/userExperience/:id", controller.UserExperience)
 		v1.POST("/addExperience/:id", controller.AddExperience)
+		v1.POST("/addProject/:id", controller.AddProject)
+		v1.GET("/userProjects/:id", controller.GetAllUserProjects)
+		v1.GET("/projectDetail/:id", controller.ProjectDetail)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

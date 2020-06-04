@@ -52,3 +52,14 @@ func SplitDot(val string) []string {
 		return split
 	}
 }
+
+// SplitDot => split string value separated by dash "-"
+func SplitDash(val string) []string {
+	split := strings.Split(val, "-")
+
+	if len(split) <= 0 {
+		return []string{}
+	} else {
+		return split
+	}
+}

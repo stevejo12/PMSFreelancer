@@ -104,7 +104,6 @@ func AddEducation(c *gin.Context) {
 	_, err = config.DB.Exec(query)
 
 	if err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query to database"})
