@@ -65,32 +65,30 @@ func RegisterUserWithPassword(c *gin.Context) {
 
 		strVal := helpers.ConvertToString(varValue)
 
-		if strVal == "" {
+		if strVal == "" || (strVal == "0" && varName == "Location") {
 			message := varName + " must not be empty"
 			multipleError = append(multipleError, message)
 		}
 	}
 
 	if len(multipleError) > 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
 			"message": multipleError})
-
 		return
 	}
 
 	// checking duplicate data
-	var databaseUsername string
+	emailExist := helpers.CheckDuplicateEmail(newUser.Email)
+	usernameExist := helpers.CheckDuplicateUsername(newUser.Username)
 
-	err := config.DB.QueryRow("SELECT email FROM login WHERE email=?", newUser.Email).Scan(&databaseUsername)
-
-	// this means email registered doesn't exist yet in the database.
-	if err == sql.ErrNoRows {
+	// this means email registered and username registered don't exist yet in the database.
+	if emailExist == nil && usernameExist == nil {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusText(http.StatusInternalServerError),
+				"code":    http.StatusInternalServerError,
 				"message": "Server unable to hash the password into database"})
 
 			return
@@ -111,7 +109,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 		err = helpers.SkillList(newUser.Skills)
 
 		if err != nil {
-			if err == errors.New("not exist") {
+			if err.Error() == "not exist" {
 				c.JSON(http.StatusBadRequest, gin.H{
 					"code":    http.StatusBadRequest,
 					"message": "There is a value that does not exist in the database id"})
@@ -119,8 +117,8 @@ func RegisterUserWithPassword(c *gin.Context) {
 			}
 
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusText(http.StatusInternalServerError),
-				"message": "Server is unable execute query to the database"})
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
 			return
 		}
 
@@ -128,7 +126,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 		err = helpers.CountryList(newUser.Location)
 
 		if err != nil {
-			if err == errors.New("not exist") {
+			if err.Error() == "not exist" {
 				c.JSON(http.StatusBadRequest, gin.H{
 					"code":    http.StatusBadRequest,
 					"message": "Country ID does not exist in the database"})
@@ -136,8 +134,8 @@ func RegisterUserWithPassword(c *gin.Context) {
 			}
 
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusText(http.StatusInternalServerError),
-				"message": "Server is unable execute query to the database"})
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
 			return
 		}
 
@@ -151,7 +149,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusText(http.StatusInternalServerError),
+				"code":    http.StatusInternalServerError,
 				"message": "Error preparing add user"})
 			return
 		}
@@ -161,25 +159,33 @@ func RegisterUserWithPassword(c *gin.Context) {
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusText(http.StatusInternalServerError),
+				"code":    http.StatusInternalServerError,
 				"message": "Server unable to execute query to database"})
 
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"code":    http.StatusText(http.StatusOK),
+			"code":    http.StatusOK,
 			"message": "Adding user has been completed"})
-	} else if err == nil {
+	} else if emailExist != nil || usernameExist != nil {
+		multipleError = []string{}
+		if emailExist != nil {
+			multipleError = append(multipleError, emailExist.Error())
+		}
+		if usernameExist != nil {
+			multipleError = append(multipleError, usernameExist.Error())
+		}
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusText(http.StatusBadRequest),
-			"message": "Email exists in the database"})
+			"code":    http.StatusBadRequest,
+			"message": multipleError})
+		return
 	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server unable to create your account"})
+		return
 	}
-
 }
 
 // LoginUserWithPassword godoc
