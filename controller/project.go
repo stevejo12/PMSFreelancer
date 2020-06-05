@@ -306,3 +306,105 @@ func ProjectDetail(c *gin.Context) {
 		"message": "Project data have been retrieved",
 		"data":    allData})
 }
+
+// SubmitProjectInterest => Potential Freelancer submit their interest before accepted by project owner
+// /:id => to get the project ID
+// parameter ID: this is the freelancer id to register
+func SubmitProjectInterest(c *gin.Context) {
+	// this is project id
+	id := c.Param("id")
+
+	// this ID is for the potential freelancer id
+	type submitInterest struct {
+		ID int
+	}
+
+	var param submitInterest
+
+	err := c.Bind(&param)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// check if this is the owner
+	owner, err := helpers.IsThisIDProjectOwner(id, param.ID)
+
+	if !owner {
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
+		// check if this member already registered
+		member, err := helpers.IsThisMemberRegistered(id, param.ID)
+
+		if !member {
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
+			// if they are not member yet, register them
+			ok := registerUserToInterestedMembers(id, param.ID)
+
+			if ok != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": ok.Error()})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{
+				"code":    http.StatusOK,
+				"message": "Member has been added to interested list"})
+		} else {
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"code":    http.StatusBadRequest,
+					"message": err.Error()})
+				return
+			}
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Something wrong with the server"})
+			return
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "This user is the project owner"})
+		return
+	}
+}
+
+func registerUserToInterestedMembers(projectID string, userID int) error {
+	listMember, err := helpers.GetMemberList(projectID)
+
+	if err != nil {
+		return err
+	}
+
+	// add member to the list
+	if listMember == "" {
+		listMember = strconv.Itoa(userID)
+	} else {
+		listMember = listMember + "," + strconv.Itoa(userID)
+	}
+
+	_, err = config.DB.Exec("UPDATE project SET interested_members=? WHERE id=?", listMember, projectID)
+
+	if err != nil {
+		return errors.New("Server is unable to execute query to the database")
+	}
+
+	return nil
+}
