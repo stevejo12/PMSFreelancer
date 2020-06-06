@@ -19,7 +19,7 @@ func UploadImage(c *gin.Context) {
 	// accept the images and store it in the tempfile
 	c.Request.ParseMultipartForm(32 << 20)
 
-	file, _, err := c.Request.FormFile("myFile")
+	file, _, err := c.Request.FormFile("file")
 	defer file.Close()
 
 	// make it in the same folder as this file
@@ -100,7 +100,7 @@ func UploadFile(c *gin.Context) {
 	// accept the images and store it in the tempfile
 	c.Request.ParseMultipartForm(5 * 1024 * 1024)
 
-	file, header, err := c.Request.FormFile("myFile")
+	file, header, err := c.Request.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,

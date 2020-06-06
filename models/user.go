@@ -22,3 +22,14 @@ type GoogleResponse struct {
 	Verified_email bool
 	Picture        string
 }
+
+type UpdateResetPassword struct {
+	Password string
+	Token    string
+}
+
+type DatabaseResetPassword struct {
+	Email  string
+	Token  string
+	Expire string
+}

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"database/sql"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -50,7 +51,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 	// checking empty body data
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Error binding new user"})
 
 		return
@@ -203,7 +204,7 @@ func LoginUserWithPassword(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Error data format login"})
 
 		return
@@ -216,7 +217,7 @@ func LoginUserWithPassword(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server unable to find the user email"})
 
 		return
@@ -226,7 +227,7 @@ func LoginUserWithPassword(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Password doesn't match the email"})
 
 		return
@@ -258,7 +259,7 @@ func LoginUserWithPassword(c *gin.Context) {
 	})
 
 	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusText(http.StatusOK),
+		"code":    http.StatusOK,
 		"message": "Login information is correct",
 		"token":   jwtToken})
 }
@@ -283,7 +284,7 @@ func ChangeUserPassword(c *gin.Context) {
 	// checking empty body data
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusText(http.StatusBadRequest),
+			"code":    http.StatusBadRequest,
 			"message": "Data format is not as expected"})
 		return
 	}
@@ -292,7 +293,7 @@ func ChangeUserPassword(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server unable to find the user email"})
 		return
 	}
@@ -301,7 +302,7 @@ func ChangeUserPassword(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusText(http.StatusBadRequest),
+			"code":    http.StatusBadRequest,
 			"message": "Old password is incorrect"})
 		return
 	}
@@ -310,7 +311,7 @@ func ChangeUserPassword(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server generate hashed password"})
 		return
 	}
@@ -319,13 +320,13 @@ func ChangeUserPassword(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query to database"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusText(http.StatusOK),
+		"code":    http.StatusOK,
 		"message": "Password has been successfully updated"})
 }
 
@@ -338,7 +339,7 @@ func HandleLogout(c *gin.Context) {
 	})
 
 	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusText(http.StatusOK),
+		"code":    http.StatusOK,
 		"message": "Successfully logged out"})
 }
 
@@ -351,7 +352,7 @@ func ResetPassword(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusText(http.StatusBadRequest),
+			"code":    http.StatusBadRequest,
 			"message": "Data format is not as expected"})
 		return
 	}
@@ -360,25 +361,55 @@ func ResetPassword(c *gin.Context) {
 
 	if err == sql.ErrNoRows {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusText(http.StatusBadRequest),
+			"code":    http.StatusBadRequest,
 			"message": "Email is not registered in our database"})
 		return
 	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusBadRequest),
+			"code":    http.StatusBadRequest,
 			"message": "Server unable to get information from database"})
 		return
 	}
 
 	// generate link to the reset password
-	// TO DO: make a generated link
-	link := "https://localhost:8080/home"
+	// TO DO: update this link from localhost to real url for resetting password
+	link := "https://localhost:8080/reset-password/"
+
+	// generate token for link
+	hashedToken, err := bcrypt.GenerateFromPassword([]byte(mail), bcrypt.DefaultCost)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to do hashing"})
+		return
+	}
+
+	// generate template to insert into database
+	// 30 mins lifespan time for the link
+	lifetime := 30 * 60 * time.Second
+	locationIndonesia, _ := time.LoadLocation("Asia/Jakarta")
+	timeNow := time.Now().In(locationIndonesia)
+
+	timeNow = timeNow.Add(lifetime)
+
+	_, err = config.DB.Exec("INSERT INTO resetpassword_token(email, token, expire) VALUES(?,?,?)", mail, string(hashedToken), timeNow)
+
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to store token into databse"})
+		return
+	}
+
+	hashStringVal := base64.StdEncoding.EncodeToString(hashedToken)
+
+	link = link + "reset_token=" + hashStringVal
 
 	msg := fmt.Sprintf(`<html>
 	<body>
-	<p>Dear, asdf</p>
-	<br>
-	<p>You have requested a reset password for SPIRITS application</p>
+	<p>We received request to reset your password</p>
 	<p>This is the link to reset your password: %s</p>
 	<p>Note: This link expires in 30 minutes after this email is recieved</p>
 	<br>
@@ -398,14 +429,95 @@ func ResetPassword(c *gin.Context) {
 	d := gomail.NewPlainDialer(CONFIG_SMTP_HOST, CONFIG_SMTP_PORT, CONFIG_EMAIL, CONFIG_PASSWORD)
 	if err := d.DialAndSend(m); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server unable to send email to user"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusText(http.StatusOK),
+		"code":    http.StatusOK,
 		"message": "Email has been send"})
+}
+
+func UpdateNewPassword(c *gin.Context) {
+	var param models.UpdateResetPassword
+
+	err = c.Bind(&param)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Data format is invalid"})
+		return
+	}
+
+	if param.Token != "" {
+		var dbData models.DatabaseResetPassword
+
+		tokenValue, err := base64.StdEncoding.DecodeString(param.Token)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server unable to decode the token"})
+			return
+		}
+
+		stringTokenValue := string(tokenValue)
+
+		err = config.DB.QueryRow("SELECT email, token, expire FROM resetpassword_token WHERE token=?", stringTokenValue).Scan(&dbData.Email, &dbData.Token, &dbData.Expire)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server unable to find the token in the database"})
+			return
+		}
+
+		timeNow := time.Now()
+		parseTime, err := time.Parse("2006-06-05 00:00:00", dbData.Expire)
+
+		// check if
+		expire := timeNow.Before(parseTime)
+
+		if expire {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":    http.StatusUnauthorized,
+				"message": "Token for this link has expired"})
+			return
+		}
+
+		// hash the password
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(param.Password), bcrypt.DefaultCost)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server unable to hash the password into database"})
+			return
+		}
+
+		_, err = config.DB.Exec("UPDATE login SET password=? WHERE email=?", hashedPassword, dbData.Email)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server unable to update the password into database"})
+			return
+		}
+
+		// remove token to avoid spam update after successfully doing it once (in the database)
+		_, err = config.DB.Exec("DELETE FROM resetpassword_token WHERE token=?", stringTokenValue)
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "User password has been successfully updated"})
+	} else {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Parameter Token is empty"})
+		return
+	}
 }
 
 func UpdateUserSkills(c *gin.Context) {
@@ -417,7 +529,7 @@ func UpdateUserSkills(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusText(http.StatusBadRequest),
+			"code":    http.StatusBadRequest,
 			"message": "Data format is invalid"})
 		return
 	}
@@ -429,12 +541,12 @@ func UpdateUserSkills(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query to database"})
 		return
 	} else if count != 1 {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusOK),
+			"code":    http.StatusOK,
 			"message": "Data is not exactly 1"})
 		return
 	}
@@ -443,7 +555,7 @@ func UpdateUserSkills(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query to database"})
 		return
 	}
@@ -459,7 +571,7 @@ func UpdateUserSkills(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server is unable execute query to the database"})
 		return
 	}
@@ -468,12 +580,12 @@ func UpdateUserSkills(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server is unable execute query to the database"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusText(http.StatusOK),
+		"code":    http.StatusOK,
 		"message": "All Skills data have been successfully updated"})
 }

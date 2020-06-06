@@ -21,7 +21,7 @@ func GetAllSkills(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query to database"})
 		return
 	}
@@ -33,7 +33,7 @@ func GetAllSkills(c *gin.Context) {
 		var skills models.UserSkills
 		if err := data.Scan(&skills.ID, &skills.Name, &skills.Created_at, &skills.Updated_at); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusText(http.StatusInternalServerError),
+				"code":    http.StatusInternalServerError,
 				"message": "Something is wrong with the database data"})
 			return
 		}
@@ -41,20 +41,20 @@ func GetAllSkills(c *gin.Context) {
 	}
 	if data.Err() != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Something is wrong with the data retrieved"})
 		return
 	}
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusText(http.StatusInternalServerError),
+			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusText(http.StatusOK),
+		"code":    http.StatusOK,
 		"message": "All Skills data have been successfully retrieved",
 		"data":    allData})
 }
