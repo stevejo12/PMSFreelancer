@@ -366,16 +366,9 @@ func SubmitProjectInterest(c *gin.Context) {
 				"code":    http.StatusOK,
 				"message": "Member has been added to interested list"})
 		} else {
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"code":    http.StatusBadRequest,
-					"message": err.Error()})
-				return
-			}
-
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusInternalServerError,
-				"message": "Something wrong with the server"})
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "This member has already been registered"})
 			return
 		}
 	} else {
@@ -407,4 +400,72 @@ func registerUserToInterestedMembers(projectID string, userID int) error {
 	}
 
 	return nil
+}
+
+func AcceptProjectInterest(c *gin.Context) {
+	id := c.Param("id")
+
+	type acceptInterest struct {
+		OwnerID      int
+		FreelancerID int
+	}
+
+	var param acceptInterest
+
+	err = c.Bind(&param)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// check if the owner id is correct
+	owner, err := helpers.IsThisIDProjectOwner(id, param.OwnerID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	if owner {
+		// check if the member is registered
+		member, err := helpers.IsThisMemberRegistered(id, param.FreelancerID)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
+		if member {
+			// list the member as accepted member and update the status to "On Going"
+			_, err = config.DB.Exec("UPDATE project SET status=?, accepted_memberid=? WHERE id=?", "On Going", param.FreelancerID, id)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": "Server is unable to execute query to the database"})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{
+				"code":    http.StatusOK,
+				"message": "Successfully accepted member"})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "This member ID is not listed yet as interested member"})
+			return
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "This Owner ID doesn't own the project"})
+		return
+	}
 }

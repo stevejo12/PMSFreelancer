@@ -86,6 +86,7 @@ func main() {
 		v1.GET("/userProjects/:id", controller.GetAllUserProjects)
 		v1.GET("/projectDetail/:id", controller.ProjectDetail)
 		v1.POST("/submitProjectInterest/:id", controller.SubmitProjectInterest)
+		v1.POST("/acceptProjectInterest/:id", controller.AcceptProjectInterest)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

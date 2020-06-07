@@ -44,7 +44,7 @@ func IsThisMemberRegistered(projectID string, userID int) (bool, error) {
 			exist := Contains(interfaceDataTypeInterestedUser, userID)
 
 			if exist {
-				return true, errors.New("User has already registered as an interested member in the list")
+				return true, nil
 			} else {
 				return false, nil
 			}
