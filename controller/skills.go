@@ -8,8 +8,8 @@ import (
 	"github.com/stevejo12/PMSFreelancer/models"
 
 	// "PMSFreelancer/config"
-	// "PMSFreelancer/models"
 	// "PMSFreelancer/helpers"
+	// "PMSFreelancer/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -92,4 +92,35 @@ func getSkillNames(param string) ([]string, error) {
 	}
 
 	return result, nil
+}
+
+func userSkills(id string) ([]models.UserSkills, error) {
+	query, err := helpers.SettingInQueryWithID("skills", id)
+
+	if err != nil {
+		return []models.UserSkills{}, errors.New(err.Error())
+	}
+
+	resp, err := config.DB.Query(query)
+
+	if err != nil {
+		return []models.UserSkills{}, errors.New(err.Error())
+	}
+
+	var allData []models.UserSkills
+
+	for resp.Next() {
+		var databaseData models.UserSkills
+		if err := resp.Scan(&databaseData.ID, &databaseData.Name, &databaseData.Created_at, &databaseData.Updated_at); err != nil {
+			return []models.UserSkills{}, errors.New("Something is wrong with the database data")
+		}
+
+		allData = append(allData, databaseData)
+	}
+
+	if resp.Err() != nil {
+		return []models.UserSkills{}, errors.New("Something is wrong with the data retrieved")
+	}
+
+	return allData, nil
 }

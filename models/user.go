@@ -33,3 +33,30 @@ type DatabaseResetPassword struct {
 	Token  string
 	Expire string
 }
+
+type UserProfile struct {
+	ID          string
+	Fullname    string
+	Email       string
+	Description string
+	Education   []EducationReturnValue
+	Skill       []UserSkills
+	Experience  []ExperienceReturnValue
+	Picture     string
+	Username    string
+	Location    string
+	Member      string
+}
+
+type QueryUserProfile struct {
+	ID          string
+	Firstname   string
+	LastName    string
+	Email       string
+	Description string
+	Picture     string
+	CreatedAt   string
+	Username    string
+	Location    string
+	Skills      string
+}

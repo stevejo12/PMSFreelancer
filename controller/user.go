@@ -589,3 +589,85 @@ func UpdateUserSkills(c *gin.Context) {
 		"code":    http.StatusOK,
 		"message": "All Skills data have been successfully updated"})
 }
+
+func GetUserProfile(c *gin.Context) {
+	id := c.Param("id")
+	var data models.UserProfile
+
+	// get education list
+	educationData, err := userEducation(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// get experience list
+	experienceData, err := userExperience(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	var dataQuery models.QueryUserProfile
+	var picData sql.NullString
+
+	err = config.DB.QueryRow("SELECT id, first_name, last_name, email, description, picture, created_at, username, location, skill FROM login WHERE id=?", id).Scan(&dataQuery.ID, &dataQuery.Firstname, &dataQuery.LastName, &dataQuery.Email, &dataQuery.Description, &picData, &dataQuery.CreatedAt, &dataQuery.Username, &dataQuery.Location, &dataQuery.Skills)
+
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to execute query to the database"})
+		return
+	}
+
+	// get skill list
+	skillData, err := userSkills(dataQuery.Skills)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// check if there is any uploaded picture
+	// valid means there is value
+	// else means null
+	if picData.Valid {
+		dataQuery.Picture = picData.String
+	} else {
+		dataQuery.Picture = ""
+	}
+
+	// Year of Member
+	arrMemberSince := helpers.SplitDash(dataQuery.CreatedAt)
+	if len(arrMemberSince) > 0 {
+		data.Member = arrMemberSince[0]
+	} else {
+		data.Member = ""
+	}
+
+	// arrange all data
+	data.Education = educationData
+	data.Experience = experienceData
+	data.Skill = skillData
+	data.ID = dataQuery.ID
+	data.Fullname = dataQuery.Firstname + " " + dataQuery.LastName
+	data.Email = dataQuery.Email
+	data.Description = dataQuery.Description
+	data.Picture = dataQuery.Picture
+	data.Username = dataQuery.Username
+	data.Location = dataQuery.Location
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "All User Profile data have been successfully retrieved",
+		"data":    data})
+}

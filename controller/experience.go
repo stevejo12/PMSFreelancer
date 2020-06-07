@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -12,16 +13,11 @@ import (
 	// "PMSFreelancer/models"
 )
 
-func UserExperience(c *gin.Context) {
-	id := c.Param("id")
-
+func userExperience(id string) ([]models.ExperienceReturnValue, error) {
 	resp, err := config.DB.Query("SELECT * FROM experience WHERE user_id=?", id)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server unable to execute query to database"})
-		return
+		return []models.ExperienceReturnValue{}, errors.New("Server unable to execute query to database")
 	}
 
 	var allData []models.ExperienceReturnValue
@@ -29,10 +25,7 @@ func UserExperience(c *gin.Context) {
 	for resp.Next() {
 		var databaseData models.ExperienceTableResponse
 		if err := resp.Scan(&databaseData.ID, &databaseData.Place, &databaseData.Position, &databaseData.StartYear, &databaseData.EndYear, &databaseData.UserID); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusInternalServerError,
-				"message": "Something is wrong with the database data"})
-			return
+			return []models.ExperienceReturnValue{}, errors.New("Something is wrong with the database data")
 		}
 
 		var returnValue models.ExperienceReturnValue
@@ -47,16 +40,28 @@ func UserExperience(c *gin.Context) {
 	}
 
 	if resp.Err() != nil {
+		return []models.ExperienceReturnValue{}, errors.New("Something is wrong with the data retrieved")
+	}
+
+	return allData, nil
+}
+
+func GetOnlyUserExperience(c *gin.Context) {
+	id := c.Param("id")
+
+	allUserExperience, err := userExperience(id)
+
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
-			"message": "Something is wrong with the data retrieved"})
-		return
+			"message": err.Error(),
+			"data":    []models.ExperienceReturnValue{}})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "All User Experience data have been retrieved",
-		"data":    allData})
+		"data":    allUserExperience})
 }
 
 func AddExperience(c *gin.Context) {

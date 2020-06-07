@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -12,28 +12,19 @@ import (
 	// "PMSFreelancer/models"
 )
 
-func UserEducation(c *gin.Context) {
-	id := c.Param("id")
+func userEducation(id string) ([]models.EducationReturnValue, error) {
+	var returnData []models.EducationReturnValue
 
 	resp, err := config.DB.Query("SELECT * FROM education WHERE user_id=?", id)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server unable to execute query to database"})
-		return
+		return returnData, errors.New("Server unable to execute query to database")
 	}
-
-	var allData []models.EducationReturnValue
 
 	for resp.Next() {
 		var databaseData models.EducationTableResponse
 		if err := resp.Scan(&databaseData.ID, &databaseData.Name, &databaseData.StartYear, &databaseData.EndYear, &databaseData.UserID); err != nil {
-			fmt.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusInternalServerError,
-				"message": "Something is wrong with the database data"})
-			return
+			return []models.EducationReturnValue{}, errors.New("Something is wrong with the database data")
 		}
 
 		var returnValue models.EducationReturnValue
@@ -43,20 +34,33 @@ func UserEducation(c *gin.Context) {
 		returnValue.StartYear = databaseData.StartYear
 		returnValue.EndYear = databaseData.EndYear
 
-		allData = append(allData, returnValue)
+		returnData = append(returnData, returnValue)
 	}
 
 	if resp.Err() != nil {
+		return []models.EducationReturnValue{}, errors.New("Something is wrong with the data retrieved")
+	}
+
+	return returnData, nil
+}
+
+// GetOnlyUserEducation => Get Detail View for the User Education
+func GetOnlyUserEducation(c *gin.Context) {
+	id := c.Param("id")
+
+	allUserEducation, err := userEducation(id)
+
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
-			"message": "Something is wrong with the data retrieved"})
-		return
+			"message": err.Error(),
+			"data":    []models.EducationReturnValue{}})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "All User Education data have been retrieved",
-		"data":    allData})
+		"data":    allUserEducation})
 }
 
 func AddEducation(c *gin.Context) {
