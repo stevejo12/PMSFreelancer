@@ -414,10 +414,21 @@ func AcceptProjectInterest(c *gin.Context) {
 
 	err = c.Bind(&param)
 
-	if err != nil {
+	if err != nil || param.OwnerID == 0 || param.FreelancerID == 0 {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
-			"message": err.Error()})
+			"message": "Data format is invalid"})
+		return
+	}
+
+	// check if status is currently Listed
+	var status string
+	err = config.DB.QueryRow("SELECT status FROM project WHERE id=?", id).Scan(&status)
+
+	if status != "Listed" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "This function works only when the project status is Listed"})
 		return
 	}
 
@@ -465,7 +476,187 @@ func AcceptProjectInterest(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
-			"message": "This Owner ID doesn't own the project"})
+			"message": "This Owner doesn't own the project"})
+		return
+	}
+}
+
+func ReviewProject(c *gin.Context) {
+	// project id
+	id := c.Param("id")
+
+	type reviewProject struct {
+		UserID int
+	}
+
+	var param reviewProject
+
+	err = c.Bind(&param)
+
+	if err != nil || param.UserID == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Data format is invalid"})
+		return
+	}
+
+	// check if status is currently Listed
+	var status string
+	err = config.DB.QueryRow("SELECT status FROM project WHERE id=?", id).Scan(&status)
+
+	if status != "On Going" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "The status isn't on going yet"})
+		return
+	}
+
+	freelancer, err := helpers.IsThisTheAcceptedMember(id, param.UserID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	if freelancer {
+		_, err = config.DB.Exec("UPDATE project SET status=? WHERE id=?", "On Review", id)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server is unable to execute query to the database"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Successfully updating project to on review"})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code":    http.StatusUnauthorized,
+			"message": "This user is unauthorized to make the project to be reviewed"})
+		return
+	}
+}
+
+func CompleteProject(c *gin.Context) {
+	// project id
+	id := c.Param("id")
+
+	type reviewProject struct {
+		OwnerID int
+	}
+
+	var param reviewProject
+
+	err = c.Bind(&param)
+
+	if err != nil || param.OwnerID == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Data format is invalid"})
+		return
+	}
+
+	// check if status is currently On Review
+	var status string
+	err = config.DB.QueryRow("SELECT status FROM project WHERE id=?", id).Scan(&status)
+
+	if status != "On Review" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "The status isn't on review yet"})
+		return
+	}
+
+	owner, err := helpers.IsThisIDProjectOwner(id, param.OwnerID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	if owner {
+		_, err = config.DB.Exec("UPDATE project SET status=? WHERE id=?", "Done", id)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server is unable to execute query to the database"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Successfully updating project to Done"})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code":    http.StatusUnauthorized,
+			"message": "This user is unauthorized to make the project DONE"})
+		return
+	}
+}
+
+func RejectReviewProject(c *gin.Context) {
+	// project id
+	id := c.Param("id")
+
+	type reviewProject struct {
+		OwnerID int
+	}
+
+	var param reviewProject
+
+	err = c.Bind(&param)
+
+	if err != nil || param.OwnerID == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Data format is invalid"})
+		return
+	}
+
+	// check if status is currently On Review
+	var status string
+	err = config.DB.QueryRow("SELECT status FROM project WHERE id=?", id).Scan(&status)
+
+	if status != "On Review" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "The status isn't on review yet"})
+		return
+	}
+
+	owner, err := helpers.IsThisIDProjectOwner(id, param.OwnerID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	if owner {
+		_, err = config.DB.Exec("UPDATE project SET status=? WHERE id=?", "On Going", id)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server is unable to execute query to the database"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Successfully updating project to On Going"})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code":    http.StatusUnauthorized,
+			"message": "This user is unauthorized to reject the project"})
 		return
 	}
 }

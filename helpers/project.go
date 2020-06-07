@@ -56,6 +56,21 @@ func IsThisMemberRegistered(projectID string, userID int) (bool, error) {
 	}
 }
 
+func IsThisTheAcceptedMember(projectID string, userID int) (bool, error) {
+	var dbMemberID int
+	err := config.DB.QueryRow("SELECT accepted_memberid FROM project WHERE id=?", projectID).Scan(&dbMemberID)
+
+	if err != nil {
+		return false, errors.New("Server is unable to execute query to database")
+	} else if dbMemberID != userID {
+		fmt.Println(dbMemberID)
+		fmt.Println(userID)
+		return false, nil
+	}
+
+	return true, nil
+}
+
 // GetMemberList => List of interested freelancer for the project
 func GetMemberList(id string) (string, error) {
 	var dbListMember sql.NullString
