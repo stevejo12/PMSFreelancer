@@ -46,6 +46,7 @@ type UserProfile struct {
 	Username    string
 	Location    string
 	Member      string
+	Portfolio   []PortfolioDatabase
 }
 
 type QueryUserProfile struct {

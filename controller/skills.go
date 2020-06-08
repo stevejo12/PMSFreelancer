@@ -80,12 +80,6 @@ func getSkillNames(param string) ([]string, error) {
 			return []string{}, errors.New("Something is wrong with the database data")
 		}
 		result = append(result, skills.Name)
-		// var name string
-		// if err := data.Scan(&name); err != nil {
-		// 	return []string{}, errors.New("Something is wrong with the database data")
-		// }
-		// fmt.Println(name)
-		// result = append(result, name)
 	}
 	if data.Err() != nil {
 		return []string{}, errors.New("Something is wrong with the data retrieved")

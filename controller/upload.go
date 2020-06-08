@@ -1,19 +1,89 @@
 package controller
 
 import (
-	// "github.com/stevejo12/PMSFreelancer/config"
-	// "github.com/stevejo12/PMSFreelancer/helpers"
+	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/helpers"
 
-	"PMSFreelancer/config"
-	"PMSFreelancer/helpers"
-	"fmt"
+	// "PMSFreelancer/config"
+	// "PMSFreelancer/helpers"
+	"errors"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 )
+
+func uploadFile(file multipart.File, header *multipart.FileHeader) (string, error) {
+	arr := helpers.SplitDot(header.Filename)
+	var fileExt string
+
+	if len(arr) == 2 {
+		// take the second part since it is the extension file
+		fileExt = arr[1]
+	} else {
+		return "", errors.New("File format is not correct ex: *.pdf or *.txt")
+	}
+
+	// make it in the same folder as this file
+	absolutePath, _ := filepath.Abs("./")
+
+	// make a temporary file in the disk
+	// will be deleted after uploading finishes
+	tempFile, err := ioutil.TempFile(absolutePath, "upload-*."+fileExt)
+	if err != nil {
+		return "", errors.New("Server unable to create temporary file for uploading")
+	}
+
+	fileBytes, err := ioutil.ReadAll(file)
+
+	if err != nil {
+		return "", errors.New("Server unable to read the temporary file")
+	}
+
+	fileName := tempFile.Name()
+
+	tempFile.Write(fileBytes)
+
+	// TO DO: Mungkin bisa dibuat restriction berdasarkan tipe file yg diupload
+	// filename itu extension nya
+
+	var url string
+	if fileExt == "pdf" {
+		url, err = config.CloudinaryService.Upload(fileName, nil, "", true, 1)
+	} else {
+		url, err = config.CloudinaryService.Upload(fileName, nil, "", true, 3)
+	}
+	// url, err = config.CloudinaryService.Upload(fileName, nil, "", true, 3)
+
+	if err != nil {
+		return "", errors.New("Server is unable to upload the file")
+	}
+
+	// 0 represent the iota or code for image in go-cloudinary
+	var urlFile string
+	if fileExt == "pdf" {
+		urlFile = config.CloudinaryService.Url(url, 1)
+	} else {
+		urlFile = config.CloudinaryService.Url(url, 3)
+	}
+	// urlFile = config.CloudinaryService.Url(url, 3)
+
+	// remove the file after using
+	err = tempFile.Close()
+	if err != nil {
+		return "", errors.New("Server is unable to close the temporary file")
+	}
+
+	err = os.RemoveAll(tempFile.Name())
+	if err != nil {
+		return "", errors.New("Server is unable to remove the temporary file")
+	}
+
+	return urlFile, nil
+}
 
 // UploadPicture => Upload Image to Cloudinary and get the URL response
 func UploadPicture(c *gin.Context) {
@@ -88,7 +158,6 @@ func UploadPicture(c *gin.Context) {
 	_, err = config.DB.Query("UPDATE login SET picture=? WHERE id=?", urlImage, id)
 
 	if err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server is unable to store url in the database"})
@@ -104,8 +173,8 @@ func UploadPicture(c *gin.Context) {
 	return
 }
 
-// UploadFile => Upload file other than image to this
-func UploadFile(c *gin.Context) {
+// UploadAttachment => Upload file other than image to this
+func UploadAttachment(c *gin.Context) {
 	// accept the images and store it in the tempfile
 	c.Request.ParseMultipartForm(5 * 1024 * 1024)
 
@@ -210,11 +279,43 @@ func UploadFile(c *gin.Context) {
 		return
 	}
 
+	type AttachmentData struct {
+		ID   string
+		Link string
+	}
+
+	asd, err := config.DB.Exec("INSERT INTO project_links(project_link) VALUES(?)", urlFile)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to execute query to database"})
+		return
+	}
+
+	var attachment AttachmentData
+	attachmentID, err := asd.LastInsertId()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to get the id of inserted attachment"})
+		return
+	}
+
+	err = config.DB.QueryRow("SELECT * FROM project_links WHERE id=?", attachmentID).Scan(&attachment.ID, &attachment.Link)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to execute query to the database"})
+		return
+	}
+
 	// response OK
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "Uploading successful",
-		"data":    urlFile})
-
+		"data":    attachment})
 	return
 }

@@ -3,11 +3,10 @@ package helpers
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"strconv"
 
-	// "github.com/stevejo12/PMSFreelancer/config"
-	"PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/config"
+	// "PMSFreelancer/config"
 )
 
 // IsThisIDProjectOwner => Check if the user id is the project owner
@@ -29,7 +28,6 @@ func IsThisMemberRegistered(projectID string, userID int) (bool, error) {
 	err := config.DB.QueryRow("SELECT interested_members FROM project WHERE id=?", projectID).Scan(&listInterested)
 
 	if err != nil {
-		fmt.Println(err)
 		return false, errors.New("Server is unable to execute query to database")
 	}
 
@@ -63,8 +61,6 @@ func IsThisTheAcceptedMember(projectID string, userID int) (bool, error) {
 	if err != nil {
 		return false, errors.New("Server is unable to execute query to database")
 	} else if dbMemberID != userID {
-		fmt.Println(dbMemberID)
-		fmt.Println(userID)
 		return false, nil
 	}
 

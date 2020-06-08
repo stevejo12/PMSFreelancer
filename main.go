@@ -68,6 +68,9 @@ func main() {
 		v1.POST("/login", controller.LoginUserWithPassword)
 		v1.POST("/logout", controller.HandleLogout)
 		v1.GET("/userProfile/:id", controller.GetUserProfile)
+		v1.POST("/addPortfolio/:id", controller.AddUserPortfolio)
+		v1.POST("/deletePortfolio/:id", controller.DeleteUserPortfolio)
+		v1.POST("/editPortfolio/:id", controller.EditUserPortfolio)
 		v1.POST("/createBoardTrello/:id", controller.AuthenticationToken, controller.CreateNewBoard)
 		v1.GET("/googleLogin", controller.HandleLoginGoogle)
 		v1.GET("/signin-callback", controller.HandleCallbackGoogle)
@@ -77,7 +80,7 @@ func main() {
 		v1.POST("/resetPassword", controller.ResetPassword)
 		v1.POST("/updateNewPassword", controller.UpdateNewPassword)
 		v1.POST("/uploadPicture/:id", controller.UploadPicture)
-		v1.POST("/uploadFile", controller.UploadFile)
+		v1.POST("/uploadAttachment", controller.UploadAttachment)
 		v1.GET("/searchProject", controller.SearchProject)
 		v1.GET("/userEducation/:id", controller.GetOnlyUserEducation)
 		v1.POST("/addEducation/:id", controller.AddEducation)
@@ -119,8 +122,8 @@ func handleHome(c *gin.Context) {
     <input type="file" name="file" />
 		<input type="submit" value="upload" />
 	</form>
-	<form enctype="multipart/form-data" action="http://localhost:8080/v1/uploadFile" method="post">
-    <input type="file" name="file" />
+	<form enctype="multipart/form-data" action="http://localhost:8080/v1/uploadAttachment" method="post">
+		<input type="file" name="file" />
     <input type="submit" value="upload" />
   </form></body></html>`
 	c.Writer.Write([]byte(html))

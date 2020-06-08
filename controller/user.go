@@ -396,7 +396,6 @@ func ResetPassword(c *gin.Context) {
 	_, err = config.DB.Exec("INSERT INTO resetpassword_token(email, token, expire) VALUES(?,?,?)", mail, string(hashedToken), timeNow)
 
 	if err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to store token into databse"})
@@ -620,7 +619,6 @@ func GetUserProfile(c *gin.Context) {
 	err = config.DB.QueryRow("SELECT id, first_name, last_name, email, description, picture, created_at, username, location, skill FROM login WHERE id=?", id).Scan(&dataQuery.ID, &dataQuery.Firstname, &dataQuery.LastName, &dataQuery.Email, &dataQuery.Description, &picData, &dataQuery.CreatedAt, &dataQuery.Username, &dataQuery.Location, &dataQuery.Skills)
 
 	if err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query to the database"})
@@ -629,6 +627,16 @@ func GetUserProfile(c *gin.Context) {
 
 	// get skill list
 	skillData, err := userSkills(dataQuery.Skills)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// get user portfolio
+	userPortfolio, err := allUserPortfolio(id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -665,6 +673,7 @@ func GetUserProfile(c *gin.Context) {
 	data.Picture = dataQuery.Picture
 	data.Username = dataQuery.Username
 	data.Location = dataQuery.Location
+	data.Portfolio = userPortfolio
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
