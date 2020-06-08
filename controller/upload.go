@@ -1,11 +1,12 @@
 package controller
 
 import (
-	"github.com/stevejo12/PMSFreelancer/config"
-	"github.com/stevejo12/PMSFreelancer/helpers"
+	// "github.com/stevejo12/PMSFreelancer/config"
+	// "github.com/stevejo12/PMSFreelancer/helpers"
 
-	// "PMSFreelancer/config"
-	// "PMSFreelancer/helpers"
+	"PMSFreelancer/config"
+	"PMSFreelancer/helpers"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -14,8 +15,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UploadImage => Upload Image to Cloudinary and get the URL response
-func UploadImage(c *gin.Context) {
+// UploadPicture => Upload Image to Cloudinary and get the URL response
+func UploadPicture(c *gin.Context) {
+	id := c.Param("id")
+
 	// accept the images and store it in the tempfile
 	c.Request.ParseMultipartForm(32 << 20)
 
@@ -32,7 +35,6 @@ func UploadImage(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to create temporary file for uploading"})
-
 		return
 	}
 
@@ -46,7 +48,6 @@ func UploadImage(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to read the temporary file"})
-
 		return
 	}
 
@@ -60,7 +61,6 @@ func UploadImage(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server is unable to upload the file"})
-
 		return
 	}
 
@@ -73,7 +73,6 @@ func UploadImage(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server is unable to close the temporary file"})
-
 		return
 	}
 
@@ -82,7 +81,17 @@ func UploadImage(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server is unable to remove the temporary file"})
+		return
+	}
 
+	// TO DO: Store the image into an id (add parameter that accept user id)
+	_, err = config.DB.Query("UPDATE login SET picture=? WHERE id=?", urlImage, id)
+
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to store url in the database"})
 		return
 	}
 

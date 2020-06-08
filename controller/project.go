@@ -464,6 +464,8 @@ func AcceptProjectInterest(c *gin.Context) {
 				return
 			}
 
+			// TO DO: Create Trello Board and store the link
+
 			c.JSON(http.StatusOK, gin.H{
 				"code":    http.StatusOK,
 				"message": "Successfully accepted member"})
