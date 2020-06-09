@@ -20,7 +20,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -189,6 +188,143 @@ func RegisterUserWithPassword(c *gin.Context) {
 	}
 }
 
+func RegisterUserWithGoogle(c *gin.Context) {
+	var newUser models.RegistrationUserUsingGoogle
+	var multipleError []string
+
+	err = c.Bind(&newUser)
+
+	// checking empty body data
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Error binding new user"})
+
+		return
+	}
+
+	ref := reflect.ValueOf(&newUser).Elem()
+
+	for i := 0; i < ref.NumField(); i++ {
+		varName := ref.Type().Field(i).Name
+		// varType := ref.Type().Field(i).Type
+		varValue := ref.Field(i).Interface()
+
+		strVal := helpers.ConvertToString(varValue)
+
+		if strVal == "" || (strVal == "0" && varName == "Location") {
+			message := varName + " must not be empty"
+			multipleError = append(multipleError, message)
+		}
+	}
+
+	if len(multipleError) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": multipleError})
+		return
+	}
+
+	// checking duplicate data
+	emailExist := helpers.CheckDuplicateEmail(newUser.Email)
+	usernameExist := helpers.CheckDuplicateUsername(newUser.Username)
+
+	// this means email registered and username registered don't exist yet in the database.
+	if emailExist == nil && usernameExist == nil {
+		// checking full name
+		// splitting into first name and last name
+		firstname, lastname, err := helpers.SplittingFullname(newUser.Fullname)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "Fullname is empty"})
+			return
+		}
+
+		// checking the skills list provided
+		err = helpers.SkillList(newUser.Skills)
+
+		if err != nil {
+			if err.Error() == "not exist" {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"code":    http.StatusBadRequest,
+					"message": "There is a value that does not exist in the database id"})
+				return
+			}
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
+		// checking location (expect the country id)
+		err = helpers.CountryList(newUser.Location)
+
+		if err != nil {
+			if err.Error() == "not exist" {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"code":    http.StatusBadRequest,
+					"message": "Country ID does not exist in the database"})
+				return
+			}
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
+		// setting up data for inserting into database
+		locationIndonesia, _ := time.LoadLocation("Asia/Jakarta")
+		timeIndonesia := time.Now().In(locationIndonesia)
+
+		formattedDate := fmt.Sprintf("%d-%02d-%02d", timeIndonesia.Year(), timeIndonesia.Month(), timeIndonesia.Day())
+
+		selDB, err := config.DB.Prepare("INSERT INTO login(email, google_id, created_at, status, username, description,first_name, last_name, location, skill) VALUES(?,?,?,?,?,?,?,?,?,?)")
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Error preparing add user"})
+			return
+		}
+
+		// status at first created should be active
+		_, err = selDB.Exec(newUser.Email, newUser.GoogleID, formattedDate, "active", newUser.Username, newUser.Description, firstname, lastname, newUser.Location, newUser.Skills)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server unable to execute query to database"})
+
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Adding user has been completed"})
+	} else if emailExist != nil || usernameExist != nil {
+		multipleError = []string{}
+		if emailExist != nil {
+			multipleError = append(multipleError, emailExist.Error())
+		}
+		if usernameExist != nil {
+			multipleError = append(multipleError, usernameExist.Error())
+		}
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": multipleError})
+		return
+	} else {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to create your account"})
+		return
+	}
+}
+
 // LoginUserWithPassword godoc
 // @Summary Login user using email and password
 // @Produce json
@@ -234,34 +370,24 @@ func LoginUserWithPassword(c *gin.Context) {
 	}
 
 	// setting token expiration
-	expirationTime := time.Now().Add(5 * time.Minute)
-	claims := &models.TokenClaims{
-		Username: user.Email,
-		StandardClaims: jwt.StandardClaims{
-			// In JWT, the expiry time is expressed as unix milliseconds
-			ExpiresAt: expirationTime.Unix(),
-		},
-	}
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := jwtToken.SignedString(jwtKey)
+	cookieToken, expirationTime, err := generateToken(user.Email)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
 		return
 	}
 
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:    "token",
-		Value:   tokenString,
+		Value:   cookieToken,
 		Expires: expirationTime,
 	})
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
-		"message": "Login information is correct",
-		"token":   jwtToken})
+		"message": "Login information is correct"})
 }
 
 // ChangeUserPassword => Changing user password

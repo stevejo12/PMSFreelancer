@@ -11,6 +11,16 @@ type RegistrationUserUsingPassword struct {
 	Username    string
 }
 
+type RegistrationUserUsingGoogle struct {
+	Email       string
+	GoogleID    string
+	Fullname    string
+	Location    int
+	Description string
+	Skills      string
+	Username    string
+}
+
 type LoginUserPassword struct {
 	Email    string
 	Password string
@@ -21,6 +31,11 @@ type GoogleResponse struct {
 	Email          string
 	Verified_email bool
 	Picture        string
+}
+
+type RegistrationInfo struct {
+	ID    string
+	Email string
 }
 
 type UpdateResetPassword struct {

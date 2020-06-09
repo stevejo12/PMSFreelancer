@@ -65,15 +65,18 @@ func main() {
 	{
 		v1.GET("/", handleHome)
 		v1.POST("/register", controller.RegisterUserWithPassword)
+		v1.GET("/googleRegister", controller.HandleRegisterGoogle)
+		v1.GET("/registerCallback", controller.HandleCallbackRegisterGoogle)
+		v1.POST("/registerUserUsingGoogle", controller.RegisterUserWithGoogle)
 		v1.POST("/login", controller.LoginUserWithPassword)
-		v1.POST("/logout", controller.HandleLogout)
+		v1.GET("/logout", controller.HandleLogout)
 		v1.GET("/userProfile/:id", controller.GetUserProfile)
 		v1.POST("/addPortfolio/:id", controller.AddUserPortfolio)
 		v1.POST("/deletePortfolio/:id", controller.DeleteUserPortfolio)
 		v1.POST("/editPortfolio/:id", controller.EditUserPortfolio)
 		v1.POST("/createBoardTrello/:id", controller.AuthenticationToken, controller.CreateNewBoard)
 		v1.GET("/googleLogin", controller.HandleLoginGoogle)
-		v1.GET("/signin-callback", controller.HandleCallbackGoogle)
+		v1.GET("/signin-callback", controller.HandleCallbackLoginGoogle)
 		v1.PUT("/change-password", controller.AuthenticationToken, controller.ChangeUserPassword)
 		v1.GET("/allSkills", controller.AuthenticationToken, controller.GetAllSkills)
 		v1.POST("/updateSkills/:id", controller.AuthenticationToken, controller.UpdateUserSkills)
@@ -117,7 +120,7 @@ func handleHome(c *gin.Context) {
 		return
 	}
 
-	const html = `<html><body><a href="/v1/googleLogin"> Google Log In</a>
+	const html = `<html><body><a href="/v1/googleLogin"> Google Log In</a><a href="/v1/googleRegister"> Google Register</a>
 	<form enctype="multipart/form-data" action="http://localhost:8080/v1/uploadImage" method="post">
     <input type="file" name="file" />
 		<input type="submit" value="upload" />

@@ -3,11 +3,10 @@ package controller
 import (
 	"database/sql"
 
-	"github.com/stevejo12/PMSFreelancer/config"
-	"github.com/stevejo12/PMSFreelancer/models"
-
-	// "PMSFreelancer/config"
-	// "PMSFreelancer/models"
+	// "github.com/stevejo12/PMSFreelancer/config"
+	// "github.com/stevejo12/PMSFreelancer/models"
+	"PMSFreelancer/config"
+	"PMSFreelancer/models"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -19,23 +18,21 @@ import (
 )
 
 var (
-	googleOauthConfigLogin = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/v1/signin-callback",
+	googleOauthConfigRegister = &oauth2.Config{
+		RedirectURL:  "http://localhost:8080/v1/registerCallback",
 		ClientID:     "776281301027-aincdrlljhjdmu39lfq2aunqeofn1hi8.apps.googleusercontent.com",
 		ClientSecret: "5q_niwCvO1dAFEzT2QkcQkok",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
 	}
-	// TO DO: randomize it
-	randomState = "random"
 )
 
-func HandleLoginGoogle(c *gin.Context) {
-	url := googleOauthConfigLogin.AuthCodeURL(randomState)
+func HandleRegisterGoogle(c *gin.Context) {
+	url := googleOauthConfigRegister.AuthCodeURL(randomState)
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func HandleCallbackLoginGoogle(c *gin.Context) {
+func HandleCallbackRegisterGoogle(c *gin.Context) {
 	if c.Request.FormValue("state") != randomState {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
@@ -44,7 +41,7 @@ func HandleCallbackLoginGoogle(c *gin.Context) {
 		return
 	}
 
-	token, err := googleOauthConfigLogin.Exchange(oauth2.NoContext, c.Request.FormValue("code"))
+	token, err := googleOauthConfigRegister.Exchange(oauth2.NoContext, c.Request.FormValue("code"))
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -89,33 +86,24 @@ func HandleCallbackLoginGoogle(c *gin.Context) {
 	err = config.DB.QueryRow("SELECT email FROM login WHERE email=?", account.Email).Scan(&email)
 
 	if err == sql.ErrNoRows {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": "Email is not registered in our database"})
-		return
+		var info models.RegistrationInfo
+
+		info.ID = account.ID
+		info.Email = account.Email
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Registration can continue",
+			"data":    info})
 	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusBadRequest,
 			"message": "Server unable to get information from database"})
 		return
-	}
-
-	cookieToken, expirationTime, err := generateToken(account.Email)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": err.Error()})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Email is already registered in our database"})
 		return
 	}
-
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:    "token",
-		Value:   cookieToken,
-		Expires: expirationTime,
-	})
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "Login information is correct"})
 }
