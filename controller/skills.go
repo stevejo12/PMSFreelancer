@@ -2,66 +2,61 @@ package controller
 
 import (
 	"errors"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/helpers"
 	"github.com/stevejo12/PMSFreelancer/models"
-
 	// "PMSFreelancer/config"
 	// "PMSFreelancer/helpers"
 	// "PMSFreelancer/models"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
-// GetAllSkills => Retrieved all the possible skill options available for users
-func GetAllSkills(c *gin.Context) {
+func getAllSkills() ([]models.UserSkills, error) {
 	data, err := config.DB.Query("SELECT * FROM skills")
+	var allData []models.UserSkills
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server unable to execute query to database"})
-		return
+		return allData, errors.New("Server unable to execute query to database")
 	}
-
-	var allData []models.UserSkills
 
 	for data.Next() {
 		// Scan one customer record
 		var skills models.UserSkills
 		if err := data.Scan(&skills.ID, &skills.Name, &skills.Created_at, &skills.Updated_at); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusInternalServerError,
-				"message": "Something is wrong with the database data"})
-			return
+			return []models.UserSkills{}, errors.New("Something is wrong with the database data")
 		}
 		allData = append(allData, skills)
 	}
 	if data.Err() != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Something is wrong with the data retrieved"})
-		return
+		return []models.UserSkills{}, errors.New("Something is wrong with the data retrieved")
 	}
+
+	return allData, nil
+}
+
+// GetAllSkills => Get a list of available skills
+func GetAllSkills(c *gin.Context) {
+	allSkills, err := getAllSkills()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
-			"message": "Server unable to execute query"})
-		return
+			"message": err.Error(),
+			"data":    []models.UserSkills{}})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
-		"message": "All Skills data have been successfully retrieved",
-		"data":    allData})
+		"message": "All Skills data have been retrieved",
+		"data":    allSkills})
 }
 
 func getSkillNames(param string) ([]string, error) {
 	var result []string
-	initialQuery, err := helpers.SettingInQueryWithID("skills", param)
+	initialQuery, err := helpers.SettingInQueryWithID("skills", param, "*")
 
 	if err != nil {
 		return nil, err
@@ -89,7 +84,7 @@ func getSkillNames(param string) ([]string, error) {
 }
 
 func userSkills(id string) ([]models.UserSkills, error) {
-	query, err := helpers.SettingInQueryWithID("skills", id)
+	query, err := helpers.SettingInQueryWithID("skills", id, "*")
 
 	if err != nil {
 		return []models.UserSkills{}, errors.New(err.Error())

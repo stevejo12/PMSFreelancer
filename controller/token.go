@@ -6,6 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stevejo12/PMSFreelancer/models"
+	// "PMSFreelancer/models"
 )
 
 func generateToken(email string) (string, time.Time, error) {

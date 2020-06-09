@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/helpers"
@@ -93,7 +94,7 @@ func SearchProject(c *gin.Context) {
 
 func getProjectLinks(param string) ([]string, error) {
 	var result []string
-	query, err := helpers.SettingInQueryWithID("project_links", param)
+	query, err := helpers.SettingInQueryWithID("project_links", param, "*")
 
 	if err != nil {
 		return nil, err
@@ -661,4 +662,158 @@ func RejectReviewProject(c *gin.Context) {
 			"message": "This user is unauthorized to reject the project"})
 		return
 	}
+}
+
+func getAllProjectForFilter() ([]models.FilterNeededData, error) {
+	var allData []models.FilterNeededData
+
+	data, err := config.DB.Query("SELECT id, title, description, skills FROM project")
+
+	if err != nil {
+		return []models.FilterNeededData{}, errors.New("Server is unable to execute query to the database")
+	}
+
+	for data.Next() {
+		var dbData models.FilterNeededData
+		if err := data.Scan(&dbData.ID, &dbData.Title, &dbData.Description, &dbData.Skill); err != nil {
+			return []models.FilterNeededData{}, errors.New("Something is wrong with the database data")
+		}
+
+		allData = append(allData, dbData)
+	}
+
+	return allData, nil
+}
+
+func FilterProject(c *gin.Context) {
+	var filteredID []string
+	keyParam, ok := c.Request.URL.Query()["key"]
+
+	if !ok || len(keyParam[0]) < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Request Url should have key for search in it"})
+		return
+	}
+
+	keyword := keyParam[0]
+
+	allData, err := getAllProjectForFilter()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// filter project id based on title
+	filteredID, err = filterData(allData, keyword)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// get all the project where it has been filtered
+	if len(filteredID) > 0 {
+		query, err := helpers.SettingInQueryWithID("project", strings.Join(filteredID, ","), "id, title, description, price")
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
+		filteredProjectData, err := config.DB.Query(query)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server is unable to execute query to the database"})
+			return
+		}
+
+		var project []models.SearchProjectQuery
+
+		for filteredProjectData.Next() {
+			var row models.SearchProjectQuery
+			if err := filteredProjectData.Scan(&row.ID, &row.Title, &row.Description, &row.Price); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": "Something is wrong with the database data"})
+				return
+			}
+			project = append(project, row)
+
+		}
+
+		if filteredProjectData.Err() != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Something is wrong with the database data"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Filter Successful",
+			"data":    project})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Filter Successful",
+			"data":    []models.SearchProjectQuery{}})
+	}
+}
+
+func filterData(data []models.FilterNeededData, keyword string) ([]string, error) {
+	var id []string
+	var skillID []string
+
+	allSkills, err := getAllSkills()
+
+	if err != nil {
+		return id, err
+	}
+
+	// filter skill name that matches the keyword
+	for i := 0; i < len(allSkills); i++ {
+		if strings.Contains(strings.ToLower(allSkills[i].Name), strings.ToLower(keyword)) {
+			skillID = append(skillID, allSkills[i].ID)
+		}
+	}
+
+	for i := 0; i < len(data); i++ {
+		if strings.Contains(strings.ToLower(data[i].Title), strings.ToLower(keyword)) {
+			id = append(id, data[i].ID)
+		}
+
+		if strings.Contains(strings.ToLower(data[i].Description), strings.ToLower(keyword)) {
+			id = append(id, data[i].ID)
+		}
+
+		arrSkill := helpers.SplitComma(data[i].Skill)
+
+		var skillMap = make(map[string]bool)
+
+		for _, ele := range skillID {
+			skillMap[ele] = true
+		}
+
+		for _, name := range arrSkill {
+			if skillMap[name] {
+				id = append(id, data[i].ID)
+				break
+			}
+		}
+	}
+
+	// remove any duplicate id in the array
+	id = helpers.RemoveDuplicateValueArray(id)
+
+	return id, nil
 }

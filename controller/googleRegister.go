@@ -3,10 +3,11 @@ package controller
 import (
 	"database/sql"
 
-	// "github.com/stevejo12/PMSFreelancer/config"
-	// "github.com/stevejo12/PMSFreelancer/models"
-	"PMSFreelancer/config"
-	"PMSFreelancer/models"
+	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/models"
+
+	// "PMSFreelancer/config"
+	// "PMSFreelancer/models"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
