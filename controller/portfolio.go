@@ -1,13 +1,13 @@
 package controller
 
 import (
-	"PMSFreelancer/config"
-	"PMSFreelancer/models"
+	// "PMSFreelancer/config"
+	// "PMSFreelancer/models"
 	"errors"
 	"net/http"
 
-	// "github.com.stevejo12/PMSFreelancer/config"
-	// "github.com.stevejo12/PMSFreelancer/models"
+	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/models"
 
 	"github.com/gin-gonic/gin"
 )
