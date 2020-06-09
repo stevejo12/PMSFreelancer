@@ -97,7 +97,7 @@ func HandleCallbackRegisterGoogle(c *gin.Context) {
 			"data":    info})
 	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusBadRequest,
+			"code":    http.StatusInternalServerError,
 			"message": "Server unable to get information from database"})
 		return
 	} else {
