@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
-
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/controller"
 	_ "github.com/stevejo12/PMSFreelancer/docs"
@@ -21,25 +18,6 @@ import (
 )
 
 var err error
-
-var (
-	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://159.89.202.223:8080/v1/signin-callback",
-		ClientID:     "776281301027-aincdrlljhjdmu39lfq2aunqeofn1hi8.apps.googleusercontent.com",
-		ClientSecret: "5q_niwCvO1dAFEzT2QkcQkok",
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
-		Endpoint:     google.Endpoint,
-	}
-	// TO DO: randomize it
-	randomState = "random"
-)
-
-var jwtKey = []byte("key_spirits")
-
-type loginInfo struct {
-	username string
-	password string
-}
 
 func init() {
 	config.ConnectToDB()
@@ -69,11 +47,11 @@ func main() {
 		v1.GET("/registerCallback", controller.HandleCallbackRegisterGoogle)
 		v1.POST("/registerUserUsingGoogle", controller.RegisterUserWithGoogle)
 		v1.POST("/login", controller.LoginUserWithPassword)
-		v1.GET("/logout", controller.HandleLogout)
-		v1.GET("/userProfile/:id", controller.GetUserProfile)
-		v1.POST("/addPortfolio/:id", controller.AddUserPortfolio)
-		v1.POST("/deletePortfolio/:id", controller.DeleteUserPortfolio)
-		v1.POST("/editPortfolio/:id", controller.EditUserPortfolio)
+		v1.GET("/logout", controller.AuthenticationToken, controller.HandleLogout)
+		v1.GET("/userProfile/:id", controller.AuthenticationToken, controller.GetUserProfile)
+		v1.POST("/addPortfolio/:id", controller.AuthenticationToken, controller.AddUserPortfolio)
+		v1.POST("/deletePortfolio/:id", controller.AuthenticationToken, controller.DeleteUserPortfolio)
+		v1.POST("/editPortfolio/:id", controller.AuthenticationToken, controller.EditUserPortfolio)
 		v1.POST("/createBoardTrello/:id", controller.AuthenticationToken, controller.CreateNewBoard)
 		v1.GET("/googleLogin", controller.HandleLoginGoogle)
 		v1.GET("/signin-callback", controller.HandleCallbackLoginGoogle)
@@ -82,22 +60,22 @@ func main() {
 		v1.POST("/updateSkills/:id", controller.AuthenticationToken, controller.UpdateUserSkills)
 		v1.POST("/resetPassword", controller.ResetPassword)
 		v1.POST("/updateNewPassword", controller.UpdateNewPassword)
-		v1.POST("/uploadPicture/:id", controller.UploadPicture)
-		v1.POST("/uploadAttachment", controller.UploadAttachment)
+		v1.POST("/uploadPicture/:id", controller.AuthenticationToken, controller.UploadPicture)
+		v1.POST("/uploadAttachment", controller.AuthenticationToken, controller.UploadAttachment)
 		v1.GET("/searchProject", controller.SearchProject)
 		v1.POST("/filterProject", controller.FilterProject)
-		v1.GET("/userEducation/:id", controller.GetOnlyUserEducation)
-		v1.POST("/addEducation/:id", controller.AddEducation)
-		v1.GET("/userExperience/:id", controller.GetOnlyUserExperience)
-		v1.POST("/addExperience/:id", controller.AddExperience)
-		v1.POST("/addProject/:id", controller.AddProject)
-		v1.GET("/userProjects/:id", controller.GetAllUserProjects)
-		v1.GET("/projectDetail/:id", controller.ProjectDetail)
-		v1.POST("/submitProjectInterest/:id", controller.SubmitProjectInterest)
-		v1.POST("/acceptProjectInterest/:id", controller.AcceptProjectInterest)
-		v1.POST("/submitProjectForReview/:id", controller.ReviewProject)
-		v1.POST("/rejectReviewProject/:id", controller.RejectReviewProject)
-		v1.POST("/completeProject/:id", controller.CompleteProject)
+		v1.GET("/userEducation/:id", controller.AuthenticationToken, controller.GetOnlyUserEducation)
+		v1.POST("/addEducation/:id", controller.AuthenticationToken, controller.AddEducation)
+		v1.GET("/userExperience/:id", controller.AuthenticationToken, controller.GetOnlyUserExperience)
+		v1.POST("/addExperience/:id", controller.AuthenticationToken, controller.AddExperience)
+		v1.POST("/addProject/:id", controller.AuthenticationToken, controller.AddProject)
+		v1.GET("/userProjects/:id", controller.AuthenticationToken, controller.GetAllUserProjects)
+		v1.GET("/projectDetail/:id", controller.AuthenticationToken, controller.ProjectDetail)
+		v1.POST("/submitProjectInterest/:id", controller.AuthenticationToken, controller.SubmitProjectInterest)
+		v1.POST("/acceptProjectInterest/:id", controller.AuthenticationToken, controller.AcceptProjectInterest)
+		v1.POST("/submitProjectForReview/:id", controller.AuthenticationToken, controller.ReviewProject)
+		v1.POST("/rejectReviewProject/:id", controller.AuthenticationToken, controller.RejectReviewProject)
+		v1.POST("/completeProject/:id", controller.AuthenticationToken, controller.CompleteProject)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
