@@ -24,7 +24,7 @@ var err error
 
 var (
 	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/v1/signin-callback",
+		RedirectURL:  "http://159.89.202.223:8080/v1/signin-callback",
 		ClientID:     "776281301027-aincdrlljhjdmu39lfq2aunqeofn1hi8.apps.googleusercontent.com",
 		ClientSecret: "5q_niwCvO1dAFEzT2QkcQkok",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
@@ -122,11 +122,11 @@ func handleHome(c *gin.Context) {
 	}
 
 	const html = `<html><body><a href="/v1/googleLogin"> Google Log In</a><a href="/v1/googleRegister"> Google Register</a>
-	<form enctype="multipart/form-data" action="http://localhost:8080/v1/uploadImage" method="post">
+	<form enctype="multipart/form-data" action="http://159.89.202.223:8080/v1/uploadImage" method="post">
     <input type="file" name="file" />
 		<input type="submit" value="upload" />
 	</form>
-	<form enctype="multipart/form-data" action="http://localhost:8080/v1/uploadAttachment" method="post">
+	<form enctype="multipart/form-data" action="http://159.89.202.223:8080/v1/uploadAttachment" method="post">
 		<input type="file" name="file" />
     <input type="submit" value="upload" />
   </form></body></html>`

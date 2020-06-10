@@ -20,7 +20,7 @@ import (
 
 var (
 	googleOauthConfigLogin = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/v1/signin-callback",
+		RedirectURL:  "http://159.89.202.223:8080/v1/signin-callback",
 		ClientID:     "776281301027-aincdrlljhjdmu39lfq2aunqeofn1hi8.apps.googleusercontent.com",
 		ClientSecret: "5q_niwCvO1dAFEzT2QkcQkok",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
