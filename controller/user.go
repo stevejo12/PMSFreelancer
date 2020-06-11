@@ -37,8 +37,9 @@ var jwtKey = []byte("key_spirits")
 // @Summary Register new user using email and password
 // @Produce json
 // @Accept  json
-// @Param account body userPassword true "Account"
+// @Param account body models.RegistrationUserUsingPassword true "Account"
 // @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /register [post]
 func RegisterUserWithPassword(c *gin.Context) {
@@ -329,8 +330,9 @@ func RegisterUserWithGoogle(c *gin.Context) {
 // @Summary Login user using email and password
 // @Produce json
 // @Accept  json
-// @Param account body userPassword true "Account"
-// @Success 200 {object} models.ResponseLoginWithToken
+// @Param account body models.LoginUserPassword true "Account"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /login [post]
 func LoginUserWithPassword(c *gin.Context) {
@@ -339,8 +341,8 @@ func LoginUserWithPassword(c *gin.Context) {
 	err = c.Bind(&user)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
 			"message": "Error data format login"})
 
 		return

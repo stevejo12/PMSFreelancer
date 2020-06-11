@@ -11,6 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetAllCountries godoc
+// @Summary Getting all list of countries
+// @Produce json
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /allCountries [get]
 func GetAllCountries(c *gin.Context) {
 	rows, err := config.DB.Query("SELECT * from app_countries")
 

@@ -1,12 +1,5 @@
 basePath: /v1
 definitions:
-  controller.userPassword:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    type: object
   models.ChangePassword:
     properties:
       email:
@@ -16,13 +9,28 @@ definitions:
       oldPassword:
         type: string
     type: object
-  models.ResponseLoginWithToken:
+  models.LoginUserPassword:
     properties:
-      code:
+      email:
         type: string
-      message:
+      password:
         type: string
-      token:
+    type: object
+  models.RegistrationUserUsingPassword:
+    properties:
+      description:
+        type: string
+      email:
+        type: string
+      fullname:
+        type: string
+      location:
+        type: integer
+      password:
+        type: string
+      skills:
+        type: string
+      username:
         type: string
     type: object
   models.ResponseWithNoBody:
@@ -41,6 +49,34 @@ info:
   title: Swagger API
   version: "1.0"
 paths:
+  /allCountries:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Getting all list of countries
+  /allSkills:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Getting all list of skills
   /change-password:
     put:
       consumes:
@@ -78,14 +114,18 @@ paths:
         name: account
         required: true
         schema:
-          $ref: '#/definitions/controller.userPassword'
+          $ref: '#/definitions/models.LoginUserPassword'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseLoginWithToken'
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
         "500":
           description: Internal Server Error
           schema:
@@ -101,12 +141,16 @@ paths:
         name: account
         required: true
         schema:
-          $ref: '#/definitions/controller.userPassword'
+          $ref: '#/definitions/models.RegistrationUserUsingPassword'
       produces:
       - application/json
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
         "500":

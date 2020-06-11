@@ -28,6 +28,50 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/allCountries": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Getting all list of countries",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/allSkills": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Getting all list of skills",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
         "/change-password": {
             "put": {
                 "consumes": [
@@ -86,7 +130,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.userPassword"
+                            "$ref": "#/definitions/models.LoginUserPassword"
                         }
                     }
                 ],
@@ -94,7 +138,13 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseLoginWithToken"
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
                         }
                     },
                     "500": {
@@ -122,13 +172,19 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.userPassword"
+                            "$ref": "#/definitions/models.RegistrationUserUsingPassword"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/models.ResponseWithNoBody"
                         }
@@ -144,17 +200,6 @@ var doc = `{
         }
     },
     "definitions": {
-        "controller.userPassword": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
         "models.ChangePassword": {
             "type": "object",
             "properties": {
@@ -169,16 +214,39 @@ var doc = `{
                 }
             }
         },
-        "models.ResponseLoginWithToken": {
+        "models.LoginUserPassword": {
             "type": "object",
             "properties": {
-                "code": {
+                "email": {
                     "type": "string"
                 },
-                "message": {
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RegistrationUserUsingPassword": {
+            "type": "object",
+            "properties": {
+                "description": {
                     "type": "string"
                 },
-                "token": {
+                "email": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "skills": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }

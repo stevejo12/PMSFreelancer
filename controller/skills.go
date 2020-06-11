@@ -37,7 +37,12 @@ func getAllSkills() ([]models.UserSkills, error) {
 	return allData, nil
 }
 
-// GetAllSkills => Get a list of available skills
+// GetAllSkills godoc
+// @Summary Getting all list of skills
+// @Produce json
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /allSkills [get]
 func GetAllSkills(c *gin.Context) {
 	allSkills, err := getAllSkills()
 
