@@ -16,7 +16,7 @@ func CheckDuplicateEmail(email string) error {
 	} else if row == nil {
 		return errors.New("Email has already registered in the database")
 	} else {
-		return errors.New("Server unable to create your account")
+		return errors.New(row.Error())
 	}
 }
 
@@ -29,7 +29,7 @@ func CheckDuplicateUsername(username string) error {
 	} else if row == nil {
 		return errors.New("Username has already registered in the database")
 	} else {
-		return errors.New("Server unable to create your account")
+		return errors.New(row.Error())
 	}
 }
 
