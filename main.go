@@ -48,6 +48,7 @@ func main() {
 		v1.POST("/registerUserUsingGoogle", controller.RegisterUserWithGoogle)
 		v1.POST("/login", controller.LoginUserWithPassword)
 		v1.GET("/logout", controller.AuthenticationToken, controller.HandleLogout)
+		v1.GET("/allCountries", controller.GetAllCountries)
 		v1.GET("/userProfile/:id", controller.AuthenticationToken, controller.GetUserProfile)
 		v1.POST("/addPortfolio/:id", controller.AuthenticationToken, controller.AddUserPortfolio)
 		v1.POST("/deletePortfolio/:id", controller.AuthenticationToken, controller.DeleteUserPortfolio)
