@@ -5,7 +5,9 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+
 	"github.com/stevejo12/PMSFreelancer/models"
+	// "PMSFreelancer/models"
 )
 
 // AuthenticationToken => authentication to get a token for login into SPIRITS

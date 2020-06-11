@@ -5,7 +5,12 @@ type ResponseWithNoBody struct {
 	message string
 }
 
-type ResponseLoginWithToken struct {
-	ResponseWithNoBody
-	token string
+type ParamSearchProject struct {
+	page int
+	size int
+}
+
+type ParamFilterProject struct {
+	page int
+	size int
 }

@@ -16,6 +16,20 @@ definitions:
       password:
         type: string
     type: object
+  models.ParamFilterProject:
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+    type: object
+  models.ParamSearchProject:
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+    type: object
   models.RegistrationUserUsingPassword:
     properties:
       description:
@@ -31,6 +45,11 @@ definitions:
       skills:
         type: string
       username:
+        type: string
+    type: object
+  models.ResetPassword:
+    properties:
+      email:
         type: string
     type: object
   models.ResponseWithNoBody:
@@ -63,6 +82,8 @@ paths:
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
       summary: Getting all list of countries
+      tags:
+      - Location
   /allSkills:
     get:
       produces:
@@ -77,6 +98,8 @@ paths:
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
       summary: Getting all list of skills
+      tags:
+      - Skills
   /change-password:
     put:
       consumes:
@@ -104,6 +127,35 @@ paths:
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
       summary: Register new user using email and password
+      tags:
+      - User
+  /filterProject:
+    post:
+      parameters:
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Filter project based on keyword
+      tags:
+      - Project
   /login:
     post:
       consumes:
@@ -111,7 +163,7 @@ paths:
       parameters:
       - description: Account
         in: body
-        name: account
+        name: parameter
         required: true
         schema:
           $ref: '#/definitions/models.LoginUserPassword'
@@ -131,6 +183,8 @@ paths:
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
       summary: Login user using email and password
+      tags:
+      - User
   /register:
     post:
       consumes:
@@ -158,4 +212,62 @@ paths:
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
       summary: Register new user using email and password
+      tags:
+      - User
+  /resetPassword:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Information needed to change password
+        in: body
+        name: Info
+        required: true
+        schema:
+          $ref: '#/definitions/models.ResetPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Reset Password (Forget Password Feature)
+      tags:
+      - User
+  /searchProject:
+    get:
+      parameters:
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Search Project initially
+      tags:
+      - Project
 swagger: "2.0"

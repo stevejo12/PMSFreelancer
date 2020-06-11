@@ -37,6 +37,7 @@ var jwtKey = []byte("key_spirits")
 // @Summary Register new user using email and password
 // @Produce json
 // @Accept  json
+// @Tags User
 // @Param account body models.RegistrationUserUsingPassword true "Account"
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 400 {object} models.ResponseWithNoBody
@@ -330,7 +331,8 @@ func RegisterUserWithGoogle(c *gin.Context) {
 // @Summary Login user using email and password
 // @Produce json
 // @Accept  json
-// @Param account body models.LoginUserPassword true "Account"
+// @Tags User
+// @Param parameter body models.LoginUserPassword true "Account"
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
@@ -397,6 +399,7 @@ func LoginUserWithPassword(c *gin.Context) {
 // @Summary Register new user using email and password
 // @Produce json
 // @Accept  json
+// @Tags User
 // @Param Info body models.ChangePassword true "Information needed to change password"
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 400 {object} models.ResponseWithNoBody
@@ -459,6 +462,16 @@ func ChangeUserPassword(c *gin.Context) {
 }
 
 // HandleLogout => Log out from SPIRITS
+// HandleLogout godoc
+// @Summary Logout
+// @Produce json
+// @Tags User
+// @Param Authorization header string true "Authorization"
+// @Param Info body models.ResetPassword true "Information needed to change password"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /resetPassword [post]
 func HandleLogout(c *gin.Context) {
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:   "token",
@@ -472,6 +485,16 @@ func HandleLogout(c *gin.Context) {
 }
 
 // ResetPassword => Sending email feature to reset password
+// ResetPassword godoc
+// @Summary Reset Password (Forget Password Feature)
+// @Produce json
+// @Accept  json
+// @Tags User
+// @Param Info body models.ResetPassword true "Information needed to change password"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /resetPassword [post]
 func ResetPassword(c *gin.Context) {
 	var data models.ResetPassword
 	var mail string

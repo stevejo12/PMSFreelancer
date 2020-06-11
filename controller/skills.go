@@ -40,6 +40,7 @@ func getAllSkills() ([]models.UserSkills, error) {
 // GetAllSkills godoc
 // @Summary Getting all list of skills
 // @Produce json
+// @Tags Skills
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /allSkills [get]

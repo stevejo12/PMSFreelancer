@@ -17,6 +17,15 @@ import (
 )
 
 // SearchProject => Search project in SPIRITS
+// SearchProject godoc
+// @Summary Search Project initially
+// @Produce json
+// @Param page query models.ParamSearchProject true "Data"
+// @Tags Project
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /searchProject [get]
 func SearchProject(c *gin.Context) {
 	// initialize variables
 	// page is page number in pagination
@@ -62,7 +71,7 @@ func SearchProject(c *gin.Context) {
 		return
 	}
 
-	var allData []models.SearchProjectQuery
+	allData := []models.SearchProjectQuery{}
 	for result.Next() {
 		var project models.SearchProjectQuery
 		if err := result.Scan(&project.ID, &project.Title, &project.Description, &project.Price); err != nil {
@@ -685,6 +694,16 @@ func getAllProjectForFilter() ([]models.FilterNeededData, error) {
 	return allData, nil
 }
 
+// FilterProject => Filter search project in SPIRITS
+// FilterProject godoc
+// @Summary Filter project based on keyword
+// @Produce json
+// @Param page query models.ParamFilterProject true "Data"
+// @Tags Project
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /filterProject [post]
 func FilterProject(c *gin.Context) {
 	var filteredID []string
 	keyParam, ok := c.Request.URL.Query()["key"]

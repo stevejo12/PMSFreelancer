@@ -14,6 +14,7 @@ import (
 // GetAllCountries godoc
 // @Summary Getting all list of countries
 // @Produce json
+// @Tags Location
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /allCountries [get]
