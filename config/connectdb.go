@@ -18,7 +18,8 @@ func ConnectToDB() {
 	dbUser := "root"
 	dbPass := "root"
 	dbName := "thesis"
-	DB, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName+"?parseTime=true")
+	//DB, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName+"?parseTime=true")
+	DB, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp(159.89.202.223:3306)/"+dbName+"?parseTime=true")
 	if err != nil {
 		panic(err.Error())
 	}
