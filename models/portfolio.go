@@ -7,8 +7,8 @@ type PortfolioRequestParameter struct {
 }
 
 type PortfolioDatabase struct {
-	ID          string
-	Description string
-	Link        string
-	OwnerID     string
+	ID          string `json:"id"`
+	Description string `json:"description"`
+	Link        string `json:"link"`
+	OwnerID     string `json:"ownerId"`
 }

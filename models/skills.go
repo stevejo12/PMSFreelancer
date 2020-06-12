@@ -1,10 +1,10 @@
 package models
 
 type UserSkills struct {
-	ID         string
-	Name       string
-	Created_at string
-	Updated_at string
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Created_at string `json:"createdAt"`
+	Updated_at string `json:"updatedAt"`
 }
 
 // UpdateSkills => data format to update skills of a user

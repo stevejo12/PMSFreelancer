@@ -1,7 +1,7 @@
 package models
 
 type CountryData struct {
-	ID          string
-	CountryCode string
-	CountryName string
+	ID          string `json:"id"`
+	CountryCode string `json:"countryCode"`
+	CountryName string `json:"countryName"`
 }

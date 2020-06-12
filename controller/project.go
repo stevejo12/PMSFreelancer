@@ -98,7 +98,7 @@ func SearchProject(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "All Project data have been retrieved",
-		"data":    allData})
+		"data":    resp})
 }
 
 func getProjectLinks(param string) ([]string, error) {

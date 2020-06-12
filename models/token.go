@@ -13,6 +13,6 @@ type TokenClaims struct {
 }
 
 type TokenResponse struct {
-	Token  string
-	Expire time.Time
+	Token  string    `json:"token"`
+	Expire time.Time `json:"expire"`
 }

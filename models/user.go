@@ -34,8 +34,8 @@ type GoogleResponse struct {
 }
 
 type RegistrationInfo struct {
-	ID    string
-	Email string
+	ID    string `json:"id"`
+	Email string `json:"email"`
 }
 
 type UpdateResetPassword struct {
@@ -50,18 +50,18 @@ type DatabaseResetPassword struct {
 }
 
 type UserProfile struct {
-	ID          string
-	Fullname    string
-	Email       string
-	Description string
-	Education   []EducationReturnValue
-	Skill       []UserSkills
-	Experience  []ExperienceReturnValue
-	Picture     string
-	Username    string
-	Location    string
-	Member      string
-	Portfolio   []PortfolioDatabase
+	ID          string                  `json:"id"`
+	Fullname    string                  `json:"fullname"`
+	Email       string                  `json:"email"`
+	Description string                  `json:"description"`
+	Education   []EducationReturnValue  `json:"education"`
+	Skill       []UserSkills            `json:"skill"`
+	Experience  []ExperienceReturnValue `json:"experience"`
+	Picture     string                  `json:"picture"`
+	Username    string                  `json:"username"`
+	Location    string                  `json:"location"`
+	Member      string                  `json:"member"`
+	Portfolio   []PortfolioDatabase     `json:"portfolio"`
 }
 
 type QueryUserProfile struct {

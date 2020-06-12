@@ -280,8 +280,8 @@ func UploadAttachment(c *gin.Context) {
 	}
 
 	type AttachmentData struct {
-		ID   string
-		Link string
+		ID   string `json:"id"`
+		Link string `json:"link"`
 	}
 
 	asd, err := config.DB.Exec("INSERT INTO project_links(project_link) VALUES(?)", urlFile)

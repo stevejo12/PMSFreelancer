@@ -19,15 +19,15 @@ type OwnerInfo struct {
 }
 
 type SearchProjectQuery struct {
-	ID          string
-	Title       string
-	Description string
-	Price       float64
+	ID          string  `json:"id"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
 }
 
 type SearchProjectResponse struct {
 	Project     []SearchProjectQuery
-	TotalSearch int
+	TotalSearch int `json:"totalSearch"`
 }
 
 type ProjectLinksResponse struct {
@@ -44,10 +44,10 @@ type CreateProject struct {
 }
 
 type GetUserProjectResponse struct {
-	ID          string
-	Title       string
-	Description string
-	Status      string
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
 }
 
 type ProjectDetailRequest struct {
@@ -61,10 +61,10 @@ type ProjectDetailRequest struct {
 }
 
 type ProjectDetailResponse struct {
-	ID         string
-	Title      string
-	Skills     []string
-	Attachment []string
-	Price      float64
-	Owner      OwnerInfo
+	ID         string    `json:"id"`
+	Title      string    `json:"title"`
+	Skills     []string  `json:"skills"`
+	Attachment []string  `json:"attachment"`
+	Price      float64   `json:"price"`
+	Owner      OwnerInfo `json:"owner"`
 }
