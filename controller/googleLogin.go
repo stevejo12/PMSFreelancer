@@ -109,13 +109,18 @@ func HandleCallbackLoginGoogle(c *gin.Context) {
 		return
 	}
 
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:    "token",
-		Value:   cookieToken,
-		Expires: expirationTime,
-	})
+	// http.SetCookie(c.Writer, &http.Cookie{
+	// 	Name:    "token",
+	// 	Value:   cookieToken,
+	// 	Expires: expirationTime,
+	// })
+
+	tokenInfo := models.TokenResponse{}
+	tokenInfo.Token = cookieToken
+	tokenInfo.Expire = expirationTime
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
-		"message": "Login information is correct"})
+		"message": "Login Successful",
+		"data":    tokenInfo})
 }

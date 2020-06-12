@@ -383,15 +383,20 @@ func LoginUserWithPassword(c *gin.Context) {
 		return
 	}
 
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:    "token",
-		Value:   cookieToken,
-		Expires: expirationTime,
-	})
+	// http.SetCookie(c.Writer, &http.Cookie{
+	// 	Name:    "token",
+	// 	Value:   cookieToken,
+	// 	Expires: expirationTime,
+	// })
+
+	tokenInfo := models.TokenResponse{}
+	tokenInfo.Token = cookieToken
+	tokenInfo.Expire = expirationTime
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
-		"message": "Login information is correct"})
+		"message": "Login Successful",
+		"data":    tokenInfo})
 }
 
 // ChangeUserPassword => Changing user password
@@ -466,12 +471,8 @@ func ChangeUserPassword(c *gin.Context) {
 // @Summary Logout
 // @Produce json
 // @Tags User
-// @Param Authorization header string true "Authorization"
-// @Param Info body models.ResetPassword true "Information needed to change password"
 // @Success 200 {object} models.ResponseWithNoBody
-// @Failure 400 {object} models.ResponseWithNoBody
-// @Failure 500 {object} models.ResponseWithNoBody
-// @Router /resetPassword [post]
+// @Router /logout [get]
 func HandleLogout(c *gin.Context) {
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:   "token",

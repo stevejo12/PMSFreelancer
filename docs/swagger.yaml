@@ -185,6 +185,18 @@ paths:
       summary: Login user using email and password
       tags:
       - User
+  /logout:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Logout
+      tags:
+      - User
   /register:
     post:
       consumes:
