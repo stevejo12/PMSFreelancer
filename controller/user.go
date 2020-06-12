@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/stevejo12/PMSFreelancer/config"
@@ -157,7 +158,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 		}
 
 		// status at first created should be active
-		_, err = selDB.Exec(newUser.Email, hashedPassword, formattedDate, "active", newUser.Username, newUser.Description, firstname, lastname, newUser.Location, newUser.Skills)
+		_, err = selDB.Exec(newUser.Email, hashedPassword, formattedDate, "active", newUser.Username, newUser.Description, firstname, lastname, newUser.Location, strings.Join(newUser.Skills, ","))
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -294,7 +295,7 @@ func RegisterUserWithGoogle(c *gin.Context) {
 		}
 
 		// status at first created should be active
-		_, err = selDB.Exec(newUser.Email, newUser.GoogleID, formattedDate, "active", newUser.Username, newUser.Description, firstname, lastname, newUser.Location, newUser.Skills)
+		_, err = selDB.Exec(newUser.Email, newUser.GoogleID, formattedDate, "active", newUser.Username, newUser.Description, firstname, lastname, newUser.Location, strings.Join(newUser.Skills, ","))
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -727,7 +728,7 @@ func UpdateUserSkills(c *gin.Context) {
 		return
 	}
 
-	_, err = config.DB.Exec("UPDATE login SET skill=? WHERE id=?", data.Skills, id)
+	_, err = config.DB.Exec("UPDATE login SET skill=? WHERE id=?", strings.Join(data.Skills, ","), id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

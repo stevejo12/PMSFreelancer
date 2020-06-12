@@ -108,7 +108,7 @@ func allUserPortfolio(id string) ([]models.PortfolioDatabase, error) {
 		return []models.PortfolioDatabase{}, errors.New(err.Error())
 	}
 
-	var returnValue []models.PortfolioDatabase
+	returnValue := []models.PortfolioDatabase{}
 
 	for data.Next() {
 		var dbData models.PortfolioDatabase

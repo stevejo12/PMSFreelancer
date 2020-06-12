@@ -13,7 +13,7 @@ import (
 )
 
 func userEducation(id string) ([]models.EducationReturnValue, error) {
-	var returnData []models.EducationReturnValue
+	returnData := []models.EducationReturnValue{}
 
 	resp, err := config.DB.Query("SELECT * FROM education WHERE user_id=?", id)
 

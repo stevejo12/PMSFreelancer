@@ -144,7 +144,7 @@ func AddProject(c *gin.Context) {
 		return
 	}
 
-	_, err = config.DB.Query("INSERT INTO project(title, description, skills, price, attachment, owner_id) VALUES(?,?,?,?,?,?)", param.Title, param.Description, param.Skills, param.Price, param.Attachment, id)
+	_, err = config.DB.Query("INSERT INTO project(title, description, skills, price, attachment, owner_id) VALUES(?,?,?,?,?,?)", param.Title, param.Description, strings.Join(param.Skills, ","), param.Price, param.Attachment, id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

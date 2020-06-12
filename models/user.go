@@ -7,7 +7,7 @@ type RegistrationUserUsingPassword struct {
 	Fullname    string
 	Location    int
 	Description string
-	Skills      string
+	Skills      []string
 	Username    string
 }
 
@@ -17,7 +17,7 @@ type RegistrationUserUsingGoogle struct {
 	Fullname    string
 	Location    int
 	Description string
-	Skills      string
+	Skills      []string
 	Username    string
 }
 

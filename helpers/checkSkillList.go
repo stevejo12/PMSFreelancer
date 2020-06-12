@@ -6,9 +6,7 @@ import (
 	"errors"
 )
 
-func SkillList(s string) error {
-	splittedData := SplitComma(s)
-
+func SkillList(s []string) error {
 	var allSkills []interface{}
 
 	rows, err := config.DB.Query("SELECT id from skills")
@@ -28,8 +26,8 @@ func SkillList(s string) error {
 		allSkills = append(allSkills, skillid)
 	}
 
-	for i := 0; i < len(splittedData); i++ {
-		exist := Contains(allSkills, splittedData[i])
+	for i := 0; i < len(s); i++ {
+		exist := Contains(allSkills, s[i])
 
 		if !exist {
 			return errors.New("not exist")

@@ -102,7 +102,7 @@ func userSkills(id string) ([]models.UserSkills, error) {
 		return []models.UserSkills{}, errors.New(err.Error())
 	}
 
-	var allData []models.UserSkills
+	allData := []models.UserSkills{}
 
 	for resp.Next() {
 		var databaseData models.UserSkills

@@ -38,7 +38,7 @@ type ProjectLinksResponse struct {
 type CreateProject struct {
 	Title       string
 	Description string
-	Skills      string
+	Skills      []string
 	Price       float64
 	Attachment  string
 }

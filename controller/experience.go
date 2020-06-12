@@ -19,7 +19,7 @@ func userExperience(id string) ([]models.ExperienceReturnValue, error) {
 		return []models.ExperienceReturnValue{}, errors.New("Server unable to execute query to database")
 	}
 
-	var allData []models.ExperienceReturnValue
+	allData := []models.ExperienceReturnValue{}
 
 	for resp.Next() {
 		var databaseData models.ExperienceTableResponse
