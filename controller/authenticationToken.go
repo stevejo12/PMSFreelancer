@@ -70,6 +70,4 @@ func AuthenticationToken(c *gin.Context) {
 	}
 
 	idToken = claims.Username
-
-	c.Next()
 }
