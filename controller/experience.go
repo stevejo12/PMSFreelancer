@@ -46,7 +46,7 @@ func userExperience(id string) ([]models.ExperienceReturnValue, error) {
 }
 
 func GetOnlyUserExperience(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 
 	allUserExperience, err := userExperience(id)
 
@@ -64,7 +64,7 @@ func GetOnlyUserExperience(c *gin.Context) {
 }
 
 func AddExperience(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 
 	// sample data
 	// experience: [

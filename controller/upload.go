@@ -87,7 +87,7 @@ func uploadFile(file multipart.File, header *multipart.FileHeader) (string, erro
 
 // UploadPicture => Upload Image to Cloudinary and get the URL response
 func UploadPicture(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 
 	// accept the images and store it in the tempfile
 	c.Request.ParseMultipartForm(32 << 20)

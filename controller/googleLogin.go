@@ -86,7 +86,8 @@ func HandleCallbackLoginGoogle(c *gin.Context) {
 
 	// find the email
 	var email string
-	err = config.DB.QueryRow("SELECT email FROM login WHERE email=?", account.Email).Scan(&email)
+	var id string
+	err = config.DB.QueryRow("SELECT id, email FROM login WHERE email=?", account.Email).Scan(&id, &email)
 
 	if err == sql.ErrNoRows {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -100,7 +101,7 @@ func HandleCallbackLoginGoogle(c *gin.Context) {
 		return
 	}
 
-	cookieToken, expirationTime, err := generateToken(account.Email)
+	cookieToken, expirationTime, err := generateToken(id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

@@ -131,7 +131,7 @@ func getProjectLinks(param string) ([]string, error) {
 }
 
 func AddProject(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 
 	var param models.CreateProject
 
@@ -161,7 +161,7 @@ func AddProject(c *gin.Context) {
 
 func GetAllUserProjects(c *gin.Context) {
 	// user id
-	id := c.Param("id")
+	id := idToken
 
 	result, err := config.DB.Query("SELECT id, title, description, status FROM project WHERE owner_id=?", id)
 

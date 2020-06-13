@@ -46,7 +46,7 @@ func userEducation(id string) ([]models.EducationReturnValue, error) {
 
 // GetOnlyUserEducation => Get Detail View for the User Education
 func GetOnlyUserEducation(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 
 	allUserEducation, err := userEducation(id)
 
@@ -64,7 +64,7 @@ func GetOnlyUserEducation(c *gin.Context) {
 }
 
 func AddEducation(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 
 	// sample data
 	// education: [

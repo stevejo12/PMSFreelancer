@@ -332,12 +332,12 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "name": "page",
+                        "name": "size",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "name": "size",
+                        "name": "page",
                         "in": "query"
                     }
                 ],
@@ -431,7 +431,10 @@ var doc = `{
                     "type": "string"
                 },
                 "skills": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "username": {
                     "type": "string"

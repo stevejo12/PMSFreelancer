@@ -9,10 +9,10 @@ import (
 	// "PMSFreelancer/models"
 )
 
-func generateToken(email string) (string, time.Time, error) {
-	expirationTime := time.Now().Add(5 * time.Minute)
+func generateToken(userID string) (string, time.Time, error) {
+	expirationTime := time.Now().Add(30 * time.Minute)
 	claims := &models.TokenClaims{
-		Username: email,
+		Username: userID,
 		StandardClaims: jwt.StandardClaims{
 			// In JWT, the expiry time is expressed as unix milliseconds
 			ExpiresAt: expirationTime.Unix(),

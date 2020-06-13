@@ -43,7 +43,9 @@ definitions:
       password:
         type: string
       skills:
-        type: string
+        items:
+          type: string
+        type: array
       username:
         type: string
     type: object
@@ -259,10 +261,10 @@ paths:
     get:
       parameters:
       - in: query
-        name: page
+        name: size
         type: integer
       - in: query
-        name: size
+        name: page
         type: integer
       produces:
       - application/json

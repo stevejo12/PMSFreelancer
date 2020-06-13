@@ -351,10 +351,11 @@ func LoginUserWithPassword(c *gin.Context) {
 		return
 	}
 
+	var databaseID string
 	var databaseEmail string
 	var databasePassword string
 
-	err = config.DB.QueryRow("SELECT email, password FROM login WHERE email=?", user.Email).Scan(&databaseEmail, &databasePassword)
+	err = config.DB.QueryRow("SELECT id, email, password FROM login WHERE email=?", user.Email).Scan(&databaseID, &databaseEmail, &databasePassword)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -375,7 +376,7 @@ func LoginUserWithPassword(c *gin.Context) {
 	}
 
 	// setting token expiration
-	cookieToken, expirationTime, err := generateToken(user.Email)
+	cookieToken, expirationTime, err := generateToken(databaseID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -673,7 +674,7 @@ func UpdateNewPassword(c *gin.Context) {
 }
 
 func UpdateUserSkills(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 
 	var data models.UpdateSkills
 
@@ -743,7 +744,7 @@ func UpdateUserSkills(c *gin.Context) {
 }
 
 func GetUserProfile(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 	var data models.UserProfile
 
 	// get education list

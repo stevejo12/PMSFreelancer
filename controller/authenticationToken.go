@@ -10,6 +10,8 @@ import (
 	// "PMSFreelancer/models"
 )
 
+var idToken string
+
 // AuthenticationToken => authentication to get a token for login into SPIRITS
 func AuthenticationToken(c *gin.Context) {
 	cookie, err := c.Request.Cookie("token")
@@ -66,4 +68,8 @@ func AuthenticationToken(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
+	idToken = claims.Username
+
+	c.Next()
 }

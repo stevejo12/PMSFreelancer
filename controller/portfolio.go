@@ -13,7 +13,7 @@ import (
 )
 
 func AddUserPortfolio(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 
 	// accept the images and store it in the tempfile
 	c.Request.ParseMultipartForm(5 * 1024 * 1024)
@@ -53,7 +53,7 @@ func AddUserPortfolio(c *gin.Context) {
 }
 
 func EditUserPortfolio(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 
 	type structData struct {
 		Description string
@@ -85,7 +85,7 @@ func EditUserPortfolio(c *gin.Context) {
 }
 
 func DeleteUserPortfolio(c *gin.Context) {
-	id := c.Param("id")
+	id := idToken
 
 	_, err = config.DB.Exec("DELETE FROM portfolio WHERE id=?", id)
 
@@ -124,7 +124,7 @@ func allUserPortfolio(id string) ([]models.PortfolioDatabase, error) {
 
 // maybe useful later or delete
 // func GetUserPortfolio(c *gin.Context) {
-// 	id := c.Param("id")
+// 	id := idToken
 
 // 	allData, err := allUserPortfolio(id)
 
