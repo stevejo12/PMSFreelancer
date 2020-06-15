@@ -132,18 +132,6 @@ var doc = `{
                     "Project"
                 ],
                 "summary": "Filter project based on keyword",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "size",
-                        "in": "query"
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -332,13 +320,58 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "name": "size",
+                        "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "name": "page",
+                        "name": "size",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/updateNewPassword": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update Password (after reset password)",
+                "parameters": [
+                    {
+                        "description": "Information needed to update password",
+                        "name": "Info",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateResetPassword"
+                        }
                     }
                 ],
                 "responses": {
@@ -387,17 +420,6 @@ var doc = `{
                 },
                 "password": {
                     "type": "string"
-                }
-            }
-        },
-        "models.ParamFilterProject": {
-            "type": "object",
-            "properties": {
-                "page": {
-                    "type": "integer"
-                },
-                "size": {
-                    "type": "integer"
                 }
             }
         },
@@ -456,6 +478,17 @@ var doc = `{
                     "type": "string"
                 },
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdateResetPassword": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }

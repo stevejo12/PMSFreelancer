@@ -592,6 +592,17 @@ func ResetPassword(c *gin.Context) {
 		"message": "Email has been send"})
 }
 
+// UpdateNewPassword => Updating user password without old password
+// ResetPassword godoc
+// @Summary Update Password (after reset password)
+// @Produce json
+// @Accept  json
+// @Tags User
+// @Param Info body models.UpdateResetPassword true "Information needed to update password"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /updateNewPassword [post]
 func UpdateNewPassword(c *gin.Context) {
 	var param models.UpdateResetPassword
 

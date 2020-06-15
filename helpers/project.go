@@ -5,8 +5,10 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/stevejo12/PMSFreelancer/config"
-	// "PMSFreelancer/config"
+	// "github.com/stevejo12/PMSFreelancer/config"
+	// "github.com/stevejo12/PMSFreelancer/models"
+	"PMSFreelancer/config"
+	"PMSFreelancer/models"
 )
 
 // IsThisIDProjectOwner => Check if the user id is the project owner
@@ -81,4 +83,47 @@ func GetMemberList(id string) (string, error) {
 	} else {
 		return "", nil
 	}
+}
+
+func GetInterestedMemberNames(id string) ([]models.ProjectDetailInterestedMember, error) {
+	imID, err := GetMemberList(id)
+	allInterestedMember := []models.ProjectDetailInterestedMember{}
+
+	query, err := SettingInQueryWithID("login", imID, "id, first_name, last_name")
+
+	if err != nil {
+		return []models.ProjectDetailInterestedMember{}, errors.New("Server has issues generating query")
+	}
+
+	data, err := config.DB.Query(query)
+
+	if err != nil {
+		return []models.ProjectDetailInterestedMember{}, errors.New("Server has issues executing query to the database")
+	}
+
+	for data.Next() {
+		interestedMember := models.ProjectDetailInterestedMember{}
+		var dbID, dbFirstName, dbLastName string
+		if err := data.Scan(&dbID, &dbFirstName, &dbLastName); err != nil {
+			return []models.ProjectDetailInterestedMember{}, errors.New("Something is wrong with the database data")
+		}
+
+		interestedMember.ID = dbID
+		interestedMember.Fullname = dbFirstName + " " + dbLastName
+
+		allInterestedMember = append(allInterestedMember, interestedMember)
+	}
+
+	return allInterestedMember, nil
+}
+
+func GetUserCompletedProject(id string) (int, error) {
+	var count int
+	err := config.DB.QueryRow("SELECT COUNT(*) FROM project WHERE owner_id=?", id).Scan(&count)
+
+	if err != nil {
+		return -1, errors.New("Server unable to execute query to database")
+	}
+
+	return count, nil
 }

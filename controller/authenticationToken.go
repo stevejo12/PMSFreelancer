@@ -18,7 +18,8 @@ func AuthenticationToken(c *gin.Context) {
 	if err != nil {
 		if err == http.ErrNoCookie {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": err.Error(),
+				"code":    http.StatusUnauthorized,
+				"message": "Token is not present",
 			})
 			c.Abort()
 			return
@@ -26,6 +27,7 @@ func AuthenticationToken(c *gin.Context) {
 
 		// For any other type of error, return a bad request status
 		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
 			"message": err.Error(),
 		})
 		c.Abort()
@@ -49,13 +51,15 @@ func AuthenticationToken(c *gin.Context) {
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": err.Error(),
+				"code":    http.StatusUnauthorized,
+				"message": "Token is invalid",
 			})
 			c.Abort()
 			return
 		}
 
 		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
 			"message": err.Error(),
 		})
 		c.Abort()
@@ -63,7 +67,8 @@ func AuthenticationToken(c *gin.Context) {
 	}
 	if !tkn.Valid {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": err.Error(),
+			"code":    http.StatusUnauthorized,
+			"message": "Token is no longer invalid",
 		})
 		c.Abort()
 		return

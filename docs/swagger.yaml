@@ -16,13 +16,6 @@ definitions:
       password:
         type: string
     type: object
-  models.ParamFilterProject:
-    properties:
-      page:
-        type: integer
-      size:
-        type: integer
-    type: object
   models.ParamSearchProject:
     properties:
       page:
@@ -59,6 +52,13 @@ definitions:
       code:
         type: string
       message:
+        type: string
+    type: object
+  models.UpdateResetPassword:
+    properties:
+      password:
+        type: string
+      token:
         type: string
     type: object
 info:
@@ -133,13 +133,6 @@ paths:
       - User
   /filterProject:
     post:
-      parameters:
-      - in: query
-        name: page
-        type: integer
-      - in: query
-        name: size
-        type: integer
       produces:
       - application/json
       responses:
@@ -261,10 +254,10 @@ paths:
     get:
       parameters:
       - in: query
-        name: size
+        name: page
         type: integer
       - in: query
-        name: page
+        name: size
         type: integer
       produces:
       - application/json
@@ -284,4 +277,33 @@ paths:
       summary: Search Project initially
       tags:
       - Project
+  /updateNewPassword:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Information needed to update password
+        in: body
+        name: Info
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateResetPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Update Password (after reset password)
+      tags:
+      - User
 swagger: "2.0"

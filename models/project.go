@@ -61,10 +61,16 @@ type ProjectDetailRequest struct {
 }
 
 type ProjectDetailResponse struct {
-	ID         string    `json:"id"`
-	Title      string    `json:"title"`
-	Skills     []string  `json:"skills"`
-	Attachment []string  `json:"attachment"`
-	Price      float64   `json:"price"`
-	Owner      OwnerInfo `json:"owner"`
+	ID                string                          `json:"id"`
+	Title             string                          `json:"title"`
+	Skills            []string                        `json:"skills"`
+	Attachment        []string                        `json:"attachment"`
+	Price             float64                         `json:"price"`
+	Owner             OwnerInfo                       `json:"owner"`
+	InterestedMembers []ProjectDetailInterestedMember `json:"interestedMembers"`
+}
+
+type ProjectDetailInterestedMember struct {
+	ID       string
+	Fullname string
 }

@@ -62,7 +62,7 @@ func SearchProject(c *gin.Context) {
 	var startingRecordNumber = page * size
 	var endingRecordNumber = startingRecordNumber + size
 
-	result, err := config.DB.Query("SELECT id, title, description, price FROM project ORDER BY ID ASC LIMIT ?,?", startingRecordNumber, endingRecordNumber)
+	result, err := config.DB.Query("SELECT id, title, description, price FROM project WHERE status=? ORDER BY ID ASC LIMIT ?,?", "Listed", startingRecordNumber, endingRecordNumber)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -282,16 +282,25 @@ func ProjectDetail(c *gin.Context) {
 		}
 
 		// get # of completed project
-		var count int
-		err = config.DB.QueryRow("SELECT COUNT(*) FROM project WHERE owner_id=?", id).Scan(&count)
+		projectCompleted, err := helpers.GetUserCompletedProject(id)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
-				"message": "Server unable to execute query to database"})
+				"message": err.Error()})
 			return
 		}
-		ownerInfo.ProjectCompleted = count
+		ownerInfo.ProjectCompleted = projectCompleted
+
+		// get the names and id of the member
+		interestedMembers, err := helpers.GetInterestedMemberNames(id)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
 
 		// construct the response to user
 		data.ID = dbResult.ID
@@ -300,6 +309,7 @@ func ProjectDetail(c *gin.Context) {
 		data.Price = dbResult.Price
 		data.Owner = ownerInfo
 		data.Attachment = dataLink
+		data.InterestedMembers = interestedMembers
 
 		allData = append(allData, data)
 	}
@@ -319,19 +329,21 @@ func ProjectDetail(c *gin.Context) {
 
 // SubmitProjectInterest => Potential Freelancer submit their interest before accepted by project owner
 // /:id => to get the project ID
-// parameter ID: this is the freelancer id to register
 func SubmitProjectInterest(c *gin.Context) {
 	// this is project id
 	id := c.Param("id")
 
-	// this ID is for the potential freelancer id
-	type submitInterest struct {
-		ID int
+	userID, err := strconv.Atoi(idToken)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Unable to retrieve user id"})
+		return
 	}
 
-	var param submitInterest
-
-	err := c.Bind(&param)
+	// check if this is the owner
+	owner, err := helpers.IsThisIDProjectOwner(id, userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -339,9 +351,6 @@ func SubmitProjectInterest(c *gin.Context) {
 			"message": err.Error()})
 		return
 	}
-
-	// check if this is the owner
-	owner, err := helpers.IsThisIDProjectOwner(id, param.ID)
 
 	if !owner {
 		if err != nil {
@@ -352,7 +361,7 @@ func SubmitProjectInterest(c *gin.Context) {
 		}
 
 		// check if this member already registered
-		member, err := helpers.IsThisMemberRegistered(id, param.ID)
+		member, err := helpers.IsThisMemberRegistered(id, userID)
 
 		if !member {
 			if err != nil {
@@ -363,7 +372,7 @@ func SubmitProjectInterest(c *gin.Context) {
 			}
 
 			// if they are not member yet, register them
-			ok := registerUserToInterestedMembers(id, param.ID)
+			ok := registerUserToInterestedMembers(id, userID)
 
 			if ok != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
@@ -416,15 +425,23 @@ func AcceptProjectInterest(c *gin.Context) {
 	id := c.Param("id")
 
 	type acceptInterest struct {
-		OwnerID      int
 		FreelancerID int
+	}
+
+	ownerID, err := strconv.Atoi(idToken)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Something wrong with convertion string to int"})
+		return
 	}
 
 	var param acceptInterest
 
 	err = c.Bind(&param)
 
-	if err != nil || param.OwnerID == 0 || param.FreelancerID == 0 {
+	if err != nil || param.FreelancerID == 0 {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Data format is invalid"})
@@ -443,7 +460,7 @@ func AcceptProjectInterest(c *gin.Context) {
 	}
 
 	// check if the owner id is correct
-	owner, err := helpers.IsThisIDProjectOwner(id, param.OwnerID)
+	owner, err := helpers.IsThisIDProjectOwner(id, ownerID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -497,18 +514,12 @@ func ReviewProject(c *gin.Context) {
 	// project id
 	id := c.Param("id")
 
-	type reviewProject struct {
-		UserID int
-	}
+	freelancerID, err := strconv.Atoi(idToken)
 
-	var param reviewProject
-
-	err = c.Bind(&param)
-
-	if err != nil || param.UserID == 0 {
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
-			"message": "Data format is invalid"})
+			"message": err.Error()})
 		return
 	}
 
@@ -523,7 +534,7 @@ func ReviewProject(c *gin.Context) {
 		return
 	}
 
-	freelancer, err := helpers.IsThisTheAcceptedMember(id, param.UserID)
+	freelancer, err := helpers.IsThisTheAcceptedMember(id, freelancerID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -557,18 +568,12 @@ func CompleteProject(c *gin.Context) {
 	// project id
 	id := c.Param("id")
 
-	type reviewProject struct {
-		OwnerID int
-	}
+	ownerID, err := strconv.Atoi(idToken)
 
-	var param reviewProject
-
-	err = c.Bind(&param)
-
-	if err != nil || param.OwnerID == 0 {
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
-			"message": "Data format is invalid"})
+			"message": err.Error()})
 		return
 	}
 
@@ -583,7 +588,7 @@ func CompleteProject(c *gin.Context) {
 		return
 	}
 
-	owner, err := helpers.IsThisIDProjectOwner(id, param.OwnerID)
+	owner, err := helpers.IsThisIDProjectOwner(id, ownerID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -617,18 +622,12 @@ func RejectReviewProject(c *gin.Context) {
 	// project id
 	id := c.Param("id")
 
-	type reviewProject struct {
-		OwnerID int
-	}
+	ownerID, err := strconv.Atoi(idToken)
 
-	var param reviewProject
-
-	err = c.Bind(&param)
-
-	if err != nil || param.OwnerID == 0 {
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
-			"message": "Data format is invalid"})
+			"message": err.Error()})
 		return
 	}
 
@@ -643,7 +642,7 @@ func RejectReviewProject(c *gin.Context) {
 		return
 	}
 
-	owner, err := helpers.IsThisIDProjectOwner(id, param.OwnerID)
+	owner, err := helpers.IsThisIDProjectOwner(id, ownerID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -698,7 +697,6 @@ func getAllProjectForFilter() ([]models.FilterNeededData, error) {
 // FilterProject godoc
 // @Summary Filter project based on keyword
 // @Produce json
-// @Param page query models.ParamFilterProject true "Data"
 // @Tags Project
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 400 {object} models.ResponseWithNoBody

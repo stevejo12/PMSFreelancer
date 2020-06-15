@@ -70,7 +70,7 @@ func main() {
 		v1.POST("/addExperience", controller.AuthenticationToken, controller.AddExperience)
 		v1.POST("/addProject", controller.AuthenticationToken, controller.AddProject)
 		v1.GET("/userProjects", controller.AuthenticationToken, controller.GetAllUserProjects)
-		v1.GET("/projectDetail/:id", controller.AuthenticationToken, controller.ProjectDetail)
+		v1.GET("/projectDetail/:id", controller.ProjectDetail)
 		v1.POST("/submitProjectInterest/:id", controller.AuthenticationToken, controller.SubmitProjectInterest)
 		v1.POST("/acceptProjectInterest/:id", controller.AuthenticationToken, controller.AcceptProjectInterest)
 		v1.POST("/submitProjectForReview/:id", controller.AuthenticationToken, controller.ReviewProject)
