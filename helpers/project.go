@@ -5,10 +5,10 @@ import (
 	"errors"
 	"strconv"
 
-	// "github.com/stevejo12/PMSFreelancer/config"
-	// "github.com/stevejo12/PMSFreelancer/models"
-	"PMSFreelancer/config"
-	"PMSFreelancer/models"
+	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/models"
+	// "PMSFreelancer/config"
+	// "PMSFreelancer/models"
 )
 
 // IsThisIDProjectOwner => Check if the user id is the project owner
