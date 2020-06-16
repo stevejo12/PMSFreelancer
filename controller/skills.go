@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -118,4 +119,58 @@ func userSkills(id string) ([]models.UserSkills, error) {
 	}
 
 	return allData, nil
+}
+
+// UpdateUserSkills => Updating User Skills
+// UpdateUserSkills godoc
+// @Summary Updating User Skills
+// @Accept  json
+// @Tags Skills
+// @Param token header string true "Token Header"
+// @Param Data body models.UpdateSkills true "New Skills ID List"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /editSkills [put]
+func UpdateUserSkills(c *gin.Context) {
+	id := idToken
+
+	var data models.UpdateSkills
+
+	err = c.Bind(&data)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Data format is invalid"})
+		return
+	}
+
+	err = helpers.SkillList(data.Skills)
+
+	if err != nil {
+		if err.Error() == "not exist" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "There is a value of skill that does not exist in the database id"})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable execute query to the database"})
+		return
+	}
+
+	_, err = config.DB.Exec("UPDATE login SET skill=? WHERE id=?", strings.Join(data.Skills, ","), id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable execute query to the database"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "All Skills data have been successfully updated"})
 }

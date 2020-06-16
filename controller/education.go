@@ -45,6 +45,15 @@ func userEducation(id string) ([]models.EducationReturnValue, error) {
 }
 
 // GetOnlyUserEducation => Get Detail View for the User Education
+// GetOnlyUserEducation godoc
+// @Summary User Education
+// @Produce json
+// @Accept  json
+// @Tags Education
+// @Param token header string true "Token Header"
+// @Success 200 {object} models.ResponseOKGetUserEducation
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /userEducation [get]
 func GetOnlyUserEducation(c *gin.Context) {
 	id := idToken
 
@@ -63,6 +72,17 @@ func GetOnlyUserEducation(c *gin.Context) {
 		"data":    allUserEducation})
 }
 
+// AddEducation => Add User Education
+// AddEducation godoc
+// @Summary Add User Education
+// @Produce json
+// @Accept  json
+// @Tags Education
+// @Param token header string true "Token Header"
+// @Param Data body models.AddEducationParameter true "Data Format to add education"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /addEducation [post]
 func AddEducation(c *gin.Context) {
 	id := idToken
 

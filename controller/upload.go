@@ -86,6 +86,15 @@ func uploadFile(file multipart.File, header *multipart.FileHeader) (string, erro
 }
 
 // UploadPicture => Upload Image to Cloudinary and get the URL response
+// UploadPicture godoc
+// @Summary Uploading Picture here
+// @Tags User
+// @Accept multipart/form-data
+// @Param token header string true "Token Header"
+// @Param file formData file true "Upload File"
+// @Success 200 {object} models.ResponseWithStringData
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /uploadPicture [post]
 func UploadPicture(c *gin.Context) {
 	id := idToken
 
@@ -174,7 +183,19 @@ func UploadPicture(c *gin.Context) {
 }
 
 // UploadAttachment => Upload file other than image to this
+// UploadAttachment godoc
+// @Summary Uploading Attachment here
+// @Tags Project
+// @Accept multipart/form-data
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Param file formData file true "Upload File"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /uploadAttachment/{id} [post]
 func UploadAttachment(c *gin.Context) {
+	// project id
+	id := c.Param("id")
 	// accept the images and store it in the tempfile
 	c.Request.ParseMultipartForm(5 * 1024 * 1024)
 
@@ -284,7 +305,7 @@ func UploadAttachment(c *gin.Context) {
 		Link string `json:"link"`
 	}
 
-	asd, err := config.DB.Exec("INSERT INTO project_links(project_link) VALUES(?)", urlFile)
+	asd, err := config.DB.Exec("INSERT INTO project_links(project_link, project_id) VALUES(?,?)", urlFile, id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -303,7 +324,7 @@ func UploadAttachment(c *gin.Context) {
 		return
 	}
 
-	err = config.DB.QueryRow("SELECT * FROM project_links WHERE id=?", attachmentID).Scan(&attachment.ID, &attachment.Link)
+	err = config.DB.QueryRow("SELECT id, project_link FROM project_links WHERE id=?", attachmentID).Scan(&attachment.ID, &attachment.Link)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

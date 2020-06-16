@@ -28,6 +28,249 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/acceptProjectInterest/{id}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Accepting Freelancer to Project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Freelancer which you want to accept",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ProjectAcceptMemberParameter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/addEducation": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Education"
+                ],
+                "summary": "Add User Education",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Data Format to add education",
+                        "name": "Data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddEducationParameter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/addExperience": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Experience"
+                ],
+                "summary": "Adding User Experience",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Data Format to add experience",
+                        "name": "Data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddExperienceParameter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/addPortfolio": {
+            "post": {
+                "consumes": [
+                    "application/json",
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "Portfolio"
+                ],
+                "summary": "Adding User Portfolio",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Upload File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Description of the File",
+                        "name": "description",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/addProject": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Adding User Project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Data Format to add education",
+                        "name": "Data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateProject"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
         "/allCountries": {
             "get": {
                 "produces": [
@@ -41,7 +284,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                            "$ref": "#/definitions/models.ResponseOKGetAllCountries"
                         }
                     },
                     "500": {
@@ -123,6 +366,187 @@ var doc = `{
                 }
             }
         },
+        "/completeProject/{id}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Review Done For Project Owner",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/deletePortfolio/{id}": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Portfolio"
+                ],
+                "summary": "Deleting User Portfolio",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/editPortfolio/{id}": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Portfolio"
+                ],
+                "summary": "Updating User Portfolio",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New Portfolio Description",
+                        "name": "Description",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.PortfolioEditParameter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/editSkills": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Skills"
+                ],
+                "summary": "Updating User Skills",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "New Skills ID List",
+                        "name": "Data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateSkills"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
         "/filterProject": {
             "post": {
                 "produces": [
@@ -181,7 +605,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                            "$ref": "#/definitions/models.ResponseOKLogin"
                         }
                     },
                     "400": {
@@ -208,9 +632,55 @@ var doc = `{
                     "User"
                 ],
                 "summary": "Logout",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/projectDetail/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "User Project Detail",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseOKProjectDetail"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/models.ResponseWithNoBody"
                         }
@@ -351,6 +821,100 @@ var doc = `{
                 }
             }
         },
+        "/submitProjectForReview/{id}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Submit Project for review",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/submitProjectInterest/{id}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Submit Project Interest",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
         "/updateNewPassword": {
             "post": {
                 "consumes": [
@@ -395,9 +959,268 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/uploadAttachment/{id}": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Uploading Attachment here",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Upload File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/uploadPicture": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Uploading Picture here",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Upload File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithStringData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/userEducation": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Education"
+                ],
+                "summary": "User Education",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseOKGetUserEducation"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/userExperience": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Experience"
+                ],
+                "summary": "User Experience",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseOKGetUserExperience"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/userProfile": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User Profile Data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseOKGetUserProfile"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/userProjects": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "User Projects",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseOKGetUserProject"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "models.AddEducationParameter": {
+            "type": "object",
+            "properties": {
+                "education": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.EducationParameters"
+                    }
+                }
+            }
+        },
+        "models.AddExperienceParameter": {
+            "type": "object",
+            "properties": {
+                "experience": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ExperienceParameters"
+                    }
+                }
+            }
+        },
         "models.ChangePassword": {
             "type": "object",
             "properties": {
@@ -408,6 +1231,128 @@ var doc = `{
                     "type": "string"
                 },
                 "oldPassword": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CountryData": {
+            "type": "object",
+            "properties": {
+                "countryCode": {
+                    "type": "string"
+                },
+                "countryName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CreateProject": {
+            "type": "object",
+            "properties": {
+                "attachment": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.EducationParameters": {
+            "type": "object",
+            "properties": {
+                "endYear": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "startYear": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.EducationReturnValue": {
+            "type": "object",
+            "properties": {
+                "endYear": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "startYear": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ExperienceParameters": {
+            "type": "object",
+            "properties": {
+                "endYear": {
+                    "type": "integer"
+                },
+                "place": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "startYear": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ExperienceReturnValue": {
+            "type": "object",
+            "properties": {
+                "endYear": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "place": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                },
+                "startYear": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.GetUserProjectResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -423,6 +1368,26 @@ var doc = `{
                 }
             }
         },
+        "models.OwnerInfo": {
+            "type": "object",
+            "properties": {
+                "fullName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "member": {
+                    "type": "string"
+                },
+                "projectCompleted": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.ParamSearchProject": {
             "type": "object",
             "properties": {
@@ -431,6 +1396,86 @@ var doc = `{
                 },
                 "size": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.PortfolioDatabase": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "ownerId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PortfolioEditParameter": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProjectAcceptMemberParameter": {
+            "type": "object",
+            "properties": {
+                "freelancerID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ProjectDetailInterestedMember": {
+            "type": "object",
+            "properties": {
+                "fullname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProjectDetailResponse": {
+            "type": "object",
+            "properties": {
+                "attachment": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "interestedMembers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ProjectDetailInterestedMember"
+                    }
+                },
+                "owner": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.OwnerInfo"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -471,6 +1516,121 @@ var doc = `{
                 }
             }
         },
+        "models.ResponseOKGetAllCountries": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CountryData"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResponseOKGetUserEducation": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.EducationReturnValue"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResponseOKGetUserExperience": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ExperienceReturnValue"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResponseOKGetUserProfile": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.UserProfile"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResponseOKGetUserProject": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.GetUserProjectResponse"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResponseOKLogin": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.TokenResponse"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResponseOKProjectDetail": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ProjectDetailResponse"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ResponseWithNoBody": {
             "type": "object",
             "properties": {
@@ -482,6 +1642,31 @@ var doc = `{
                 }
             }
         },
+        "models.ResponseWithStringData": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TokenResponse": {
+            "type": "object",
+            "properties": {
+                "expire": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UpdateResetPassword": {
             "type": "object",
             "properties": {
@@ -489,6 +1674,87 @@ var doc = `{
                     "type": "string"
                 },
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpdateSkills": {
+            "type": "object",
+            "properties": {
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.UserProfile": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "education": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.EducationReturnValue"
+                    }
+                },
+                "email": {
+                    "type": "string"
+                },
+                "experience": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ExperienceReturnValue"
+                    }
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "member": {
+                    "type": "string"
+                },
+                "picture": {
+                    "type": "string"
+                },
+                "portfolio": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PortfolioDatabase"
+                    }
+                },
+                "skill": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.UserSkills"
+                    }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserSkills": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }

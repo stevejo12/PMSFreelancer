@@ -89,6 +89,11 @@ func GetInterestedMemberNames(id string) ([]models.ProjectDetailInterestedMember
 	imID, err := GetMemberList(id)
 	allInterestedMember := []models.ProjectDetailInterestedMember{}
 
+	// if there is no interested member in the project
+	if imID == "" {
+		return []models.ProjectDetailInterestedMember{}, nil
+	}
+
 	query, err := SettingInQueryWithID("login", imID, "id, first_name, last_name")
 
 	if err != nil {

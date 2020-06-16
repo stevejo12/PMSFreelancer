@@ -15,7 +15,7 @@ import (
 // @Summary Getting all list of countries
 // @Produce json
 // @Tags Location
-// @Success 200 {object} models.ResponseWithNoBody
+// @Success 200 {object} models.ResponseOKGetAllCountries
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /allCountries [get]
 func GetAllCountries(c *gin.Context) {

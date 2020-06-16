@@ -45,6 +45,16 @@ func userExperience(id string) ([]models.ExperienceReturnValue, error) {
 	return allData, nil
 }
 
+// GetOnlyUserExperience => Get Detail View for the User Experience
+// GetOnlyUserExperience godoc
+// @Summary User Experience
+// @Produce json
+// @Accept  json
+// @Tags Experience
+// @Param token header string true "Token Header"
+// @Success 200 {object} models.ResponseOKGetUserExperience
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /userExperience [get]
 func GetOnlyUserExperience(c *gin.Context) {
 	id := idToken
 
@@ -63,24 +73,19 @@ func GetOnlyUserExperience(c *gin.Context) {
 		"data":    allUserExperience})
 }
 
+// AddExperience => Add User Experience
+// AddExperience godoc
+// @Summary Adding User Experience
+// @Produce json
+// @Accept  json
+// @Tags Experience
+// @Param token header string true "Token Header"
+// @Param Data body models.AddExperienceParameter true "Data Format to add experience"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /addExperience [post]
 func AddExperience(c *gin.Context) {
 	id := idToken
-
-	// sample data
-	// experience: [
-	// 	{
-	// 		Place
-	//		Position
-	// 		StartYear
-	// 		EndYear
-	// 	},
-	// 	{
-	// 		Place
-	//		Position
-	// 		StartYear
-	// 		EndYear
-	// 	}
-	// ]
 
 	var data models.AddExperienceParameter
 

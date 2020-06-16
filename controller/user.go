@@ -3,7 +3,6 @@ package controller
 import (
 	"database/sql"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -334,7 +333,7 @@ func RegisterUserWithGoogle(c *gin.Context) {
 // @Accept  json
 // @Tags User
 // @Param parameter body models.LoginUserPassword true "Account"
-// @Success 200 {object} models.ResponseWithNoBody
+// @Success 200 {object} models.ResponseOKLogin
 // @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /login [post]
@@ -473,6 +472,7 @@ func ChangeUserPassword(c *gin.Context) {
 // @Summary Logout
 // @Produce json
 // @Tags User
+// @Param token header string true "Token Header"
 // @Success 200 {object} models.ResponseWithNoBody
 // @Router /logout [get]
 func HandleLogout(c *gin.Context) {
@@ -684,76 +684,16 @@ func UpdateNewPassword(c *gin.Context) {
 	}
 }
 
-func UpdateUserSkills(c *gin.Context) {
-	id := idToken
-
-	var data models.UpdateSkills
-
-	err = c.Bind(&data)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": "Data format is invalid"})
-		return
-	}
-
-	var totalSkills int
-	var count int
-
-	err = config.DB.QueryRow("SELECT COUNT(*) FROM login WHERE id=?", id).Scan(&count)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server unable to execute query to database"})
-		return
-	} else if count != 1 {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusOK,
-			"message": "Data is not exactly 1"})
-		return
-	}
-
-	err = config.DB.QueryRow("SELECT COUNT(*) FROM skills").Scan(&totalSkills)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server unable to execute query to database"})
-		return
-	}
-
-	err = helpers.SkillList(data.Skills)
-
-	if err != nil {
-		if err == errors.New("not exist") {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusBadRequest,
-				"message": "There is a value that does not exist in the database id"})
-			return
-		}
-
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server is unable execute query to the database"})
-		return
-	}
-
-	_, err = config.DB.Exec("UPDATE login SET skill=? WHERE id=?", strings.Join(data.Skills, ","), id)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server is unable execute query to the database"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "All Skills data have been successfully updated"})
-}
-
+// GetUserProfile => Updating user password without old password
+// GetUserProfile godoc
+// @Summary User Profile Data
+// @Produce json
+// @Accept  json
+// @Tags User
+// @Param token header string true "Token Header"
+// @Success 200 {object} models.ResponseOKGetUserProfile
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /userProfile [get]
 func GetUserProfile(c *gin.Context) {
 	id := idToken
 	var data models.UserProfile

@@ -101,15 +101,10 @@ func SearchProject(c *gin.Context) {
 		"data":    resp})
 }
 
-func getProjectLinks(param string) ([]string, error) {
+func getProjectAttachments(projectID string) ([]string, error) {
 	var result []string
-	query, err := helpers.SettingInQueryWithID("project_links", param, "*")
 
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := config.DB.Query(query)
+	data, err := config.DB.Query("SELECT * FROM project_links WHERE project_id=?", projectID)
 
 	if err != nil {
 		return nil, errors.New("Server unable to execute query to database")
@@ -130,6 +125,17 @@ func getProjectLinks(param string) ([]string, error) {
 	return result, nil
 }
 
+// AddProject => Add User Education
+// AddProject godoc
+// @Summary Adding User Project
+// @Produce json
+// @Accept  json
+// @Tags Project
+// @Param token header string true "Token Header"
+// @Param Data body models.CreateProject true "Data Format to add education"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /addProject [post]
 func AddProject(c *gin.Context) {
 	id := idToken
 
@@ -159,6 +165,16 @@ func AddProject(c *gin.Context) {
 		"message": "Successfully Added New Project"})
 }
 
+// GetAllUserProjects => List of User Projects
+// GetAllUserProjects godoc
+// @Summary User Projects
+// @Produce json
+// @Accept  json
+// @Tags Project
+// @Param token header string true "Token Header"
+// @Success 200 {object} models.ResponseOKGetUserProject
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /userProjects [get]
 func GetAllUserProjects(c *gin.Context) {
 	// user id
 	id := idToken
@@ -172,7 +188,7 @@ func GetAllUserProjects(c *gin.Context) {
 		return
 	}
 
-	var allData []models.GetUserProjectResponse
+	allData := []models.GetUserProjectResponse{}
 
 	for result.Next() {
 		var project models.GetUserProjectResponse
@@ -200,11 +216,21 @@ func GetAllUserProjects(c *gin.Context) {
 		"data":    allData})
 }
 
+// ProjectDetail => Project Detail
+// ProjectDetail godoc
+// @Summary User Project Detail
+// @Produce json
+// @Accept  json
+// @Tags Project
+// @Param id path int64 true "Project ID"
+// @Success 200 {object} models.ResponseOKProjectDetail
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /projectDetail/{id} [get]
 func ProjectDetail(c *gin.Context) {
 	// project id
 	id := c.Param("id")
 
-	result, err := config.DB.Query("SELECT id, title, skills, price, attachment, owner_id, interested_members FROM project WHERE id=?", id)
+	result, err := config.DB.Query("SELECT id, title, skills, price, owner_id, interested_members FROM project WHERE id=?", id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -213,12 +239,12 @@ func ProjectDetail(c *gin.Context) {
 		return
 	}
 
-	var allData []models.ProjectDetailResponse
+	allData := []models.ProjectDetailResponse{}
 	for result.Next() {
 		var dbResult models.ProjectDetailRequest
 		var data models.ProjectDetailResponse
 
-		if err = result.Scan(&dbResult.ID, &dbResult.Title, &dbResult.Skills, &dbResult.Price, &dbResult.Attachment, &dbResult.OwnerID, &dbResult.InterestedMembers); err != nil {
+		if err = result.Scan(&dbResult.ID, &dbResult.Title, &dbResult.Skills, &dbResult.Price, &dbResult.OwnerID, &dbResult.InterestedMembers); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
 				"message": "Something is wrong with the database data"})
@@ -231,23 +257,18 @@ func ProjectDetail(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
-				"message": err})
+				"message": err.Error()})
 			return
 		}
 
 		// get the detail link of the attachment for this project
-		var dataLink []string
-		if dbResult.Attachment.Valid {
-			dataLink, err = getProjectLinks(dbResult.Attachment.String)
+		dataLink, err := getProjectAttachments(id)
 
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"code":    http.StatusInternalServerError,
-					"message": "Something is wrong with the database data"})
-				return
-			}
-		} else {
-			dataLink = []string{}
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
 		}
 
 		// get the detail about the owner
@@ -328,7 +349,16 @@ func ProjectDetail(c *gin.Context) {
 }
 
 // SubmitProjectInterest => Potential Freelancer submit their interest before accepted by project owner
-// /:id => to get the project ID
+// SubmitProjectInterest godoc
+// @Summary Submit Project Interest
+// @Accept  json
+// @Tags Project
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /submitProjectInterest/{id} [post]
 func SubmitProjectInterest(c *gin.Context) {
 	// this is project id
 	id := c.Param("id")
@@ -421,12 +451,19 @@ func registerUserToInterestedMembers(projectID string, userID int) error {
 	return nil
 }
 
+// AcceptProjectInterest godoc
+// @Summary Accepting Freelancer to Project
+// @Accept  json
+// @Tags Project
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Param data body models.ProjectAcceptMemberParameter true "Freelancer which you want to accept"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /acceptProjectInterest/{id} [post]
 func AcceptProjectInterest(c *gin.Context) {
 	id := c.Param("id")
-
-	type acceptInterest struct {
-		FreelancerID int
-	}
 
 	ownerID, err := strconv.Atoi(idToken)
 
@@ -437,13 +474,13 @@ func AcceptProjectInterest(c *gin.Context) {
 		return
 	}
 
-	var param acceptInterest
+	param := models.ProjectAcceptMemberParameter{}
 
 	err = c.Bind(&param)
 
 	if err != nil || param.FreelancerID == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
 			"message": "Data format is invalid"})
 		return
 	}
@@ -510,6 +547,16 @@ func AcceptProjectInterest(c *gin.Context) {
 	}
 }
 
+// ReviewProject godoc
+// @Summary Submit Project for review
+// @Accept  json
+// @Tags Project
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /submitProjectForReview/{id} [post]
 func ReviewProject(c *gin.Context) {
 	// project id
 	id := c.Param("id")
@@ -564,6 +611,16 @@ func ReviewProject(c *gin.Context) {
 	}
 }
 
+// CompleteProject godoc
+// @Summary Review Done For Project Owner
+// @Accept  json
+// @Tags Project
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /completeProject/{id} [post]
 func CompleteProject(c *gin.Context) {
 	// project id
 	id := c.Param("id")

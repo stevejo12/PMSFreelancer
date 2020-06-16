@@ -12,6 +12,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// AddUserPortfolio => Adding User Portfolio
+// AddUserPortfolio godoc
+// @Summary Adding User Portfolio
+// @Accept  json
+// @Tags Portfolio
+// @Accept multipart/form-data
+// @Param token header string true "Token Header"
+// @Param file formData file true "Upload File"
+// @Param description formData string true "Description of the File"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /addPortfolio [post]
 func AddUserPortfolio(c *gin.Context) {
 	id := idToken
 
@@ -52,14 +64,21 @@ func AddUserPortfolio(c *gin.Context) {
 		"message": "Successfully added user portfolio"})
 }
 
+// EditUserPortfolio => Updating User Portfolio
+// EditUserPortfolio godoc
+// @Summary Updating User Portfolio
+// @Accept  json
+// @Tags Portfolio
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Param Description body models.PortfolioEditParameter true "New Portfolio Description"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /editPortfolio/{id} [put]
 func EditUserPortfolio(c *gin.Context) {
-	id := idToken
+	id := c.Param("id")
 
-	type structData struct {
-		Description string
-	}
-
-	var data structData
+	var data models.PortfolioEditParameter
 
 	err = c.Bind(&data)
 
@@ -70,7 +89,9 @@ func EditUserPortfolio(c *gin.Context) {
 		return
 	}
 
-	_, err = config.DB.Exec("UPDATE portfolio SET description=? WHERE id=?", data.Description, id)
+	query := "UPDATE portfolio SET description=\"" + data.Description + "\" WHERE id=" + id
+
+	_, err = config.DB.Exec(query)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -84,8 +105,28 @@ func EditUserPortfolio(c *gin.Context) {
 		"message": "Successfully edited user portfolio"})
 }
 
+// DeleteUserPortfolio => Deleting User Portfolio
+// DeleteUserPortfolio godoc
+// @Summary Deleting User Portfolio
+// @Accept  json
+// @Tags Portfolio
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /deletePortfolio/{id} [delete]
 func DeleteUserPortfolio(c *gin.Context) {
-	id := idToken
+	id := c.Param("id")
+
+	// check if the portfolio id exist
+	dataID, err := config.DB.Query("SELECT * FROM portfolio WHERE id=?", id)
+
+	if !dataID.Next() {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "The project ID doesn't exist in the database"})
+		return
+	}
 
 	_, err = config.DB.Exec("DELETE FROM portfolio WHERE id=?", id)
 

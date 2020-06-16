@@ -55,7 +55,6 @@ type ProjectDetailRequest struct {
 	Title             string
 	Skills            string
 	Price             float64
-	Attachment        sql.NullString
 	OwnerID           int
 	InterestedMembers sql.NullString
 }
@@ -73,4 +72,8 @@ type ProjectDetailResponse struct {
 type ProjectDetailInterestedMember struct {
 	ID       string
 	Fullname string
+}
+
+type ProjectAcceptMemberParameter struct {
+	FreelancerID int
 }

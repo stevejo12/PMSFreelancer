@@ -1,5 +1,19 @@
 basePath: /v1
 definitions:
+  models.AddEducationParameter:
+    properties:
+      education:
+        items:
+          $ref: '#/definitions/models.EducationParameters'
+        type: array
+    type: object
+  models.AddExperienceParameter:
+    properties:
+      experience:
+        items:
+          $ref: '#/definitions/models.ExperienceParameters'
+        type: array
+    type: object
   models.ChangePassword:
     properties:
       email:
@@ -9,6 +23,85 @@ definitions:
       oldPassword:
         type: string
     type: object
+  models.CountryData:
+    properties:
+      countryCode:
+        type: string
+      countryName:
+        type: string
+      id:
+        type: string
+    type: object
+  models.CreateProject:
+    properties:
+      attachment:
+        type: string
+      description:
+        type: string
+      price:
+        type: number
+      skills:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
+  models.EducationParameters:
+    properties:
+      endYear:
+        type: integer
+      name:
+        type: string
+      startYear:
+        type: integer
+    type: object
+  models.EducationReturnValue:
+    properties:
+      endYear:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      startYear:
+        type: integer
+    type: object
+  models.ExperienceParameters:
+    properties:
+      endYear:
+        type: integer
+      place:
+        type: string
+      position:
+        type: string
+      startYear:
+        type: integer
+    type: object
+  models.ExperienceReturnValue:
+    properties:
+      endYear:
+        type: integer
+      id:
+        type: integer
+      place:
+        type: string
+      position:
+        type: string
+      startYear:
+        type: integer
+    type: object
+  models.GetUserProjectResponse:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
   models.LoginUserPassword:
     properties:
       email:
@@ -16,12 +109,77 @@ definitions:
       password:
         type: string
     type: object
+  models.OwnerInfo:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: string
+      location:
+        type: string
+      member:
+        type: string
+      projectCompleted:
+        type: integer
+    type: object
   models.ParamSearchProject:
     properties:
       page:
         type: integer
       size:
         type: integer
+    type: object
+  models.PortfolioDatabase:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      link:
+        type: string
+      ownerId:
+        type: string
+    type: object
+  models.PortfolioEditParameter:
+    properties:
+      description:
+        type: string
+    type: object
+  models.ProjectAcceptMemberParameter:
+    properties:
+      freelancerID:
+        type: integer
+    type: object
+  models.ProjectDetailInterestedMember:
+    properties:
+      fullname:
+        type: string
+      id:
+        type: string
+    type: object
+  models.ProjectDetailResponse:
+    properties:
+      attachment:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      interestedMembers:
+        items:
+          $ref: '#/definitions/models.ProjectDetailInterestedMember'
+        type: array
+      owner:
+        $ref: '#/definitions/models.OwnerInfo'
+        type: object
+      price:
+        type: number
+      skills:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
     type: object
   models.RegistrationUserUsingPassword:
     properties:
@@ -47,6 +205,81 @@ definitions:
       email:
         type: string
     type: object
+  models.ResponseOKGetAllCountries:
+    properties:
+      code:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/models.CountryData'
+        type: array
+      message:
+        type: string
+    type: object
+  models.ResponseOKGetUserEducation:
+    properties:
+      code:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/models.EducationReturnValue'
+        type: array
+      message:
+        type: string
+    type: object
+  models.ResponseOKGetUserExperience:
+    properties:
+      code:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/models.ExperienceReturnValue'
+        type: array
+      message:
+        type: string
+    type: object
+  models.ResponseOKGetUserProfile:
+    properties:
+      code:
+        type: string
+      data:
+        $ref: '#/definitions/models.UserProfile'
+        type: object
+      message:
+        type: string
+    type: object
+  models.ResponseOKGetUserProject:
+    properties:
+      code:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/models.GetUserProjectResponse'
+        type: array
+      message:
+        type: string
+    type: object
+  models.ResponseOKLogin:
+    properties:
+      code:
+        type: string
+      data:
+        $ref: '#/definitions/models.TokenResponse'
+        type: object
+      message:
+        type: string
+    type: object
+  models.ResponseOKProjectDetail:
+    properties:
+      code:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/models.ProjectDetailResponse'
+        type: array
+      message:
+        type: string
+    type: object
   models.ResponseWithNoBody:
     properties:
       code:
@@ -54,11 +287,80 @@ definitions:
       message:
         type: string
     type: object
+  models.ResponseWithStringData:
+    properties:
+      code:
+        type: string
+      data:
+        type: string
+      message:
+        type: string
+    type: object
+  models.TokenResponse:
+    properties:
+      expire:
+        type: string
+      token:
+        type: string
+    type: object
   models.UpdateResetPassword:
     properties:
       password:
         type: string
       token:
+        type: string
+    type: object
+  models.UpdateSkills:
+    properties:
+      skills:
+        items:
+          type: string
+        type: array
+    type: object
+  models.UserProfile:
+    properties:
+      description:
+        type: string
+      education:
+        items:
+          $ref: '#/definitions/models.EducationReturnValue'
+        type: array
+      email:
+        type: string
+      experience:
+        items:
+          $ref: '#/definitions/models.ExperienceReturnValue'
+        type: array
+      fullname:
+        type: string
+      id:
+        type: string
+      location:
+        type: string
+      member:
+        type: string
+      picture:
+        type: string
+      portfolio:
+        items:
+          $ref: '#/definitions/models.PortfolioDatabase'
+        type: array
+      skill:
+        items:
+          $ref: '#/definitions/models.UserSkills'
+        type: array
+      username:
+        type: string
+    type: object
+  models.UserSkills:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
         type: string
     type: object
 info:
@@ -70,6 +372,166 @@ info:
   title: Swagger API
   version: "1.0"
 paths:
+  /acceptProjectInterest/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Freelancer which you want to accept
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProjectAcceptMemberParameter'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Accepting Freelancer to Project
+      tags:
+      - Project
+  /addEducation:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Data Format to add education
+        in: body
+        name: Data
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddEducationParameter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Add User Education
+      tags:
+      - Education
+  /addExperience:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Data Format to add experience
+        in: body
+        name: Data
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddExperienceParameter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Adding User Experience
+      tags:
+      - Experience
+  /addPortfolio:
+    post:
+      consumes:
+      - application/json
+      - multipart/form-data
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Upload File
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Description of the File
+        in: formData
+        name: description
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Adding User Portfolio
+      tags:
+      - Portfolio
+  /addProject:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Data Format to add education
+        in: body
+        name: Data
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateProject'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Adding User Project
+      tags:
+      - Project
   /allCountries:
     get:
       produces:
@@ -78,7 +540,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseWithNoBody'
+            $ref: '#/definitions/models.ResponseOKGetAllCountries'
         "500":
           description: Internal Server Error
           schema:
@@ -131,6 +593,125 @@ paths:
       summary: Register new user using email and password
       tags:
       - User
+  /completeProject/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Review Done For Project Owner
+      tags:
+      - Project
+  /deletePortfolio/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Deleting User Portfolio
+      tags:
+      - Portfolio
+  /editPortfolio/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New Portfolio Description
+        in: body
+        name: Description
+        required: true
+        schema:
+          $ref: '#/definitions/models.PortfolioEditParameter'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Updating User Portfolio
+      tags:
+      - Portfolio
+  /editSkills:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: New Skills ID List
+        in: body
+        name: Data
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateSkills'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Updating User Skills
+      tags:
+      - Skills
   /filterProject:
     post:
       produces:
@@ -168,7 +749,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseWithNoBody'
+            $ref: '#/definitions/models.ResponseOKLogin'
         "400":
           description: Bad Request
           schema:
@@ -182,6 +763,12 @@ paths:
       - User
   /logout:
     get:
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -192,6 +779,30 @@ paths:
       summary: Logout
       tags:
       - User
+  /projectDetail/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKProjectDetail'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: User Project Detail
+      tags:
+      - Project
   /register:
     post:
       consumes:
@@ -277,6 +888,68 @@ paths:
       summary: Search Project initially
       tags:
       - Project
+  /submitProjectForReview/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Submit Project for review
+      tags:
+      - Project
+  /submitProjectInterest/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Submit Project Interest
+      tags:
+      - Project
   /updateNewPassword:
     post:
       consumes:
@@ -306,4 +979,159 @@ paths:
       summary: Update Password (after reset password)
       tags:
       - User
+  /uploadAttachment/{id}:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Upload File
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Uploading Attachment here
+      tags:
+      - Project
+  /uploadPicture:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Upload File
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithStringData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Uploading Picture here
+      tags:
+      - User
+  /userEducation:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKGetUserEducation'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: User Education
+      tags:
+      - Education
+  /userExperience:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKGetUserExperience'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: User Experience
+      tags:
+      - Experience
+  /userProfile:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKGetUserProfile'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: User Profile Data
+      tags:
+      - User
+  /userProjects:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKGetUserProject'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: User Projects
+      tags:
+      - Project
 swagger: "2.0"
