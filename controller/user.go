@@ -773,8 +773,9 @@ func GetUserProfile(c *gin.Context) {
 	data.Experience = experienceData
 	data.Skill = skillData
 	data.ID = dataQuery.ID
-	data.FirstName = dataQuery.Firstname
-	data.LastName = dataQuery.LastName
+	data.Fullname = dataQuery.Firstname + " " + dataQuery.LastName
+	// data.FirstName = dataQuery.Firstname
+	// data.LastName = dataQuery.LastName
 	data.Email = dataQuery.Email
 	data.Description = dataQuery.Description
 	data.Picture = dataQuery.Picture
