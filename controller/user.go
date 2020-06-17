@@ -357,6 +357,8 @@ func LoginUserWithPassword(c *gin.Context) {
 	err = config.DB.QueryRow("SELECT id, email, password FROM login WHERE email=?", user.Email).Scan(&databaseID, &databaseEmail, &databasePassword)
 
 	if err != nil {
+		fmt.Println("user email", user.Email)
+		fmt.Println("user pass", user.Password)
 		fmt.Println("err", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
