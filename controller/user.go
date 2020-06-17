@@ -353,7 +353,11 @@ func LoginUserWithPassword(c *gin.Context) {
 
 	fmt.Println("user email", user.Email)
 	fmt.Println("user pass", user.Password)
-	x, _ := ioutil.ReadAll(c.Request.Body)
+	body, err := c.Request.GetBody()
+	if err != nil {
+		fmt.Println(err)
+	}
+	x, _ := ioutil.ReadAll(body)
 
 	fmt.Printf("body is: %s \n", string(x))
 
