@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strings"
@@ -340,15 +342,26 @@ func RegisterUserWithGoogle(c *gin.Context) {
 func LoginUserWithPassword(c *gin.Context) {
 	var user models.LoginUserPassword
 
+	body, err := ioutil.ReadAll(c.Request.Body)
+
+	if err != nil {
+		fmt.Println("err", err.Error())
+	}
+
+	fmt.Println("body of the request: ", string(body))
+
+	c.Request.Body = ioutil.NopCloser(bytes.NewReader([]byte(body)))
+
 	err = c.Bind(&user)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
 			"message": "Error data format login"})
-
 		return
 	}
+
+	// tambahin ERROR DEH KALO USER EMAIL / PASSWORD KOSONG
 
 	fmt.Println(user)
 	fmt.Println("user email", user.Email)
