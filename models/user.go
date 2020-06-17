@@ -21,9 +21,10 @@ type RegistrationUserUsingGoogle struct {
 	Username    string
 }
 
+// LoginUserPassword => Parameter login
 type LoginUserPassword struct {
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type GoogleResponse struct {
