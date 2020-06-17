@@ -357,6 +357,7 @@ func LoginUserWithPassword(c *gin.Context) {
 	err = config.DB.QueryRow("SELECT id, email, password FROM login WHERE email=?", user.Email).Scan(&databaseID, &databaseEmail, &databasePassword)
 
 	if err != nil {
+		fmt.Println("err", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to find the user email"})
@@ -772,7 +773,8 @@ func GetUserProfile(c *gin.Context) {
 	data.Experience = experienceData
 	data.Skill = skillData
 	data.ID = dataQuery.ID
-	data.Fullname = dataQuery.Firstname + " " + dataQuery.LastName
+	data.FirstName = dataQuery.Firstname
+	data.LastName = dataQuery.LastName
 	data.Email = dataQuery.Email
 	data.Description = dataQuery.Description
 	data.Picture = dataQuery.Picture
