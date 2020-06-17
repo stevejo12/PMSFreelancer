@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strings"
@@ -351,21 +350,15 @@ func LoginUserWithPassword(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(user)
 	fmt.Println("user email", user.Email)
 	fmt.Println("user pass", user.Password)
-	body, err := c.Request.GetBody()
-	if err != nil {
-		fmt.Println(err)
-	}
-	x, _ := ioutil.ReadAll(body)
-
-	fmt.Printf("body is: %s \n", string(x))
 
 	var databaseID string
 	var databaseEmail string
 	var databasePassword string
 
-	err = config.DB.QueryRow("SELECT id, email, password FROM login WHERE email=?", user.Email).Scan(&databaseID, &databaseEmail, &databasePassword)
+	err = config.DB.QueryRow("SELECT id, email, password FROM login WHERE email=?", &user.Email).Scan(&databaseID, &databaseEmail, &databasePassword)
 
 	if err != nil {
 		fmt.Println("err", err.Error())
