@@ -108,13 +108,15 @@ func GetInterestedMemberNames(id string) ([]models.ProjectDetailInterestedMember
 
 	for data.Next() {
 		interestedMember := models.ProjectDetailInterestedMember{}
-		var dbID, dbFirstName, dbLastName string
+		var dbID int
+		var dbFirstName, dbLastName string
 		if err := data.Scan(&dbID, &dbFirstName, &dbLastName); err != nil {
 			return []models.ProjectDetailInterestedMember{}, errors.New("Something is wrong with the database data")
 		}
 
 		interestedMember.ID = dbID
-		interestedMember.Fullname = dbFirstName + " " + dbLastName
+		interestedMember.FirstName = dbFirstName
+		interestedMember.LastName = dbLastName
 
 		allInterestedMember = append(allInterestedMember, interestedMember)
 	}

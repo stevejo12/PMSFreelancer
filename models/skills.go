@@ -1,7 +1,7 @@
 package models
 
 type UserSkills struct {
-	ID         string `json:"id"`
+	ID         int    `json:"id"`
 	Name       string `json:"name"`
 	Created_at string `json:"createdAt"`
 	Updated_at string `json:"updatedAt"`

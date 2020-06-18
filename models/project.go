@@ -31,7 +31,7 @@ type SearchProjectResponse struct {
 }
 
 type ProjectLinksResponse struct {
-	ID           string
+	ID           int
 	Project_link string
 }
 
@@ -44,14 +44,14 @@ type CreateProject struct {
 }
 
 type GetUserProjectResponse struct {
-	ID          string `json:"id"`
+	ID          int    `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
 }
 
 type ProjectDetailRequest struct {
-	ID                string
+	ID                int
 	Title             string
 	Skills            string
 	Price             float64
@@ -60,7 +60,7 @@ type ProjectDetailRequest struct {
 }
 
 type ProjectDetailResponse struct {
-	ID                string                          `json:"id"`
+	ID                int                             `json:"id"`
 	Title             string                          `json:"title"`
 	Skills            []string                        `json:"skills"`
 	Attachment        []string                        `json:"attachment"`
@@ -70,8 +70,9 @@ type ProjectDetailResponse struct {
 }
 
 type ProjectDetailInterestedMember struct {
-	ID       string
-	Fullname string
+	ID        int
+	FirstName string
+	LastName  string
 }
 
 type ProjectAcceptMemberParameter struct {

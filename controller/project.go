@@ -101,10 +101,10 @@ func SearchProject(c *gin.Context) {
 		"data":    resp})
 }
 
-func getProjectAttachments(projectID string) ([]string, error) {
-	var result []string
+func getProjectAttachments(projectID string) ([]models.ProjectLinksResponse, error) {
+	result := []models.ProjectLinksResponse{}
 
-	data, err := config.DB.Query("SELECT * FROM project_links WHERE project_id=?", projectID)
+	data, err := config.DB.Query("SELECT id, project_link FROM project_links WHERE project_id=?", projectID)
 
 	if err != nil {
 		return nil, errors.New("Server unable to execute query to database")
@@ -114,12 +114,12 @@ func getProjectAttachments(projectID string) ([]string, error) {
 		// Scan one customer record
 		var link models.ProjectLinksResponse
 		if err := data.Scan(&link.ID, &link.Project_link); err != nil {
-			return []string{}, errors.New("Something is wrong with the database data")
+			return []models.ProjectLinksResponse{}, errors.New("Something is wrong with the database data")
 		}
-		result = append(result, link.Project_link)
+		result = append(result, link)
 	}
 	if data.Err() != nil {
-		return []string{}, errors.New("Something is wrong with the data retrieved")
+		return []models.ProjectLinksResponse{}, errors.New("Something is wrong with the data retrieved")
 	}
 
 	return result, nil
@@ -902,7 +902,7 @@ func FilterProject(c *gin.Context) {
 
 func filterData(data []models.FilterNeededData, keyword string) ([]string, error) {
 	var id []string
-	var skillID []string
+	var skillID []int
 
 	allSkills, err := getAllSkills()
 
@@ -928,14 +928,19 @@ func filterData(data []models.FilterNeededData, keyword string) ([]string, error
 
 		arrSkill := helpers.SplitComma(data[i].Skill)
 
-		var skillMap = make(map[string]bool)
+		var skillMap = make(map[int]bool)
 
 		for _, ele := range skillID {
 			skillMap[ele] = true
 		}
 
 		for _, name := range arrSkill {
-			if skillMap[name] {
+			num, err := strconv.Atoi(name)
+			if err != nil {
+				return []string{}, errors.New("Server can't convert string to integer")
+			}
+
+			if skillMap[num] {
 				id = append(id, data[i].ID)
 				break
 			}
