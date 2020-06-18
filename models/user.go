@@ -4,7 +4,8 @@ package models
 type RegistrationUserUsingPassword struct {
 	Email       string
 	Password    string
-	Fullname    string
+	FirstName   string
+	LastName    string
 	Location    int
 	Description string
 	Skills      []string
@@ -14,7 +15,8 @@ type RegistrationUserUsingPassword struct {
 type RegistrationUserUsingGoogle struct {
 	Email       string
 	GoogleID    string
-	Fullname    string
+	FirstName   string
+	LastName    string
 	Location    int
 	Description string
 	Skills      []string
