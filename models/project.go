@@ -1,7 +1,6 @@
 package models
 
 import (
-	"PMSFreelancer/models"
 	"database/sql"
 )
 
@@ -66,7 +65,7 @@ type ProjectDetailResponse struct {
 	ID                int                             `json:"id"`
 	Title             string                          `json:"title"`
 	Skills            []string                        `json:"skills"`
-	Attachment        []models.ProjectLinksResponse   `json:"attachment"`
+	Attachment        []ProjectLinksResponse          `json:"attachment"`
 	Price             float64                         `json:"price"`
 	Owner             OwnerInfo                       `json:"owner"`
 	InterestedMembers []ProjectDetailInterestedMember `json:"interestedMembers"`
