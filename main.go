@@ -61,7 +61,7 @@ func main() {
 		v1.POST("/resetPassword", controller.ResetPassword)
 		v1.POST("/updateNewPassword", controller.UpdateNewPassword)
 		v1.POST("/uploadPicture", controller.AuthenticationToken, controller.UploadPicture)
-		v1.POST("/uploadAttachment/:id", controller.AuthenticationToken, controller.UploadAttachment)
+		v1.POST("/uploadAttachment", controller.AuthenticationToken, controller.UploadAttachment)
 		v1.GET("/searchProject", controller.SearchProject)
 		v1.POST("/filterProject", controller.FilterProject)
 		v1.GET("/userEducation", controller.AuthenticationToken, controller.GetOnlyUserEducation)

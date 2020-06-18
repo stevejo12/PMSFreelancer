@@ -194,8 +194,6 @@ func UploadPicture(c *gin.Context) {
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /uploadAttachment/{id} [post]
 func UploadAttachment(c *gin.Context) {
-	// project id
-	id := c.Param("id")
 	// accept the images and store it in the tempfile
 	c.Request.ParseMultipartForm(5 * 1024 * 1024)
 
@@ -300,43 +298,10 @@ func UploadAttachment(c *gin.Context) {
 		return
 	}
 
-	type AttachmentData struct {
-		ID   string `json:"id"`
-		Link string `json:"link"`
-	}
-
-	asd, err := config.DB.Exec("INSERT INTO project_links(project_link, project_id) VALUES(?,?)", urlFile, id)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server is unable to execute query to database"})
-		return
-	}
-
-	var attachment AttachmentData
-	attachmentID, err := asd.LastInsertId()
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server is unable to get the id of inserted attachment"})
-		return
-	}
-
-	err = config.DB.QueryRow("SELECT id, project_link FROM project_links WHERE id=?", attachmentID).Scan(&attachment.ID, &attachment.Link)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server is unable to execute query to the database"})
-		return
-	}
-
 	// response OK
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "Uploading successful",
-		"data":    attachment})
+		"data":    gin.H{"url": urlFile}})
 	return
 }

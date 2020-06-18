@@ -150,14 +150,50 @@ func AddProject(c *gin.Context) {
 		return
 	}
 
-	_, err = config.DB.Query("INSERT INTO project(title, description, skills, price, owner_id) VALUES(?,?,?,?,?,?)", param.Title, param.Description, strings.Join(param.Skills, ","), param.Price, id)
+	err = helpers.SkillList(param.Skills)
+
+	if err != nil {
+		if err.Error() == "not exist" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "There is skill id does not exist in the database id"})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	queryResult, err := config.DB.Exec("INSERT INTO project(title, description, skills, price, owner_id) VALUES(?,?,?,?,?)", param.Title, param.Description, strings.Join(param.Skills, ","), param.Price, id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query to database"})
-
 		return
+	}
+
+	rowID, err := queryResult.LastInsertId()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to retrieve the id inserted"})
+		return
+	}
+
+	// add project link list
+	for i := 0; i < len(param.Attachment); i++ {
+		_, err = config.DB.Exec("INSERT INTO project_links(project_link, project_id) VALUES(?,?)", param.Attachment[i], rowID)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server unable to execute query to database"})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
