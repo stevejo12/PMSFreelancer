@@ -764,7 +764,7 @@ paths:
       tags:
       - User
   /logout:
-    get:
+    post:
       parameters:
       - description: Token Header
         in: header

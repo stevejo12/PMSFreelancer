@@ -46,7 +46,7 @@ func main() {
 		v1.GET("/registerCallback", controller.HandleCallbackRegisterGoogle)
 		v1.POST("/registerUserUsingGoogle", controller.RegisterUserWithGoogle)
 		v1.POST("/login", controller.LoginUserWithPassword)
-		v1.GET("/logout", controller.AuthenticationToken, controller.HandleLogout)
+		v1.POST("/logout", controller.AuthenticationToken, controller.HandleLogout)
 		v1.GET("/allCountries", controller.GetAllCountries)
 		v1.GET("/userProfile", controller.AuthenticationToken, controller.GetUserProfile)
 		v1.POST("/addPortfolio", controller.AuthenticationToken, controller.AddUserPortfolio)

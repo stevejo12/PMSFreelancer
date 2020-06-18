@@ -492,7 +492,7 @@ func ChangeUserPassword(c *gin.Context) {
 // @Tags User
 // @Param token header string true "Token Header"
 // @Success 200 {object} models.ResponseWithNoBody
-// @Router /logout [get]
+// @Router /logout [post]
 func HandleLogout(c *gin.Context) {
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:   "token",

@@ -608,7 +608,7 @@
             }
         },
         "/logout": {
-            "get": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],

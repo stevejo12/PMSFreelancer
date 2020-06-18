@@ -624,7 +624,7 @@ var doc = `{
             }
         },
         "/logout": {
-            "get": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],
