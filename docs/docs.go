@@ -1692,6 +1692,9 @@ var doc = `{
         "models.UserProfile": {
             "type": "object",
             "properties": {
+                "balance": {
+                    "type": "number"
+                },
                 "description": {
                     "type": "string"
                 },
