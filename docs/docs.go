@@ -1710,10 +1710,13 @@ var doc = `{
                         "$ref": "#/definitions/models.ExperienceReturnValue"
                     }
                 },
-                "fullname": {
+                "firstName": {
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "lastName": {
                     "type": "string"
                 },
                 "location": {

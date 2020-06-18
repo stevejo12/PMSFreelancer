@@ -331,9 +331,11 @@ definitions:
         items:
           $ref: '#/definitions/models.ExperienceReturnValue'
         type: array
-      fullname:
+      firstName:
         type: string
       id:
+        type: string
+      lastName:
         type: string
       location:
         type: string

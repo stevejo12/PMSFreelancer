@@ -52,7 +52,8 @@ type DatabaseResetPassword struct {
 
 type UserProfile struct {
 	ID          string                  `json:"id"`
-	Fullname    string                  `json:"fullname"`
+	FirstName   string                  `json:"firstName"`
+	LastName    string                  `json:"lastName"`
 	Email       string                  `json:"email"`
 	Description string                  `json:"description"`
 	Education   []EducationReturnValue  `json:"education"`
