@@ -1245,7 +1245,7 @@ var doc = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 }
             }
         },
@@ -1253,7 +1253,10 @@ var doc = `{
             "type": "object",
             "properties": {
                 "attachment": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "description": {
                     "type": "string"
@@ -1347,7 +1350,7 @@ var doc = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "status": {
                     "type": "string"
@@ -1429,16 +1432,22 @@ var doc = `{
             "properties": {
                 "freelancerID": {
                     "type": "integer"
+                },
+                "trelloKey": {
+                    "type": "string"
                 }
             }
         },
         "models.ProjectDetailInterestedMember": {
             "type": "object",
             "properties": {
-                "fullname": {
+                "firstName": {
                     "type": "string"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "lastName": {
                     "type": "string"
                 }
             }
@@ -1449,11 +1458,11 @@ var doc = `{
                 "attachment": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/models.ProjectLinksResponse"
                     }
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "interestedMembers": {
                     "type": "array",
@@ -1479,6 +1488,17 @@ var doc = `{
                 }
             }
         },
+        "models.ProjectLinksResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "project_link": {
+                    "type": "string"
+                }
+            }
+        },
         "models.RegistrationUserUsingPassword": {
             "type": "object",
             "properties": {
@@ -1488,7 +1508,10 @@ var doc = `{
                 "email": {
                     "type": "string"
                 },
-                "fullname": {
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
                     "type": "string"
                 },
                 "location": {
@@ -1755,7 +1778,7 @@ var doc = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"

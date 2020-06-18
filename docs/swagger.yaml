@@ -30,12 +30,14 @@ definitions:
       countryName:
         type: string
       id:
-        type: string
+        type: integer
     type: object
   models.CreateProject:
     properties:
       attachment:
-        type: string
+        items:
+          type: string
+        type: array
       description:
         type: string
       price:
@@ -96,7 +98,7 @@ definitions:
       description:
         type: string
       id:
-        type: string
+        type: integer
       status:
         type: string
       title:
@@ -149,22 +151,26 @@ definitions:
     properties:
       freelancerID:
         type: integer
+      trelloKey:
+        type: string
     type: object
   models.ProjectDetailInterestedMember:
     properties:
-      fullname:
+      firstName:
         type: string
       id:
+        type: integer
+      lastName:
         type: string
     type: object
   models.ProjectDetailResponse:
     properties:
       attachment:
         items:
-          type: string
+          $ref: '#/definitions/models.ProjectLinksResponse'
         type: array
       id:
-        type: string
+        type: integer
       interestedMembers:
         items:
           $ref: '#/definitions/models.ProjectDetailInterestedMember'
@@ -181,13 +187,22 @@ definitions:
       title:
         type: string
     type: object
+  models.ProjectLinksResponse:
+    properties:
+      id:
+        type: integer
+      project_link:
+        type: string
+    type: object
   models.RegistrationUserUsingPassword:
     properties:
       description:
         type: string
       email:
         type: string
-      fullname:
+      firstName:
+        type: string
+      lastName:
         type: string
       location:
         type: integer
@@ -361,7 +376,7 @@ definitions:
       createdAt:
         type: string
       id:
-        type: string
+        type: integer
       name:
         type: string
       updatedAt:

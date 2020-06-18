@@ -1,6 +1,9 @@
 package models
 
-import "database/sql"
+import (
+	"PMSFreelancer/models"
+	"database/sql"
+)
 
 type OwnerInfoQuery struct {
 	ID        string
@@ -63,7 +66,7 @@ type ProjectDetailResponse struct {
 	ID                int                             `json:"id"`
 	Title             string                          `json:"title"`
 	Skills            []string                        `json:"skills"`
-	Attachment        []string                        `json:"attachment"`
+	Attachment        []models.ProjectLinksResponse   `json:"attachment"`
 	Price             float64                         `json:"price"`
 	Owner             OwnerInfo                       `json:"owner"`
 	InterestedMembers []ProjectDetailInterestedMember `json:"interestedMembers"`
