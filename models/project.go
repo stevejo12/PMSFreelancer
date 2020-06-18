@@ -40,7 +40,7 @@ type CreateProject struct {
 	Description string
 	Skills      []string
 	Price       float64
-	Attachment  string
+	Attachment  []string
 }
 
 type GetUserProjectResponse struct {
@@ -75,5 +75,6 @@ type ProjectDetailInterestedMember struct {
 }
 
 type ProjectAcceptMemberParameter struct {
-	FreelancerID int
+	FreelancerID int    `json:"freelancerID"`
+	TrelloKey    string `json:"trelloKey"`
 }

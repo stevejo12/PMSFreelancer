@@ -141,7 +141,7 @@ func AddProject(c *gin.Context) {
 
 	var param models.CreateProject
 
-	err := c.Bind(&param)
+	err := c.BindJSON(&param)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -150,7 +150,7 @@ func AddProject(c *gin.Context) {
 		return
 	}
 
-	_, err = config.DB.Query("INSERT INTO project(title, description, skills, price, attachment, owner_id) VALUES(?,?,?,?,?,?)", param.Title, param.Description, strings.Join(param.Skills, ","), param.Price, param.Attachment, id)
+	_, err = config.DB.Query("INSERT INTO project(title, description, skills, price, owner_id) VALUES(?,?,?,?,?,?)", param.Title, param.Description, strings.Join(param.Skills, ","), param.Price, id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -476,7 +476,7 @@ func AcceptProjectInterest(c *gin.Context) {
 
 	param := models.ProjectAcceptMemberParameter{}
 
-	err = c.Bind(&param)
+	err = c.BindJSON(&param)
 
 	if err != nil || param.FreelancerID == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -518,8 +518,9 @@ func AcceptProjectInterest(c *gin.Context) {
 		}
 
 		if member {
-			// list the member as accepted member and update the status to "On Going"
-			_, err = config.DB.Exec("UPDATE project SET status=?, accepted_memberid=? WHERE id=?", "On Going", param.FreelancerID, id)
+			// Create Trello Board and store the link
+			var boardTitle string
+			err = config.DB.QueryRow("SELECT title FROM project WHERE id=?", id).Scan(&boardTitle)
 
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
@@ -528,7 +529,26 @@ func AcceptProjectInterest(c *gin.Context) {
 				return
 			}
 
-			// TO DO: Create Trello Board and store the link
+			trelloBoardID, err := createTrelloBoard(boardTitle, param.TrelloKey)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
+			trelloURL := "https://www.trello.com/b/" + trelloBoardID
+
+			// Update the project data
+			_, err = config.DB.Exec("UPDATE project SET status=?, accepted_memberid=?, trello_url=? WHERE id=?", "On Going", param.FreelancerID, trelloURL, id)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": "Server is unable to execute query to the database"})
+				return
+			}
 
 			c.JSON(http.StatusOK, gin.H{
 				"code":    http.StatusOK,

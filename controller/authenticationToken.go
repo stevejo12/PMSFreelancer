@@ -1,13 +1,12 @@
 package controller
 
 import (
+	// "PMSFreelancer/models"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-
 	"github.com/stevejo12/PMSFreelancer/models"
-	// "PMSFreelancer/models"
 )
 
 var idToken string

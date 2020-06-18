@@ -49,7 +49,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 	var newUser models.RegistrationUserUsingPassword
 	var multipleError []string
 
-	err = c.Bind(&newUser)
+	err = c.BindJSON(&newUser)
 
 	// checking empty body data
 	if err != nil {
@@ -196,7 +196,7 @@ func RegisterUserWithGoogle(c *gin.Context) {
 	var newUser models.RegistrationUserUsingGoogle
 	var multipleError []string
 
-	err = c.Bind(&newUser)
+	err = c.BindJSON(&newUser)
 
 	// checking empty body data
 	if err != nil {
@@ -352,7 +352,7 @@ func LoginUserWithPassword(c *gin.Context) {
 
 	c.Request.Body = ioutil.NopCloser(bytes.NewReader([]byte(body)))
 
-	err = c.BindJSON(&user)
+	err = c.BindJSONJSON(&user)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -434,7 +434,7 @@ func ChangeUserPassword(c *gin.Context) {
 	var databaseEmail string
 	var databasePassword string
 
-	err := c.Bind(&data)
+	err := c.BindJSON(&data)
 
 	// checking empty body data
 	if err != nil {
@@ -520,7 +520,7 @@ func ResetPassword(c *gin.Context) {
 	var data models.ResetPassword
 	var mail string
 
-	err := c.Bind(&data)
+	err := c.BindJSON(&data)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -624,7 +624,7 @@ func ResetPassword(c *gin.Context) {
 func UpdateNewPassword(c *gin.Context) {
 	var param models.UpdateResetPassword
 
-	err = c.Bind(&param)
+	err = c.BindJSON(&param)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

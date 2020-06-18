@@ -102,7 +102,7 @@ func AddEducation(c *gin.Context) {
 
 	var data models.AddEducationParameter
 
-	err = c.Bind(&data)
+	err = c.BindJSON(&data)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

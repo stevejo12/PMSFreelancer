@@ -89,7 +89,7 @@ func AddExperience(c *gin.Context) {
 
 	var data models.AddExperienceParameter
 
-	err = c.Bind(&data)
+	err = c.BindJSON(&data)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

@@ -80,7 +80,7 @@ func EditUserPortfolio(c *gin.Context) {
 
 	var data models.PortfolioEditParameter
 
-	err = c.Bind(&data)
+	err = c.BindJSON(&data)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

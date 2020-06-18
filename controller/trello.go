@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -19,6 +20,38 @@ var token = "1761f2e9417b6855adf4f50dc00d4721086d6fad6c079a966b673f6c8e927432"
 // token pinjeman
 // var token = "51ee616bd00d17e7615e2aca0dc0d849211863855567446935478143a96c4115"
 var client = trello.NewClient(key, token)
+
+func createTrelloBoard(title string, trelloToken string) (string, error) {
+	client := trello.NewClient(key, trelloToken)
+
+	boardName := title
+
+	board := trello.NewBoard(boardName)
+
+	// trello.Defaults bisa dirubah ama arguments
+	// such as description
+	err := client.CreateBoard(&board, trello.Defaults())
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	allBoards := GetUserTrelloBoard()
+
+	var boardIDCreated string
+
+	for i := 0; i < len(allBoards); i++ {
+		if allBoards[i].Name == boardName {
+			boardIDCreated = allBoards[i].ID
+		}
+	}
+
+	if boardIDCreated == "" {
+		return boardIDCreated, errors.New("Server is unable to find trello board")
+	}
+
+	return boardIDCreated, nil
+}
 
 // CreateNewBoard godoc
 // This function is used to create a new board in trello using user's token
