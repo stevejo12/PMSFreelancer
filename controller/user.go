@@ -739,7 +739,7 @@ func GetUserProfile(c *gin.Context) {
 	var dataQuery models.QueryUserProfile
 	var picData sql.NullString
 
-	err = config.DB.QueryRow("SELECT id, first_name, last_name, email, description, picture, created_at, username, location, skill FROM login WHERE id=?", id).Scan(&dataQuery.ID, &dataQuery.Firstname, &dataQuery.LastName, &dataQuery.Email, &dataQuery.Description, &picData, &dataQuery.CreatedAt, &dataQuery.Username, &dataQuery.Location, &dataQuery.Skills)
+	err = config.DB.QueryRow("SELECT id, first_name, last_name, email, description, picture, created_at, username, location, skill, balance FROM login WHERE id=?", id).Scan(&dataQuery.ID, &dataQuery.Firstname, &dataQuery.LastName, &dataQuery.Email, &dataQuery.Description, &picData, &dataQuery.CreatedAt, &dataQuery.Username, &dataQuery.Location, &dataQuery.Skills, &dataQuery.Balance)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -799,6 +799,7 @@ func GetUserProfile(c *gin.Context) {
 	data.Username = dataQuery.Username
 	data.Location = dataQuery.Location
 	data.Portfolio = userPortfolio
+	data.Balance = dataQuery.Balance
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,

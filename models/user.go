@@ -64,6 +64,7 @@ type UserProfile struct {
 	Location    string                  `json:"location"`
 	Member      string                  `json:"member"`
 	Portfolio   []PortfolioDatabase     `json:"portfolio"`
+	Balance     float64                 `json:"balance"`
 }
 
 type QueryUserProfile struct {
@@ -77,4 +78,5 @@ type QueryUserProfile struct {
 	Username    string
 	Location    string
 	Skills      string
+	Balance     float64
 }
