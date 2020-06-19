@@ -1309,6 +1309,9 @@ var doc = `{
         "models.ExperienceParameters": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "endYear": {
                     "type": "integer"
                 },
@@ -1326,6 +1329,9 @@ var doc = `{
         "models.ExperienceReturnValue": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "endYear": {
                     "type": "integer"
                 },

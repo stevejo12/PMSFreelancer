@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
+	// "PMSFreelancer/config"
+	// "PMSFreelancer/models"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/models"
-	// "PMSFreelancer/config"
-	// "PMSFreelancer/models"
 )
 
 func userExperience(id string) ([]models.ExperienceReturnValue, error) {
@@ -23,7 +24,7 @@ func userExperience(id string) ([]models.ExperienceReturnValue, error) {
 
 	for resp.Next() {
 		var databaseData models.ExperienceTableResponse
-		if err := resp.Scan(&databaseData.ID, &databaseData.Place, &databaseData.Position, &databaseData.StartYear, &databaseData.EndYear, &databaseData.UserID); err != nil {
+		if err := resp.Scan(&databaseData.ID, &databaseData.Description, &databaseData.Place, &databaseData.Position, &databaseData.StartYear, &databaseData.EndYear, &databaseData.UserID); err != nil {
 			return []models.ExperienceReturnValue{}, errors.New("Something is wrong with the database data")
 		}
 
@@ -34,6 +35,7 @@ func userExperience(id string) ([]models.ExperienceReturnValue, error) {
 		returnValue.Place = databaseData.Place
 		returnValue.StartYear = databaseData.StartYear
 		returnValue.EndYear = databaseData.EndYear
+		returnValue.Description = databaseData.Description
 
 		allData = append(allData, returnValue)
 	}
@@ -100,13 +102,14 @@ func AddExperience(c *gin.Context) {
 
 	experience := data.Experience
 
-	query := "INSERT INTO experience(place, position, starting_year, ending_year, user_id) VALUES"
+	query := "INSERT INTO experience(place, position, starting_year, ending_year, user_id, description) VALUES"
 	for i := 0; i < len(experience); i++ {
 		place := experience[i].Place
 		position := experience[i].Position
 		startingYear := experience[i].StartYear
 		endYear := experience[i].EndYear
-		query = query + "(\"" + place + "\", \"" + position + "\"," + strconv.Itoa(startingYear) + ", " + strconv.Itoa(endYear) + ", " + id + "),"
+		description := experience[i].Description
+		query = query + "(\"" + place + "\", \"" + position + "\"," + strconv.Itoa(startingYear) + ", " + strconv.Itoa(endYear) + ", " + id + ", \"" + description + "\"),"
 	}
 
 	if last := len(query) - 1; last >= 0 && query[last] == ',' {

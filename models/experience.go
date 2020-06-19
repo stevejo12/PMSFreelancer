@@ -1,10 +1,11 @@
 package models
 
 type ExperienceParameters struct {
-	Place     string `json:"place"`
-	Position  string `json:"position"`
-	StartYear int    `json:"startYear"`
-	EndYear   int    `json:"endYear"`
+	Place       string `json:"place"`
+	Position    string `json:"position"`
+	StartYear   int    `json:"startYear"`
+	EndYear     int    `json:"endYear"`
+	Description string `json:"description"`
 }
 
 type ExperienceReturnValue struct {

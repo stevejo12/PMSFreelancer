@@ -1293,6 +1293,9 @@
         "models.ExperienceParameters": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "endYear": {
                     "type": "integer"
                 },
@@ -1310,6 +1313,9 @@
         "models.ExperienceReturnValue": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "endYear": {
                     "type": "integer"
                 },

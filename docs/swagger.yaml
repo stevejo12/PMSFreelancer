@@ -71,6 +71,8 @@ definitions:
     type: object
   models.ExperienceParameters:
     properties:
+      description:
+        type: string
       endYear:
         type: integer
       place:
@@ -82,6 +84,8 @@ definitions:
     type: object
   models.ExperienceReturnValue:
     properties:
+      description:
+        type: string
       endYear:
         type: integer
       id:
