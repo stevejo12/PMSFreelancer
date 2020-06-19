@@ -7,8 +7,8 @@ import (
 	// "PMSFreelancer/config"
 )
 
-// CountryName => get the country name based on the id
-func getCountryName(id int) (string, error) {
+// GetCountryName => get the country name based on the id
+func GetCountryName(id int) (string, error) {
 	var countryName string
 
 	err := config.DB.QueryRow("SELECT country_name FROM app_countries WHERE id=?", id).Scan(&countryName)
