@@ -784,6 +784,8 @@ func GetUserProfile(c *gin.Context) {
 	} else {
 		data.Member = ""
 	}
+	// get user location name
+	country, err := getCountryName(dataQuery.Location)
 
 	// arrange all data
 	data.Education = educationData
@@ -797,7 +799,7 @@ func GetUserProfile(c *gin.Context) {
 	data.Description = dataQuery.Description
 	data.Picture = dataQuery.Picture
 	data.Username = dataQuery.Username
-	data.Location = dataQuery.Location
+	data.Location = country
 	data.Portfolio = userPortfolio
 	data.Balance = dataQuery.Balance
 

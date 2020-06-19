@@ -78,7 +78,7 @@ type QueryUserProfile struct {
 	Picture     string
 	CreatedAt   string
 	Username    string
-	Location    string
+	Location    int
 	Skills      string
 	Balance     float64
 }
