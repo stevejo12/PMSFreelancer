@@ -785,7 +785,7 @@ func GetUserProfile(c *gin.Context) {
 		data.Member = ""
 	}
 	// get user location name
-	country, err := getCountryName(dataQuery.Location)
+	country, err := helpers.getCountryName(dataQuery.Location)
 
 	// arrange all data
 	data.Education = educationData
