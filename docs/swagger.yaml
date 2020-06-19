@@ -141,6 +141,8 @@ definitions:
         type: string
       ownerId:
         type: string
+      title:
+        type: string
     type: object
   models.PortfolioEditParameter:
     properties:
@@ -351,7 +353,7 @@ definitions:
       firstName:
         type: string
       id:
-        type: string
+        type: integer
       lastName:
         type: string
       location:

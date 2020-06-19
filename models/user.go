@@ -53,7 +53,7 @@ type DatabaseResetPassword struct {
 }
 
 type UserProfile struct {
-	ID          string                  `json:"id"`
+	ID          int                     `json:"id"`
 	FirstName   string                  `json:"firstName"`
 	LastName    string                  `json:"lastName"`
 	Email       string                  `json:"email"`
@@ -70,7 +70,7 @@ type UserProfile struct {
 }
 
 type QueryUserProfile struct {
-	ID          string
+	ID          int
 	Firstname   string
 	LastName    string
 	Email       string

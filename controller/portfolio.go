@@ -153,7 +153,7 @@ func allUserPortfolio(id string) ([]models.PortfolioDatabase, error) {
 
 	for data.Next() {
 		var dbData models.PortfolioDatabase
-		if err := data.Scan(&dbData.ID, &dbData.Description, &dbData.Link, &dbData.OwnerID); err != nil {
+		if err := data.Scan(&dbData.ID, &dbData.Title, &dbData.Description, &dbData.Link, &dbData.OwnerID); err != nil {
 			return []models.PortfolioDatabase{}, errors.New("Something is wrong with the database data")
 		}
 

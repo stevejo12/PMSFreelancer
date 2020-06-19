@@ -1416,6 +1416,9 @@ var doc = `{
                 },
                 "ownerId": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -1740,7 +1743,7 @@ var doc = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "lastName": {
                     "type": "string"

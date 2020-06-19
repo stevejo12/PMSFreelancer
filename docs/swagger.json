@@ -1400,6 +1400,9 @@
                 },
                 "ownerId": {
                     "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -1724,7 +1727,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "lastName": {
                     "type": "string"
