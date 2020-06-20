@@ -117,9 +117,11 @@ definitions:
     type: object
   models.OwnerInfo:
     properties:
-      fullName:
+      firstName:
         type: string
       id:
+        type: string
+      lastName:
         type: string
       location:
         type: string
@@ -324,6 +326,19 @@ definitions:
       token:
         type: string
     type: object
+  models.UpdateProfile:
+    properties:
+      description:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      location:
+        type: integer
+      username:
+        type: string
+    type: object
   models.UpdateResetPassword:
     properties:
       password:
@@ -370,6 +385,8 @@ definitions:
         items:
           $ref: '#/definitions/models.PortfolioDatabase'
         type: array
+      projectCompleted:
+        type: integer
       skill:
         items:
           $ref: '#/definitions/models.UserSkills'
@@ -1002,6 +1019,38 @@ paths:
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
       summary: Update Password (after reset password)
+      tags:
+      - User
+  /updateProfile:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: New Data for User Profile
+        in: body
+        name: Description
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateProfile'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Updating User Profile
       tags:
       - User
   /uploadAttachment/{id}:

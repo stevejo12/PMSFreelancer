@@ -819,6 +819,17 @@ func GetUserProfile(c *gin.Context) {
 		"data":    data})
 }
 
+// UpdateUserProfile => Updating User Profile
+// UpdateUserProfile godoc
+// @Summary Updating User Profile
+// @Accept  json
+// @Tags User
+// @Param token header string true "Token Header"
+// @Param Description body models.UpdateProfile true "New Data for User Profile"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /updateProfile [put]
 func UpdateUserProfile(c *gin.Context) {
 	id := idToken
 	var data models.UpdateProfile

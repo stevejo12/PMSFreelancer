@@ -960,6 +960,55 @@ var doc = `{
                 }
             }
         },
+        "/updateProfile": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Updating User Profile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "New Data for User Profile",
+                        "name": "Description",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateProfile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
         "/uploadAttachment/{id}": {
             "post": {
                 "consumes": [
@@ -1380,10 +1429,13 @@ var doc = `{
         "models.OwnerInfo": {
             "type": "object",
             "properties": {
-                "fullName": {
+                "firstName": {
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "lastName": {
                     "type": "string"
                 },
                 "location": {
@@ -1699,6 +1751,26 @@ var doc = `{
                 }
             }
         },
+        "models.UpdateProfile": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UpdateResetPassword": {
             "type": "object",
             "properties": {
@@ -1768,6 +1840,9 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/models.PortfolioDatabase"
                     }
+                },
+                "projectCompleted": {
+                    "type": "integer"
                 },
                 "skill": {
                     "type": "array",
