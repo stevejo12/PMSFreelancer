@@ -1,18 +1,15 @@
 basePath: /v1
 definitions:
-  models.AddEducationParameter:
+  models.AddReview:
     properties:
-      education:
-        items:
-          $ref: '#/definitions/models.EducationParameters'
-        type: array
-    type: object
-  models.AddExperienceParameter:
-    properties:
-      experience:
-        items:
-          $ref: '#/definitions/models.ExperienceParameters'
-        type: array
+      message:
+        type: string
+      projectID:
+        type: integer
+      starRating:
+        type: integer
+      userID:
+        type: integer
     type: object
   models.ChangePassword:
     properties:
@@ -195,6 +192,13 @@ definitions:
       title:
         type: string
     type: object
+  models.ProjectInformationForReview:
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
   models.ProjectLinksResponse:
     properties:
       id:
@@ -303,6 +307,17 @@ definitions:
       message:
         type: string
     type: object
+  models.ResponseOKUserReviews:
+    properties:
+      code:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/models.ReviewInfo'
+        type: array
+      message:
+        type: string
+    type: object
   models.ResponseWithNoBody:
     properties:
       code:
@@ -318,6 +333,23 @@ definitions:
         type: string
       message:
         type: string
+    type: object
+  models.ReviewInfo:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      project:
+        $ref: '#/definitions/models.ProjectInformationForReview'
+        type: object
+      reviewer:
+        $ref: '#/definitions/models.UserInformationForReview'
+        type: object
+      starRating:
+        type: integer
     type: object
   models.TokenResponse:
     properties:
@@ -352,6 +384,15 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  models.UserInformationForReview:
+    properties:
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
     type: object
   models.UserProfile:
     properties:
@@ -466,7 +507,7 @@ paths:
         name: Data
         required: true
         schema:
-          $ref: '#/definitions/models.AddEducationParameter'
+          $ref: '#/definitions/models.EducationParameters'
       produces:
       - application/json
       responses:
@@ -496,7 +537,7 @@ paths:
         name: Data
         required: true
         schema:
-          $ref: '#/definitions/models.AddExperienceParameter'
+          $ref: '#/definitions/models.ExperienceParameters'
       produces:
       - application/json
       responses:
@@ -1184,6 +1225,35 @@ paths:
       summary: User Profile Data
       tags:
       - User
+  /userProfile/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKGetUserProfile'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: User Profile Data
+      tags:
+      - User
   /userProjects:
     get:
       consumes:
@@ -1208,4 +1278,61 @@ paths:
       summary: User Projects
       tags:
       - Project
+  /userReview:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKUserReviews'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Get User Review
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Data Format to add review
+        in: body
+        name: Data
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddReview'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Add User Review
+      tags:
+      - User
 swagger: "2.0"

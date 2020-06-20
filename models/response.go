@@ -50,6 +50,11 @@ type ParamSearchProject struct {
 	size int
 }
 
+type ResponseOKUserReviews struct {
+	ResponseWithNoBody
+	data []ReviewInfo
+}
+
 type ParamFilterProject struct {
 	page int
 	size int

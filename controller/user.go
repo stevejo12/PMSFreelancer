@@ -702,7 +702,7 @@ func UpdateNewPassword(c *gin.Context) {
 	}
 }
 
-// GetUserProfile => Updating user password without old password
+// GetUserProfile => Getting User Profile
 // GetUserProfile godoc
 // @Summary User Profile Data
 // @Produce json
@@ -893,4 +893,123 @@ func UpdateUserProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "Successfully updating user"})
+}
+
+// GetUserProfileByID => Get User Profile based on ID
+// GetUserProfileByID godoc
+// @Summary User Profile Data
+// @Produce json
+// @Accept  json
+// @Tags User
+// @Param token header string true "Token Header"
+// @Param id path int64 true "User ID"
+// @Success 200 {object} models.ResponseOKGetUserProfile
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /userProfile/{id} [get]
+func GetUserProfileByID(c *gin.Context) {
+	id := c.Param("id")
+
+	var data models.UserProfile
+
+	// get education list
+	educationData, err := userEducation(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// get experience list
+	experienceData, err := userExperience(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	var dataQuery models.QueryUserProfile
+	var picData sql.NullString
+
+	err = config.DB.QueryRow("SELECT id, first_name, last_name, email, description, picture, created_at, username, location, skill, balance FROM login WHERE id=?", id).Scan(&dataQuery.ID, &dataQuery.Firstname, &dataQuery.LastName, &dataQuery.Email, &dataQuery.Description, &picData, &dataQuery.CreatedAt, &dataQuery.Username, &dataQuery.Location, &dataQuery.Skills, &dataQuery.Balance)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to execute query to the database"})
+		return
+	}
+
+	// get skill list
+	skillData, err := userSkills(dataQuery.Skills)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// get user portfolio
+	userPortfolio, err := allUserPortfolio(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// check if there is any uploaded picture
+	// valid means there is value
+	// else means null
+	if picData.Valid {
+		dataQuery.Picture = picData.String
+	} else {
+		dataQuery.Picture = ""
+	}
+
+	// Year of Member
+	arrMemberSince := helpers.SplitDash(dataQuery.CreatedAt)
+	if len(arrMemberSince) > 0 {
+		data.Member = arrMemberSince[0]
+	} else {
+		data.Member = ""
+	}
+	// get user location name
+	country, err := helpers.GetCountryName(dataQuery.Location)
+
+	// get # of completed project
+	projectCompleted, err := helpers.GetUserCompletedProject(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// arrange all data
+	data.Education = educationData
+	data.Experience = experienceData
+	data.Skill = skillData
+	data.ID = dataQuery.ID
+	data.ProjectCompleted = projectCompleted
+	data.FirstName = dataQuery.Firstname
+	data.LastName = dataQuery.LastName
+	data.Email = dataQuery.Email
+	data.Description = dataQuery.Description
+	data.Picture = dataQuery.Picture
+	data.Username = dataQuery.Username
+	data.Location = country
+	data.Portfolio = userPortfolio
+	data.Balance = dataQuery.Balance
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "All User Profile data have been successfully retrieved",
+		"data":    data})
 }

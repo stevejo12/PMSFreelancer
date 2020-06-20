@@ -82,14 +82,14 @@ func GetOnlyUserExperience(c *gin.Context) {
 // @Accept  json
 // @Tags Experience
 // @Param token header string true "Token Header"
-// @Param Data body models.AddExperienceParameter true "Data Format to add experience"
+// @Param Data body models.ExperienceParameters true "Data Format to add experience"
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /addExperience [post]
 func AddExperience(c *gin.Context) {
 	id := idToken
 
-	var data models.AddExperienceParameter
+	var data models.ExperienceParameters
 
 	err = c.BindJSON(&data)
 
@@ -100,21 +100,15 @@ func AddExperience(c *gin.Context) {
 		return
 	}
 
-	experience := data.Experience
+	if data.StartYear > data.EndYear {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Start year should be in the past compared to end year"})
+		return
+	}
 
 	query := "INSERT INTO experience(place, position, starting_year, ending_year, user_id, description) VALUES"
-	for i := 0; i < len(experience); i++ {
-		place := experience[i].Place
-		position := experience[i].Position
-		startingYear := experience[i].StartYear
-		endYear := experience[i].EndYear
-		description := experience[i].Description
-		query = query + "(\"" + place + "\", \"" + position + "\"," + strconv.Itoa(startingYear) + ", " + strconv.Itoa(endYear) + ", " + id + ", \"" + description + "\"),"
-	}
-
-	if last := len(query) - 1; last >= 0 && query[last] == ',' {
-		query = query[:last]
-	}
+	query = query + "(\"" + data.Place + "\", \"" + data.Position + "\"," + strconv.Itoa(data.StartYear) + ", " + strconv.Itoa(data.EndYear) + ", " + id + ", \"" + data.Description + "\")"
 
 	_, err = config.DB.Exec(query)
 

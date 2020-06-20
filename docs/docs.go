@@ -110,7 +110,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.AddEducationParameter"
+                            "$ref": "#/definitions/models.EducationParameters"
                         }
                     }
                 ],
@@ -156,7 +156,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.AddExperienceParameter"
+                            "$ref": "#/definitions/models.ExperienceParameters"
                         }
                     }
                 ],
@@ -1209,6 +1209,50 @@ var doc = `{
                 }
             }
         },
+        "/userProfile/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "User Profile Data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseOKGetUserProfile"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
         "/userProjects": {
             "get": {
                 "consumes": [
@@ -1245,28 +1289,110 @@ var doc = `{
                     }
                 }
             }
-        }
-    },
-    "definitions": {
-        "models.AddEducationParameter": {
-            "type": "object",
-            "properties": {
-                "education": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.EducationParameters"
+        },
+        "/userReview": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get User Review",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseOKUserReviews"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Add User Review",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Data Format to add review",
+                        "name": "Data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddReview"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
                     }
                 }
             }
-        },
-        "models.AddExperienceParameter": {
+        }
+    },
+    "definitions": {
+        "models.AddReview": {
             "type": "object",
             "properties": {
-                "experience": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.ExperienceParameters"
-                    }
+                "message": {
+                    "type": "string"
+                },
+                "projectID": {
+                    "type": "integer"
+                },
+                "starRating": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
                 }
             }
         },
@@ -1549,6 +1675,17 @@ var doc = `{
                 }
             }
         },
+        "models.ProjectInformationForReview": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ProjectLinksResponse": {
             "type": "object",
             "properties": {
@@ -1715,6 +1852,23 @@ var doc = `{
                 }
             }
         },
+        "models.ResponseOKUserReviews": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ReviewInfo"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ResponseWithNoBody": {
             "type": "object",
             "properties": {
@@ -1737,6 +1891,31 @@ var doc = `{
                 },
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "models.ReviewInfo": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "project": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.ProjectInformationForReview"
+                },
+                "reviewer": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.UserInformationForReview"
+                },
+                "starRating": {
+                    "type": "integer"
                 }
             }
         },
@@ -1790,6 +1969,20 @@ var doc = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "models.UserInformationForReview": {
+            "type": "object",
+            "properties": {
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
                 }
             }
         },

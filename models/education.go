@@ -15,7 +15,3 @@ type EducationTableResponse struct {
 	EducationReturnValue
 	UserID int
 }
-
-type AddEducationParameter struct {
-	Education []EducationParameters
-}

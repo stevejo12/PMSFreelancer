@@ -79,28 +79,14 @@ func GetOnlyUserEducation(c *gin.Context) {
 // @Accept  json
 // @Tags Education
 // @Param token header string true "Token Header"
-// @Param Data body models.AddEducationParameter true "Data Format to add education"
+// @Param Data body models.EducationParameters true "Data Format to add education"
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /addEducation [post]
 func AddEducation(c *gin.Context) {
 	id := idToken
 
-	// sample data
-	// education: [
-	// 	{
-	// 		Name
-	// 		StartYear
-	// 		EndYear
-	// 	},
-	// 	{
-	// 		Name
-	// 		StartYear
-	// 		EndYear
-	// 	}
-	// ]
-
-	var data models.AddEducationParameter
+	var data models.EducationParameters
 
 	err = c.BindJSON(&data)
 
@@ -111,19 +97,15 @@ func AddEducation(c *gin.Context) {
 		return
 	}
 
-	education := data.Education
+	if data.StartYear > data.EndYear {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Start year should be in the past compared to end year"})
+		return
+	}
 
 	query := "INSERT INTO education(name, starting_year, ending_year, user_id) VALUES"
-	for i := 0; i < len(education); i++ {
-		name := education[i].Name
-		startingYear := education[i].StartYear
-		endYear := education[i].EndYear
-		query = query + "(\"" + name + "\", " + strconv.Itoa(startingYear) + ", " + strconv.Itoa(endYear) + ", " + id + "),"
-	}
-
-	if last := len(query) - 1; last >= 0 && query[last] == ',' {
-		query = query[:last]
-	}
+	query = query + "(\"" + data.Name + "\", " + strconv.Itoa(data.StartYear) + ", " + strconv.Itoa(data.EndYear) + ", " + id + ")"
 
 	_, err = config.DB.Exec(query)
 

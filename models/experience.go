@@ -17,7 +17,3 @@ type ExperienceTableResponse struct {
 	ExperienceReturnValue
 	UserID int
 }
-
-type AddExperienceParameter struct {
-	Experience []ExperienceParameters
-}
