@@ -126,7 +126,7 @@ func GetInterestedMemberNames(id string) ([]models.ProjectDetailInterestedMember
 
 func GetUserCompletedProject(id string) (int, error) {
 	var count int
-	err := config.DB.QueryRow("SELECT COUNT(*) FROM project WHERE owner_id=?", id).Scan(&count)
+	err := config.DB.QueryRow("SELECT COUNT(*) FROM project WHERE owner_id=? && status=\"Done\"", id).Scan(&count)
 
 	if err != nil {
 		return -1, errors.New("Server unable to execute query to database")

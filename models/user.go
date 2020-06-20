@@ -53,20 +53,21 @@ type DatabaseResetPassword struct {
 }
 
 type UserProfile struct {
-	ID          int                     `json:"id"`
-	FirstName   string                  `json:"firstName"`
-	LastName    string                  `json:"lastName"`
-	Email       string                  `json:"email"`
-	Description string                  `json:"description"`
-	Education   []EducationReturnValue  `json:"education"`
-	Skill       []UserSkills            `json:"skill"`
-	Experience  []ExperienceReturnValue `json:"experience"`
-	Picture     string                  `json:"picture"`
-	Username    string                  `json:"username"`
-	Location    string                  `json:"location"`
-	Member      string                  `json:"member"`
-	Portfolio   []PortfolioDatabase     `json:"portfolio"`
-	Balance     float64                 `json:"balance"`
+	ID               int                     `json:"id"`
+	FirstName        string                  `json:"firstName"`
+	LastName         string                  `json:"lastName"`
+	Email            string                  `json:"email"`
+	Description      string                  `json:"description"`
+	Education        []EducationReturnValue  `json:"education"`
+	Skill            []UserSkills            `json:"skill"`
+	Experience       []ExperienceReturnValue `json:"experience"`
+	Picture          string                  `json:"picture"`
+	Username         string                  `json:"username"`
+	Location         string                  `json:"location"`
+	Member           string                  `json:"member"`
+	Portfolio        []PortfolioDatabase     `json:"portfolio"`
+	Balance          float64                 `json:"balance"`
+	ProjectCompleted int                     `json:"projectCompleted`
 }
 
 type QueryUserProfile struct {
@@ -81,4 +82,12 @@ type QueryUserProfile struct {
 	Location    int
 	Skills      string
 	Balance     float64
+}
+
+type UpdateProfile struct {
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	Username    string `json:"username"`
+	Location    int    `json:"location"`
+	Description string `json:"description"`
 }

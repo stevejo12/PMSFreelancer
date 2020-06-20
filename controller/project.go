@@ -328,7 +328,8 @@ func ProjectDetail(c *gin.Context) {
 			}
 
 			ownerInfo.ID = queryResult.ID
-			ownerInfo.FullName = queryResult.FirstName + " " + queryResult.LastName
+			ownerInfo.FirstName = queryResult.FirstName
+			ownerInfo.LastName = queryResult.LastName
 			ownerInfo.Location = queryResult.Location
 			memberInfo := helpers.SplitDash(queryResult.CreatedAt)
 			if len(memberInfo) == 3 {

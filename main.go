@@ -49,6 +49,7 @@ func main() {
 		v1.POST("/logout", controller.AuthenticationToken, controller.HandleLogout)
 		v1.GET("/allCountries", controller.GetAllCountries)
 		v1.GET("/userProfile", controller.AuthenticationToken, controller.GetUserProfile)
+		v1.PUT("/updateProfile", controller.AuthenticationToken, controller.UpdateUserProfile)
 		v1.POST("/addPortfolio", controller.AuthenticationToken, controller.AddUserPortfolio)
 		v1.DELETE("/deletePortfolio/:id", controller.AuthenticationToken, controller.DeleteUserPortfolio)
 		v1.PUT("/editPortfolio/:id", controller.AuthenticationToken, controller.EditUserPortfolio)

@@ -787,12 +787,22 @@ func GetUserProfile(c *gin.Context) {
 	// get user location name
 	country, err := helpers.GetCountryName(dataQuery.Location)
 
+	// get # of completed project
+	projectCompleted, err := helpers.GetUserCompletedProject(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
 	// arrange all data
 	data.Education = educationData
 	data.Experience = experienceData
 	data.Skill = skillData
 	data.ID = dataQuery.ID
-	// data.Fullname = dataQuery.Firstname + " " + dataQuery.LastName
+	data.ProjectCompleted = projectCompleted
 	data.FirstName = dataQuery.Firstname
 	data.LastName = dataQuery.LastName
 	data.Email = dataQuery.Email
@@ -807,4 +817,69 @@ func GetUserProfile(c *gin.Context) {
 		"code":    http.StatusOK,
 		"message": "All User Profile data have been successfully retrieved",
 		"data":    data})
+}
+
+func UpdateUserProfile(c *gin.Context) {
+	id := idToken
+	var data models.UpdateProfile
+
+	err := c.BindJSON(&data)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Data format is invalid"})
+		return
+	}
+
+	// check empty values
+	empty := helpers.IsEmptyData(data)
+
+	if empty {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "There is empty value(s) in the data parameters"})
+		return
+	}
+
+	// check location
+	err = helpers.CountryList(data.Location)
+
+	if err != nil {
+		if err.Error() == "not exist" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "Country ID does not exist in the database"})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// check username
+	err = helpers.CheckUpdatedUsername(data.Username, id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// update the user
+	_, err = config.DB.Exec("UPDATE login SET first_name=?, last_name=?, username=?, location=?, description=? WHERE id=?", data.FirstName, data.LastName, data.Username, data.Location, data.Description, id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to execute query to the database"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully updating user"})
 }

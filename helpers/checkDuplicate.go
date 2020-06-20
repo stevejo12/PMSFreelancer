@@ -44,3 +44,16 @@ func RemoveDuplicateValueArray(arr []string) []string {
 	}
 	return list
 }
+
+func CheckUpdatedUsername(username string, id string) error {
+	var existingID int
+	row := config.DB.QueryRow("SELECT id FROM login WHERE username=? && id !=?", username, id).Scan(&existingID)
+
+	if row == sql.ErrNoRows {
+		return nil
+	} else if row == nil {
+		return errors.New("Username has already been taken")
+	} else {
+		return errors.New(row.Error())
+	}
+}
