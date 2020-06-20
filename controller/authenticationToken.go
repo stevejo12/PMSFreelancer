@@ -27,6 +27,15 @@ func AuthenticationToken(c *gin.Context) {
 			return jwtKey, nil
 		})
 		if errSwagger != nil {
+			if !tknSwagger.Valid {
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"code":    http.StatusUnauthorized,
+					"message": "Token is no longer invalid",
+				})
+				c.Abort()
+				return
+			}
+
 			if errSwagger == jwt.ErrSignatureInvalid {
 				c.JSON(http.StatusUnauthorized, gin.H{
 					"code":    http.StatusUnauthorized,
@@ -39,14 +48,6 @@ func AuthenticationToken(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    http.StatusBadRequest,
 				"message": err.Error(),
-			})
-			c.Abort()
-			return
-		}
-		if !tknSwagger.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":    http.StatusUnauthorized,
-				"message": "Token is no longer invalid",
 			})
 			c.Abort()
 			return
@@ -92,6 +93,15 @@ func AuthenticationToken(c *gin.Context) {
 		})
 
 		if err != nil {
+			if !tkn.Valid {
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"code":    http.StatusUnauthorized,
+					"message": "Token is no longer invalid",
+				})
+				c.Abort()
+				return
+			}
+
 			if err == jwt.ErrSignatureInvalid {
 				c.JSON(http.StatusUnauthorized, gin.H{
 					"code":    http.StatusUnauthorized,
@@ -104,14 +114,6 @@ func AuthenticationToken(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"code":    http.StatusBadRequest,
 				"message": err.Error(),
-			})
-			c.Abort()
-			return
-		}
-		if !tkn.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":    http.StatusUnauthorized,
-				"message": "Token is no longer invalid",
 			})
 			c.Abort()
 			return
