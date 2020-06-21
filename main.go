@@ -67,7 +67,6 @@ func main() {
 		v1.POST("/uploadPicture", controller.AuthenticationToken, controller.UploadPicture)
 		v1.POST("/uploadAttachment", controller.AuthenticationToken, controller.UploadAttachment)
 		v1.GET("/searchProject", controller.SearchProject)
-		v1.POST("/filterProject", controller.FilterProject)
 		v1.GET("/userEducation", controller.AuthenticationToken, controller.GetOnlyUserEducation)
 		v1.POST("/addEducation", controller.AuthenticationToken, controller.AddEducation)
 		v1.GET("/userExperience", controller.AuthenticationToken, controller.GetOnlyUserExperience)
