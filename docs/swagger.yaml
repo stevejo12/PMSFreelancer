@@ -243,28 +243,6 @@ definitions:
       message:
         type: string
     type: object
-  models.ResponseOKGetUserEducation:
-    properties:
-      code:
-        type: string
-      data:
-        items:
-          $ref: '#/definitions/models.EducationReturnValue'
-        type: array
-      message:
-        type: string
-    type: object
-  models.ResponseOKGetUserExperience:
-    properties:
-      code:
-        type: string
-      data:
-        items:
-          $ref: '#/definitions/models.ExperienceReturnValue'
-        type: array
-      message:
-        type: string
-    type: object
   models.ResponseOKGetUserProfile:
     properties:
       code:
@@ -730,6 +708,68 @@ paths:
       summary: Review Done For Project Owner
       tags:
       - Project
+  /deleteEducation/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Education ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Deleting User Education
+      tags:
+      - Education
+  /deleteExperience/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Deleting User Experience
+      tags:
+      - Experience
   /deletePortfolio/{id}:
     delete:
       consumes:
@@ -757,6 +797,80 @@ paths:
       summary: Deleting User Portfolio
       tags:
       - Portfolio
+  /editEducation/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Education ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New Education Description
+        in: body
+        name: Description
+        required: true
+        schema:
+          $ref: '#/definitions/models.EducationParameters'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Updating User Education
+      tags:
+      - Education
+  /editExperience/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Experience ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New Experience Description
+        in: body
+        name: Description
+        required: true
+        schema:
+          $ref: '#/definitions/models.ExperienceParameters'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Updating User Experience
+      tags:
+      - Experience
   /editPortfolio/{id}:
     put:
       consumes:
@@ -1172,54 +1286,6 @@ paths:
       summary: Uploading Picture here
       tags:
       - User
-  /userEducation:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Token Header
-        in: header
-        name: token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ResponseOKGetUserEducation'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ResponseWithNoBody'
-      summary: User Education
-      tags:
-      - Education
-  /userExperience:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Token Header
-        in: header
-        name: token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ResponseOKGetUserExperience'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ResponseWithNoBody'
-      summary: User Experience
-      tags:
-      - Experience
   /userProfile:
     get:
       consumes:

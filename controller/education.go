@@ -15,7 +15,7 @@ import (
 func userEducation(id string) ([]models.EducationReturnValue, error) {
 	returnData := []models.EducationReturnValue{}
 
-	resp, err := config.DB.Query("SELECT * FROM education WHERE user_id=?", id)
+	resp, err := config.DB.Query("SELECT * FROM education WHERE user_id=? ORDER BY starting_year DESC, ending_year DESC, id DESC", id)
 
 	if err != nil {
 		return returnData, errors.New("Server unable to execute query to database")
@@ -42,34 +42,6 @@ func userEducation(id string) ([]models.EducationReturnValue, error) {
 	}
 
 	return returnData, nil
-}
-
-// GetOnlyUserEducation => Get Detail View for the User Education
-// GetOnlyUserEducation godoc
-// @Summary User Education
-// @Produce json
-// @Accept  json
-// @Tags Education
-// @Param token header string true "Token Header"
-// @Success 200 {object} models.ResponseOKGetUserEducation
-// @Failure 500 {object} models.ResponseWithNoBody
-// @Router /userEducation [get]
-func GetOnlyUserEducation(c *gin.Context) {
-	id := idToken
-
-	allUserEducation, err := userEducation(id)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": err.Error(),
-			"data":    []models.EducationReturnValue{}})
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "All User Education data have been retrieved",
-		"data":    allUserEducation})
 }
 
 // AddEducation => Add User Education
@@ -120,4 +92,84 @@ func AddEducation(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "Successfully Added Education"})
+}
+
+// EditEducation => Updating User Education
+// EditEducation godoc
+// @Summary Updating User Education
+// @Accept  json
+// @Tags Education
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Education ID"
+// @Param Description body models.EducationParameters true "New Education Description"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /editEducation/{id} [put]
+func EditEducation(c *gin.Context) {
+	id := c.Param("id")
+
+	data := models.EducationParameters{}
+
+	err = c.BindJSON(&data)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Data format is invalid"})
+		return
+	}
+
+	query := "UPDATE education SET name=\"" + data.Name + "\", starting_year=" + strconv.Itoa(data.StartYear) + ", ending_year=" + strconv.Itoa(data.EndYear) + " WHERE id=" + id
+
+	_, err = config.DB.Exec(query)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to execute query to the database"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully edited user education"})
+}
+
+// DeleteEducation => Deleting User Education
+// DeleteEducation godoc
+// @Summary Deleting User Education
+// @Accept  json
+// @Tags Education
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Education ID"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /deleteEducation/{id} [delete]
+func DeleteEducation(c *gin.Context) {
+	id := c.Param("id")
+
+	// check if the education id exist
+	dataID, err := config.DB.Query("SELECT * FROM education WHERE id=?", id)
+
+	if !dataID.Next() {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "The education ID doesn't exist in the database"})
+		return
+	}
+
+	_, err = config.DB.Exec("DELETE FROM education WHERE id=?", id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to delete the data in the database"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully deleted user education"})
 }

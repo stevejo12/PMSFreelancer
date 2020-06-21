@@ -14,7 +14,7 @@ import (
 )
 
 func userExperience(id string) ([]models.ExperienceReturnValue, error) {
-	resp, err := config.DB.Query("SELECT * FROM experience WHERE user_id=?", id)
+	resp, err := config.DB.Query("SELECT * FROM experience WHERE user_id=? ORDER BY starting_year DESC, ending_year DESC, id DESC", id)
 
 	if err != nil {
 		return []models.ExperienceReturnValue{}, errors.New("Server unable to execute query to database")
@@ -45,34 +45,6 @@ func userExperience(id string) ([]models.ExperienceReturnValue, error) {
 	}
 
 	return allData, nil
-}
-
-// GetOnlyUserExperience => Get Detail View for the User Experience
-// GetOnlyUserExperience godoc
-// @Summary User Experience
-// @Produce json
-// @Accept  json
-// @Tags Experience
-// @Param token header string true "Token Header"
-// @Success 200 {object} models.ResponseOKGetUserExperience
-// @Failure 500 {object} models.ResponseWithNoBody
-// @Router /userExperience [get]
-func GetOnlyUserExperience(c *gin.Context) {
-	id := idToken
-
-	allUserExperience, err := userExperience(id)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": err.Error(),
-			"data":    []models.ExperienceReturnValue{}})
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "All User Experience data have been retrieved",
-		"data":    allUserExperience})
 }
 
 // AddExperience => Add User Experience
@@ -123,4 +95,90 @@ func AddExperience(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "Successfully Added Experience"})
+}
+
+// EditExperience => Updating User Experience
+// EditExperience godoc
+// @Summary Updating User Experience
+// @Accept  json
+// @Tags Experience
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Experience ID"
+// @Param Description body models.ExperienceParameters true "New Experience Description"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /editExperience/{id} [put]
+func EditExperience(c *gin.Context) {
+	id := c.Param("id")
+
+	data := models.ExperienceParameters{}
+
+	err = c.BindJSON(&data)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Data format is invalid"})
+		return
+	}
+
+	// setting up query so it is not so long per line
+	query := "UPDATE experience SET place=\"" + data.Place + "\""
+	query = query + ", position=\"" + data.Position + "\""
+	query = query + ", starting_year=\"" + strconv.Itoa(data.StartYear) + "\""
+	query = query + ", ending_year=\"" + strconv.Itoa(data.EndYear) + "\""
+	query = query + ", description=\"" + data.Description + "\""
+	query = query + " WHERE id=" + id
+
+	_, err = config.DB.Exec(query)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to execute query to the database"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully edited user Experience"})
+}
+
+// DeleteExperience => Deleting User Experience
+// DeleteExperience godoc
+// @Summary Deleting User Experience
+// @Accept  json
+// @Tags Experience
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /deleteExperience/{id} [delete]
+func DeleteExperience(c *gin.Context) {
+	id := c.Param("id")
+
+	// check if the Experience id exist
+	dataID, err := config.DB.Query("SELECT * FROM experience WHERE id=?", id)
+
+	if !dataID.Next() {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "The Experience ID doesn't exist in the database"})
+		return
+	}
+
+	_, err = config.DB.Exec("DELETE FROM experience WHERE id=?", id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to delete the data in the database"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully deleted user Experience"})
 }
