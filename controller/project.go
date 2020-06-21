@@ -5,6 +5,7 @@ import (
 	// "PMSFreelancer/helpers"
 	// "PMSFreelancer/models"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,91 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-// SearchProject => Search project in SPIRITS
-// SearchProject godoc
-// @Summary Search Project initially
-// @Produce json
-// @Param page query models.ParamSearchProject true "Data"
-// @Tags Project
-// @Success 200 {object} models.ResponseWithNoBody
-// @Failure 400 {object} models.ResponseWithNoBody
-// @Failure 500 {object} models.ResponseWithNoBody
-// @Router /searchProject [get]
-func SearchProject(c *gin.Context) {
-	// initialize variables
-	// page is page number in pagination
-	// size is the number of result per page
-	pageParam, ok := c.Request.URL.Query()["page"]
-	sizeParam, ok := c.Request.URL.Query()["size"]
-
-	if !ok || len(pageParam[0]) < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": "Request Url should have page and size in it"})
-		return
-	}
-
-	page, err := strconv.Atoi(pageParam[0])
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": "Page value is not integer"})
-		return
-	}
-
-	size, err := strconv.Atoi(sizeParam[0])
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": "Size value is not integer"})
-		return
-	}
-
-	// record #1 is number 0
-	var startingRecordNumber = page * size
-	var endingRecordNumber = startingRecordNumber + size
-
-	result, err := config.DB.Query("SELECT id, title, description, price FROM project WHERE status=? ORDER BY ID ASC LIMIT ?,?", "Listed", startingRecordNumber, endingRecordNumber)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Something is wrong with query to get the project list"})
-		return
-	}
-
-	allData := []models.SearchProjectQuery{}
-	for result.Next() {
-		var project models.SearchProjectQuery
-		if err := result.Scan(&project.ID, &project.Title, &project.Description, &project.Price); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"code":    http.StatusInternalServerError,
-				"message": "Something is wrong with the database data"})
-			return
-		}
-		allData = append(allData, project)
-	}
-
-	if result.Err() != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Something is wrong with the data retrieved"})
-		return
-	}
-
-	var resp models.SearchProjectResponse
-
-	resp.Project = allData
-	resp.TotalSearch = len(allData)
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"message": "All Project data have been retrieved",
-		"data":    resp})
-}
 
 func getProjectAttachments(projectID string) ([]models.ProjectLinksResponse, error) {
 	result := []models.ProjectLinksResponse{}
@@ -166,7 +82,9 @@ func AddProject(c *gin.Context) {
 		return
 	}
 
-	queryResult, err := config.DB.Exec("INSERT INTO project(title, description, skills, price, owner_id) VALUES(?,?,?,?,?)", param.Title, param.Description, strings.Join(param.Skills, ","), param.Price, id)
+	skillDataQuery := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(param.Skills)), ","), "[]")
+
+	queryResult, err := config.DB.Exec("INSERT INTO project(title, description, skills, price, owner_id) VALUES(?,?,?,?,?)", param.Title, param.Description, skillDataQuery, param.Price, id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -807,27 +725,88 @@ func getAllProjectForFilter() ([]models.FilterNeededData, error) {
 	return allData, nil
 }
 
-// FilterProject => Filter search project in SPIRITS
-// FilterProject godoc
-// @Summary Filter project based on keyword
+// SearchProject => Filter search project in SPIRITS
+// SearchProject godoc
+// @Summary Search and filter project here
 // @Produce json
 // @Tags Project
-// @Success 200 {object} models.ResponseWithNoBody
+// @Param page query int64 true "page"
+// @Param size query int64 true "size"
+// @Param keyword query string false "Keyword"
+// @Param sort query string false "Sort"
+// @Param filter query string false "Filter Skills"
+// @Success 200 {object} models.ResponseOKSearchProject
 // @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
-// @Router /filterProject [post]
-func FilterProject(c *gin.Context) {
-	var filteredID []string
-	keyParam, ok := c.Request.URL.Query()["key"]
+// @Router /searchProject [post]
+func SearchProject(c *gin.Context) {
+	sortChoice := []string{"newest", "highestprice", "lowestprice"}
+	interfaceChoice := make([]interface{}, len(sortChoice))
+	for i, v := range sortChoice {
+		interfaceChoice[i] = v
+	}
 
-	if !ok || len(keyParam[0]) < 1 {
+	// var filteredID []string
+	var wordFilter, skillFilter string
+	var sortFilter string
+	keyParam, okKey := c.Request.URL.Query()["keyword"]
+	sortParam, okSort := c.Request.URL.Query()["sort"]
+	filterParam, okFilter := c.Request.URL.Query()["filter"]
+
+	pageParam, ok := c.Request.URL.Query()["page"]
+	sizeParam, ok := c.Request.URL.Query()["size"]
+
+	if !ok || len(pageParam[0]) < 1 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
-			"message": "Request Url should have key for search in it"})
+			"message": "Request Url should have page and size in it"})
 		return
 	}
 
-	keyword := keyParam[0]
+	page, err := strconv.Atoi(pageParam[0])
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Page value is not integer"})
+		return
+	}
+
+	size, err := strconv.Atoi(sizeParam[0])
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Size value is not integer"})
+		return
+	}
+
+	if !okKey || len(keyParam[0]) < 1 {
+		wordFilter = ""
+	} else {
+		wordFilter = keyParam[0]
+	}
+	if !okFilter || len(filterParam[0]) < 1 {
+		skillFilter = ""
+	} else {
+		skillFilter = filterParam[0]
+	}
+	if !okSort || len(sortParam[0]) < 1 {
+		sortFilter = ""
+	} else {
+		sortFilter = strings.ToLower(sortParam[0])
+	}
+
+	correctSortFilter := helpers.Contains(interfaceChoice, sortFilter)
+
+	if sortFilter != "" {
+		if !correctSortFilter {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "Sorting name not recognized"})
+			return
+		}
+	}
 
 	allData, err := getAllProjectForFilter()
 
@@ -839,7 +818,7 @@ func FilterProject(c *gin.Context) {
 	}
 
 	// filter project id based on title
-	filteredID, err = filterData(allData, keyword)
+	filteredID, err := filterData(allData, wordFilter, skillFilter)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -850,7 +829,11 @@ func FilterProject(c *gin.Context) {
 
 	// get all the project where it has been filtered
 	if len(filteredID) > 0 {
-		query, err := helpers.SettingInQueryWithID("project", strings.Join(filteredID, ","), "id, title, description, price")
+		stringID := strings.Trim(strings.Replace(fmt.Sprint(filteredID), " ", ",", -1), "[]")
+		query, err := helpers.SettingInQueryWithID("project", stringID, "id, title, description, price")
+
+		// get the project list that is listed
+		query = query + " AND status=\"Listed\""
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -858,6 +841,107 @@ func FilterProject(c *gin.Context) {
 				"message": err.Error()})
 			return
 		}
+
+		switch sortFilter {
+		case "newest":
+			query = query + " ORDER BY id DESC"
+		case "highestprice":
+			query = query + " ORDER BY price DESC"
+		case "lowestprice":
+			query = query + " ORDER BY price ASC"
+		}
+
+		// include page and size
+		var startingRecordNumber = page * size
+		var endingRecordNumber = startingRecordNumber + size
+		query = query + " LIMIT " + strconv.Itoa(startingRecordNumber) + "," + strconv.Itoa(endingRecordNumber)
+
+		filteredProjectData, err := config.DB.Query(query)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server is unable to execute query to the database"})
+			return
+		}
+
+		var project []models.SearchProjectQuery
+
+		for filteredProjectData.Next() {
+			var row models.SearchProjectQuery
+			if err := filteredProjectData.Scan(&row.ID, &row.Title, &row.Description, &row.Price); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": "Something is wrong with the database data"})
+				return
+			}
+			project = append(project, row)
+
+		}
+
+		if filteredProjectData.Err() != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Something is wrong with the database data"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Filter Successful",
+			"data":    project})
+	} else if sortFilter == "" && skillFilter == "" && wordFilter == "" {
+		// this is when the search only page and size
+		var startingRecordNumber = page * size
+		var endingRecordNumber = startingRecordNumber + size
+
+		result, err := config.DB.Query("SELECT id, title, description, price FROM project WHERE status=? ORDER BY ID DESC LIMIT ?,?", "Listed", startingRecordNumber, endingRecordNumber)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server is unable to execute query to the database"})
+			return
+		}
+		var project []models.SearchProjectQuery
+
+		for result.Next() {
+			var row models.SearchProjectQuery
+			if err := result.Scan(&row.ID, &row.Title, &row.Description, &row.Price); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": "Something is wrong with the database data"})
+				return
+			}
+			project = append(project, row)
+		}
+
+		if result.Err() != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Something is wrong with the database data"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Filter Successful",
+			"data":    project})
+	} else if sortFilter != "" && wordFilter == "" {
+		query := "SELECT id, title, description, price FROM project"
+
+		switch sortFilter {
+		case "newest":
+			query = query + " ORDER BY id DESC"
+		case "highestprice":
+			query = query + " ORDER BY price DESC"
+		case "lowestprice":
+			query = query + " ORDER BY price ASC"
+		}
+
+		var startingRecordNumber = page * size
+		var endingRecordNumber = startingRecordNumber + size
+		query = query + " LIMIT " + strconv.Itoa(startingRecordNumber) + "," + strconv.Itoa(endingRecordNumber)
 
 		filteredProjectData, err := config.DB.Query(query)
 
@@ -901,55 +985,81 @@ func FilterProject(c *gin.Context) {
 	}
 }
 
-func filterData(data []models.FilterNeededData, keyword string) ([]string, error) {
-	var id []string
-	var skillID []int
-
-	allSkills, err := getAllSkills()
+func filterData(data []models.FilterNeededData, keyword string, skill string) ([]int, error) {
+	id := []int{}
+	skillProjectID := []int{}
 
 	if err != nil {
 		return id, err
 	}
 
-	// filter skill name that matches the keyword
-	for i := 0; i < len(allSkills); i++ {
-		if strings.Contains(strings.ToLower(allSkills[i].Name), strings.ToLower(keyword)) {
-			skillID = append(skillID, allSkills[i].ID)
-		}
-	}
-
 	for i := 0; i < len(data); i++ {
-		if strings.Contains(strings.ToLower(data[i].Title), strings.ToLower(keyword)) {
+		// title search based on keyword
+		if keyword != "" && strings.Contains(strings.ToLower(data[i].Title), strings.ToLower(keyword)) {
 			id = append(id, data[i].ID)
 		}
 
-		if strings.Contains(strings.ToLower(data[i].Description), strings.ToLower(keyword)) {
+		// description search based on keyword
+		if keyword != "" && strings.Contains(strings.ToLower(data[i].Description), strings.ToLower(keyword)) {
 			id = append(id, data[i].ID)
 		}
 
-		arrSkill := helpers.SplitComma(data[i].Skill)
+		// skill search based on id filtered
+		if skill != "" {
+			arrSkill := helpers.SplitComma(data[i].Skill)
+			arrFilteredSkill := helpers.SplitComma(skill)
 
-		var skillMap = make(map[int]bool)
-
-		for _, ele := range skillID {
-			skillMap[ele] = true
-		}
-
-		for _, name := range arrSkill {
-			num, err := strconv.Atoi(name)
-			if err != nil {
-				return []string{}, errors.New("Server can't convert string to integer")
+			var t2 = []int{}
+			for _, i := range arrFilteredSkill {
+				j, err := strconv.Atoi(i)
+				if err != nil {
+					panic(err)
+				}
+				t2 = append(t2, j)
 			}
 
-			if skillMap[num] {
-				id = append(id, data[i].ID)
-				break
+			err = helpers.SkillList(t2)
+
+			if err != nil {
+				if err.Error() == "not exist" {
+					return []int{}, errors.New("There is skill value that does not exist in the database id")
+				}
+
+				return []int{}, err
+			}
+
+			// find intersect value
+			IntersectValue := helpers.FindDuplicateString(arrSkill, arrFilteredSkill)
+
+			var integersIntersectValue = []int{}
+
+			for _, i := range IntersectValue {
+				j, err := strconv.Atoi(i)
+				if err != nil {
+					return []int{}, errors.New("Server is unable to convert string to integer")
+				}
+				integersIntersectValue = append(integersIntersectValue, j)
+			}
+
+			integersIntersectValue = helpers.RemoveDuplicateIntegerArray(integersIntersectValue)
+
+			if len(integersIntersectValue) > 0 {
+				skillProjectID = append(skillProjectID, data[i].ID)
 			}
 		}
 	}
 
-	// remove any duplicate id in the array
-	id = helpers.RemoveDuplicateValueArray(id)
+	// all filter condition
+	if skill != "" && keyword != "" {
+		id = helpers.FindDuplicateInteger(id, skillProjectID)
+	}
+
+	// if there is no keyword
+	if keyword == "" && len(skillProjectID) > 0 {
+		id = skillProjectID
+	}
+
+	id = helpers.RemoveDuplicateIntegerArray(id)
 
 	return id, nil
 }

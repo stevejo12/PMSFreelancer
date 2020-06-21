@@ -547,37 +547,6 @@ var doc = `{
                 }
             }
         },
-        "/filterProject": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "summary": "Filter project based on keyword",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
-                        }
-                    }
-                }
-            }
-        },
         "/login": {
             "post": {
                 "consumes": [
@@ -779,23 +748,45 @@ var doc = `{
             }
         },
         "/searchProject": {
-            "get": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Project"
                 ],
-                "summary": "Search Project initially",
+                "summary": "Search and filter project here",
                 "parameters": [
                     {
                         "type": "integer",
+                        "description": "page",
                         "name": "page",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
+                        "description": "size",
                         "name": "size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Keyword",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter Skills",
+                        "name": "filter",
                         "in": "query"
                     }
                 ],
@@ -803,7 +794,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                            "$ref": "#/definitions/models.ResponseOKSearchProject"
                         }
                     },
                     "400": {
@@ -1424,6 +1415,17 @@ var doc = `{
                 }
             }
         },
+        "models.CountryDataProfile": {
+            "type": "object",
+            "properties": {
+                "countryName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.CreateProject": {
             "type": "object",
             "properties": {
@@ -1442,7 +1444,7 @@ var doc = `{
                 "skills": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "type": "integer"
                     }
                 },
                 "title": {
@@ -1571,17 +1573,6 @@ var doc = `{
                     "type": "string"
                 },
                 "projectCompleted": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.ParamSearchProject": {
-            "type": "object",
-            "properties": {
-                "page": {
-                    "type": "integer"
-                },
-                "size": {
                     "type": "integer"
                 }
             }
@@ -1721,7 +1712,7 @@ var doc = `{
                 "skills": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "type": "integer"
                     }
                 },
                 "username": {
@@ -1852,6 +1843,23 @@ var doc = `{
                 }
             }
         },
+        "models.ResponseOKSearchProject": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SearchProjectQuery"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ResponseOKUserReviews": {
             "type": "object",
             "properties": {
@@ -1919,6 +1927,23 @@ var doc = `{
                 }
             }
         },
+        "models.SearchProjectQuery": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.TokenResponse": {
             "type": "object",
             "properties": {
@@ -1967,7 +1992,7 @@ var doc = `{
                 "skills": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "type": "integer"
                     }
                 }
             }
@@ -2020,7 +2045,8 @@ var doc = `{
                     "type": "string"
                 },
                 "location": {
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/models.CountryDataProfile"
                 },
                 "member": {
                     "type": "string"

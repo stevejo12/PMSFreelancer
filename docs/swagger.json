@@ -531,37 +531,6 @@
                 }
             }
         },
-        "/filterProject": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "summary": "Filter project based on keyword",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
-                        }
-                    }
-                }
-            }
-        },
         "/login": {
             "post": {
                 "consumes": [
@@ -763,23 +732,45 @@
             }
         },
         "/searchProject": {
-            "get": {
+            "post": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Project"
                 ],
-                "summary": "Search Project initially",
+                "summary": "Search and filter project here",
                 "parameters": [
                     {
                         "type": "integer",
+                        "description": "page",
                         "name": "page",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
+                        "description": "size",
                         "name": "size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Keyword",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter Skills",
+                        "name": "filter",
                         "in": "query"
                     }
                 ],
@@ -787,7 +778,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                            "$ref": "#/definitions/models.ResponseOKSearchProject"
                         }
                     },
                     "400": {
@@ -1408,6 +1399,17 @@
                 }
             }
         },
+        "models.CountryDataProfile": {
+            "type": "object",
+            "properties": {
+                "countryName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.CreateProject": {
             "type": "object",
             "properties": {
@@ -1426,7 +1428,7 @@
                 "skills": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "type": "integer"
                     }
                 },
                 "title": {
@@ -1555,17 +1557,6 @@
                     "type": "string"
                 },
                 "projectCompleted": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.ParamSearchProject": {
-            "type": "object",
-            "properties": {
-                "page": {
-                    "type": "integer"
-                },
-                "size": {
                     "type": "integer"
                 }
             }
@@ -1705,7 +1696,7 @@
                 "skills": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "type": "integer"
                     }
                 },
                 "username": {
@@ -1836,6 +1827,23 @@
                 }
             }
         },
+        "models.ResponseOKSearchProject": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SearchProjectQuery"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ResponseOKUserReviews": {
             "type": "object",
             "properties": {
@@ -1903,6 +1911,23 @@
                 }
             }
         },
+        "models.SearchProjectQuery": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.TokenResponse": {
             "type": "object",
             "properties": {
@@ -1951,7 +1976,7 @@
                 "skills": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "type": "integer"
                     }
                 }
             }
@@ -2004,7 +2029,8 @@
                     "type": "string"
                 },
                 "location": {
-                    "type": "string"
+                    "type": "object",
+                    "$ref": "#/definitions/models.CountryDataProfile"
                 },
                 "member": {
                     "type": "string"

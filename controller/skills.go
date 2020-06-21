@@ -2,7 +2,9 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -145,7 +147,19 @@ func UpdateUserSkills(c *gin.Context) {
 		return
 	}
 
-	err = helpers.SkillList(data.Skills)
+	strSkills := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(data.Skills)), ","), "[]")
+	arrStrSkill := helpers.SplitComma(strSkills)
+
+	var t2 = []int{}
+	for _, i := range arrStrSkill {
+		j, err := strconv.Atoi(i)
+		if err != nil {
+			panic(err)
+		}
+		t2 = append(t2, j)
+	}
+
+	err = helpers.SkillList(t2)
 
 	if err != nil {
 		if err.Error() == "not exist" {
@@ -161,7 +175,7 @@ func UpdateUserSkills(c *gin.Context) {
 		return
 	}
 
-	_, err = config.DB.Exec("UPDATE login SET skill=? WHERE id=?", strings.Join(data.Skills, ","), id)
+	_, err = config.DB.Exec("UPDATE login SET skill=? WHERE id=?", strSkills, id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

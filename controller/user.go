@@ -98,17 +98,6 @@ func RegisterUserWithPassword(c *gin.Context) {
 			return
 		}
 
-		// checking full name
-		// splitting into first name and last name
-		// firstname, lastname, err := helpers.SplittingFullname(newUser.Fullname)
-
-		// if err != nil {
-		// 	c.JSON(http.StatusBadRequest, gin.H{
-		// 		"code":    http.StatusBadRequest,
-		// 		"message": "Fullname is empty"})
-		// 	return
-		// }
-
 		// checking the skills list provided
 		err = helpers.SkillList(newUser.Skills)
 
@@ -116,7 +105,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 			if err.Error() == "not exist" {
 				c.JSON(http.StatusBadRequest, gin.H{
 					"code":    http.StatusBadRequest,
-					"message": "There is a value that does not exist in the database id"})
+					"message": "There is skill value that does not exist in the database id"})
 				return
 			}
 
@@ -158,8 +147,10 @@ func RegisterUserWithPassword(c *gin.Context) {
 			return
 		}
 
+		skillDataQuery := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(newUser.Skills)), ","), "[]")
+
 		// status at first created should be active
-		_, err = selDB.Exec(newUser.Email, hashedPassword, formattedDate, "active", newUser.Username, newUser.Description, newUser.FirstName, newUser.LastName, newUser.Location, strings.Join(newUser.Skills, ","))
+		_, err = selDB.Exec(newUser.Email, hashedPassword, formattedDate, "active", newUser.Username, newUser.Description, newUser.FirstName, newUser.LastName, newUser.Location, skillDataQuery)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -295,8 +286,10 @@ func RegisterUserWithGoogle(c *gin.Context) {
 			return
 		}
 
+		skillDataQuery := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(newUser.Skills)), ","), "[]")
+
 		// status at first created should be active
-		_, err = selDB.Exec(newUser.Email, newUser.GoogleID, formattedDate, "active", newUser.Username, newUser.Description, newUser.FirstName, newUser.LastName, newUser.Location, strings.Join(newUser.Skills, ","))
+		_, err = selDB.Exec(newUser.Email, newUser.GoogleID, formattedDate, "active", newUser.Username, newUser.Description, newUser.FirstName, newUser.LastName, newUser.Location, skillDataQuery)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -785,7 +778,7 @@ func GetUserProfile(c *gin.Context) {
 		data.Member = ""
 	}
 	// get user location name
-	country, err := helpers.GetCountryName(dataQuery.Location)
+	country, err := helpers.GetCountryInformation(dataQuery.Location)
 
 	// get # of completed project
 	projectCompleted, err := helpers.GetUserCompletedProject(id)
@@ -980,7 +973,7 @@ func GetUserProfileByID(c *gin.Context) {
 		data.Member = ""
 	}
 	// get user location name
-	country, err := helpers.GetCountryName(dataQuery.Location)
+	country, err := helpers.GetCountryInformation(dataQuery.Location)
 
 	// get # of completed project
 	projectCompleted, err := helpers.GetUserCompletedProject(id)

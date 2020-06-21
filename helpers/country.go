@@ -4,18 +4,20 @@ import (
 	"errors"
 
 	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/models"
 	// "PMSFreelancer/config"
+	// "PMSFreelancer/models"
 )
 
-// GetCountryName => get the country name based on the id
-func GetCountryName(id int) (string, error) {
-	var countryName string
+// GetCountryInformation => get the country name based on the id
+func GetCountryInformation(id int) (models.CountryDataProfile, error) {
+	countryInfo := models.CountryDataProfile{}
 
-	err := config.DB.QueryRow("SELECT country_name FROM app_countries WHERE id=?", id).Scan(&countryName)
+	err := config.DB.QueryRow("SELECT id, country_name FROM app_countries WHERE id=?", id).Scan(&countryInfo.ID, &countryInfo.CountryName)
 
 	if err != nil {
-		return "", errors.New("Server is unable to execute query to the database")
+		return models.CountryDataProfile{}, errors.New("Server is unable to execute query to the database")
 	}
 
-	return countryName, nil
+	return countryInfo, nil
 }

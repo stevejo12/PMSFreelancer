@@ -33,9 +33,9 @@ func CheckDuplicateUsername(username string) error {
 	}
 }
 
-func RemoveDuplicateValueArray(arr []string) []string {
-	keys := make(map[string]bool)
-	list := []string{}
+func RemoveDuplicateIntegerArray(arr []int) []int {
+	keys := make(map[int]bool)
+	list := []int{}
 	for _, entry := range arr {
 		if _, value := keys[entry]; !value {
 			keys[entry] = true

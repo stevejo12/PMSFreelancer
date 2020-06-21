@@ -9,5 +9,5 @@ type UserSkills struct {
 
 // UpdateSkills => data format to update skills of a user
 type UpdateSkills struct {
-	Skills []string
+	Skills []int
 }

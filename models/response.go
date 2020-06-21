@@ -59,3 +59,8 @@ type ParamFilterProject struct {
 	page int
 	size int
 }
+
+type ResponseOKSearchProject struct {
+	ResponseWithNoBody
+	data []SearchProjectQuery
+}

@@ -6,7 +6,7 @@ import (
 	"errors"
 )
 
-func SkillList(s []string) error {
+func SkillList(s []int) error {
 	var allSkills []interface{}
 
 	rows, err := config.DB.Query("SELECT id from skills")
@@ -15,7 +15,7 @@ func SkillList(s []string) error {
 		return err
 	}
 
-	var skillid string
+	var skillid int
 	for rows.Next() {
 		err := rows.Scan(&skillid)
 

@@ -29,6 +29,13 @@ definitions:
       id:
         type: integer
     type: object
+  models.CountryDataProfile:
+    properties:
+      countryName:
+        type: string
+      id:
+        type: integer
+    type: object
   models.CreateProject:
     properties:
       attachment:
@@ -41,7 +48,7 @@ definitions:
         type: number
       skills:
         items:
-          type: string
+          type: integer
         type: array
       title:
         type: string
@@ -125,13 +132,6 @@ definitions:
       member:
         type: string
       projectCompleted:
-        type: integer
-    type: object
-  models.ParamSearchProject:
-    properties:
-      page:
-        type: integer
-      size:
         type: integer
     type: object
   models.PortfolioDatabase:
@@ -222,7 +222,7 @@ definitions:
         type: string
       skills:
         items:
-          type: string
+          type: integer
         type: array
       username:
         type: string
@@ -307,6 +307,17 @@ definitions:
       message:
         type: string
     type: object
+  models.ResponseOKSearchProject:
+    properties:
+      code:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/models.SearchProjectQuery'
+        type: array
+      message:
+        type: string
+    type: object
   models.ResponseOKUserReviews:
     properties:
       code:
@@ -351,6 +362,17 @@ definitions:
       starRating:
         type: integer
     type: object
+  models.SearchProjectQuery:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      price:
+        type: number
+      title:
+        type: string
+    type: object
   models.TokenResponse:
     properties:
       expire:
@@ -382,7 +404,7 @@ definitions:
     properties:
       skills:
         items:
-          type: string
+          type: integer
         type: array
     type: object
   models.UserInformationForReview:
@@ -417,7 +439,8 @@ definitions:
       lastName:
         type: string
       location:
-        type: string
+        $ref: '#/definitions/models.CountryDataProfile'
+        type: object
       member:
         type: string
       picture:
@@ -795,26 +818,6 @@ paths:
       summary: Updating User Skills
       tags:
       - Skills
-  /filterProject:
-    post:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ResponseWithNoBody'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ResponseWithNoBody'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ResponseWithNoBody'
-      summary: Filter project based on keyword
-      tags:
-      - Project
   /login:
     post:
       consumes:
@@ -945,21 +948,37 @@ paths:
       tags:
       - User
   /searchProject:
-    get:
+    post:
       parameters:
-      - in: query
+      - description: page
+        in: query
         name: page
+        required: true
         type: integer
-      - in: query
+      - description: size
+        in: query
         name: size
+        required: true
         type: integer
+      - description: Keyword
+        in: query
+        name: keyword
+        type: string
+      - description: Sort
+        in: query
+        name: sort
+        type: string
+      - description: Filter Skills
+        in: query
+        name: filter
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseWithNoBody'
+            $ref: '#/definitions/models.ResponseOKSearchProject'
         "400":
           description: Bad Request
           schema:
@@ -968,7 +987,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
-      summary: Search Project initially
+      summary: Search and filter project here
       tags:
       - Project
   /submitProjectForReview/{id}:

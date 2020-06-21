@@ -1,7 +1,7 @@
 package models
 
 type FilterNeededData struct {
-	ID          string
+	ID          int
 	Title       string
 	Description string
 	Skill       string

@@ -22,7 +22,7 @@ type OwnerInfo struct {
 }
 
 type SearchProjectQuery struct {
-	ID          string  `json:"id"`
+	ID          int     `json:"id"`
 	Title       string  `json:"title"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
@@ -41,7 +41,7 @@ type ProjectLinksResponse struct {
 type CreateProject struct {
 	Title       string
 	Description string
-	Skills      []string
+	Skills      []int
 	Price       float64
 	Attachment  []string
 }

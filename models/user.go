@@ -8,7 +8,7 @@ type RegistrationUserUsingPassword struct {
 	LastName    string
 	Location    int
 	Description string
-	Skills      []string
+	Skills      []int
 	Username    string
 }
 
@@ -19,7 +19,7 @@ type RegistrationUserUsingGoogle struct {
 	LastName    string
 	Location    int
 	Description string
-	Skills      []string
+	Skills      []int
 	Username    string
 }
 
@@ -63,11 +63,11 @@ type UserProfile struct {
 	Experience       []ExperienceReturnValue `json:"experience"`
 	Picture          string                  `json:"picture"`
 	Username         string                  `json:"username"`
-	Location         string                  `json:"location"`
+	Location         CountryDataProfile      `json:"location"`
 	Member           string                  `json:"member"`
 	Portfolio        []PortfolioDatabase     `json:"portfolio"`
 	Balance          float64                 `json:"balance"`
-	ProjectCompleted int                     `json:"projectCompleted`
+	ProjectCompleted int                     `json:"projectCompleted"`
 }
 
 type QueryUserProfile struct {
