@@ -1,11 +1,16 @@
 package models
 
-type PortfolioDatabase struct {
-	ID          string `json:"id"`
+type PortfolioRequestParameter struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Link        string `json:"link"`
-	OwnerID     string `json:"ownerId"`
+	StartYear   int    `json:"startYear"`
+	EndYear     int    `json:"endYear"`
+}
+
+type PortfolioReturnParameter struct {
+	ID int `json:"id"`
+	PortfolioRequestParameter
 }
 
 type PortfolioEditParameter struct {

@@ -7,9 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/helpers"
 	"github.com/stevejo12/PMSFreelancer/models"
 	// "PMSFreelancer/config"
 	// "PMSFreelancer/models"
+	// "PMSFreelancer/helpers"
 )
 
 func userEducation(id string) ([]models.EducationReturnValue, error) {
@@ -69,10 +71,10 @@ func AddEducation(c *gin.Context) {
 		return
 	}
 
-	if data.StartYear > data.EndYear {
+	if (data.StartYear > data.EndYear) || (!helpers.IsYearConsistFourNumber(data.StartYear, data.EndYear)) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
-			"message": "Start year should be in the past compared to end year"})
+			"message": "Start or/and End year is invalid"})
 		return
 	}
 

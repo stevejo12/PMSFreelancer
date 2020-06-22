@@ -179,8 +179,7 @@ var doc = `{
         "/addPortfolio": {
             "post": {
                 "consumes": [
-                    "application/json",
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "tags": [
                     "Portfolio"
@@ -195,23 +194,24 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "type": "file",
-                        "description": "Upload File",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Description of the File",
-                        "name": "description",
-                        "in": "formData",
-                        "required": true
+                        "description": "New Portfolio Description",
+                        "name": "Parameters",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.PortfolioRequestParameter"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/models.ResponseWithNoBody"
                         }
@@ -539,6 +539,12 @@ var doc = `{
                             "$ref": "#/definitions/models.ResponseWithNoBody"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -685,12 +691,12 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "description": "New Portfolio Description",
+                        "description": "Update Portfolio Description",
                         "name": "Description",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PortfolioEditParameter"
+                            "$ref": "#/definitions/models.PortfolioRequestParameter"
                         }
                     }
                 ],
@@ -1709,30 +1715,45 @@ var doc = `{
                 }
             }
         },
-        "models.PortfolioDatabase": {
+        "models.PortfolioRequestParameter": {
             "type": "object",
             "properties": {
                 "description": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "string"
+                "endYear": {
+                    "type": "integer"
                 },
                 "link": {
                     "type": "string"
                 },
-                "ownerId": {
-                    "type": "string"
+                "startYear": {
+                    "type": "integer"
                 },
                 "title": {
                     "type": "string"
                 }
             }
         },
-        "models.PortfolioEditParameter": {
+        "models.PortfolioReturnParameter": {
             "type": "object",
             "properties": {
                 "description": {
+                    "type": "string"
+                },
+                "endYear": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "startYear": {
+                    "type": "integer"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -2155,7 +2176,7 @@ var doc = `{
                 "portfolio": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.PortfolioDatabase"
+                        "$ref": "#/definitions/models.PortfolioReturnParameter"
                     }
                 },
                 "projectCompleted": {

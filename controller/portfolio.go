@@ -2,11 +2,14 @@ package controller
 
 import (
 	// "PMSFreelancer/config"
+	// "PMSFreelancer/helpers"
 	// "PMSFreelancer/models"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/helpers"
 	"github.com/stevejo12/PMSFreelancer/models"
 
 	"github.com/gin-gonic/gin"
@@ -17,45 +20,39 @@ import (
 // @Summary Adding User Portfolio
 // @Accept  json
 // @Tags Portfolio
-// @Accept multipart/form-data
 // @Param token header string true "Token Header"
-// @Param file formData file true "Upload File"
-// @Param description formData string true "Description of the File"
+// @Param Parameters body models.PortfolioRequestParameter true "New Portfolio Description"
 // @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /addPortfolio [post]
 func AddUserPortfolio(c *gin.Context) {
 	id := idToken
 
-	// accept the images and store it in the tempfile
-	c.Request.ParseMultipartForm(5 * 1024 * 1024)
+	param := models.PortfolioRequestParameter{}
 
-	file, header, err := c.Request.FormFile("file")
+	err := c.BindJSON(&param)
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server is unable to read the uploaded file"})
-		return
-	}
-	defer file.Close()
-
-	description := c.Request.FormValue("description")
-
-	if description == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    http.StatusBadRequest,
-			"message": "Description should not be empty"})
+			"message": "Data format is invalid"})
 		return
 	}
 
-	url, err := uploadFile(file, header)
+	if (param.StartYear > param.EndYear) || (!helpers.IsYearConsistFourNumber(param.StartYear, param.EndYear)) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Start or/and End year is invalid"})
+		return
+	}
 
-	_, err = config.DB.Query("INSERT INTO portfolio(description, link, user_id) VALUES(?,?,?)", description, url, id)
+	_, err = config.DB.Exec("INSERT INTO portfolio(title, description, link, user_id, start_year, end_year) VALUES(?,?,?,?,?,?)", param.Title, param.Description, param.Link, id, param.StartYear, param.EndYear)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
-			"message": "Server is unable to read the uploaded file"})
+			"message": "Server is unable to execute query to the database"})
 		return
 	}
 
@@ -71,14 +68,14 @@ func AddUserPortfolio(c *gin.Context) {
 // @Tags Portfolio
 // @Param token header string true "Token Header"
 // @Param id path int64 true "Project ID"
-// @Param Description body models.PortfolioEditParameter true "New Portfolio Description"
+// @Param Description body models.PortfolioRequestParameter true "Update Portfolio Description"
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /editPortfolio/{id} [put]
 func EditUserPortfolio(c *gin.Context) {
 	id := c.Param("id")
 
-	var data models.PortfolioEditParameter
+	data := models.PortfolioRequestParameter{}
 
 	err = c.BindJSON(&data)
 
@@ -89,20 +86,25 @@ func EditUserPortfolio(c *gin.Context) {
 		return
 	}
 
-	query := "UPDATE portfolio SET description=\"" + data.Description + "\" WHERE id=" + id
+	query := "UPDATE portfolio SET description=\"" + data.Description + "\""
+	query = query + ", title=\"" + data.Title + "\""
+	query = query + ", link=\"" + data.Link + "\""
+	query = query + ", start_year=" + strconv.Itoa(data.StartYear)
+	query = query + ", end_year=" + strconv.Itoa(data.EndYear)
+	query = query + " WHERE id=" + id
 
 	_, err = config.DB.Exec(query)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
-			"message": "Server is unable to delete the data in the database"})
+			"message": "Server is unable to update the data in the database"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
-		"message": "Successfully edited user portfolio"})
+		"message": "Successfully update user portfolio"})
 }
 
 // DeleteUserPortfolio => Deleting User Portfolio
@@ -113,6 +115,7 @@ func EditUserPortfolio(c *gin.Context) {
 // @Param token header string true "Token Header"
 // @Param id path int64 true "Project ID"
 // @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /deletePortfolio/{id} [delete]
 func DeleteUserPortfolio(c *gin.Context) {
@@ -142,19 +145,19 @@ func DeleteUserPortfolio(c *gin.Context) {
 		"message": "Successfully deleted user portfolio"})
 }
 
-func allUserPortfolio(id string) ([]models.PortfolioDatabase, error) {
-	data, err := config.DB.Query("SELECT * FROM portfolio WHERE user_id=?", id)
+func allUserPortfolio(id string) ([]models.PortfolioReturnParameter, error) {
+	data, err := config.DB.Query("SELECT id, title, description, link, start_year, end_year  FROM portfolio WHERE user_id=? ORDER BY start_year DESC, end_year DESC, id DESC", id)
 
 	if err != nil {
-		return []models.PortfolioDatabase{}, errors.New(err.Error())
+		return []models.PortfolioReturnParameter{}, errors.New(err.Error())
 	}
 
-	returnValue := []models.PortfolioDatabase{}
+	returnValue := []models.PortfolioReturnParameter{}
 
 	for data.Next() {
-		var dbData models.PortfolioDatabase
-		if err := data.Scan(&dbData.ID, &dbData.Title, &dbData.Description, &dbData.Link, &dbData.OwnerID); err != nil {
-			return []models.PortfolioDatabase{}, errors.New("Something is wrong with the database data")
+		var dbData models.PortfolioReturnParameter
+		if err := data.Scan(&dbData.ID, &dbData.Title, &dbData.Description, &dbData.Link, &dbData.StartYear, &dbData.EndYear); err != nil {
+			return []models.PortfolioReturnParameter{}, errors.New("Something is wrong with the database data")
 		}
 
 		returnValue = append(returnValue, dbData)
@@ -162,22 +165,3 @@ func allUserPortfolio(id string) ([]models.PortfolioDatabase, error) {
 
 	return returnValue, nil
 }
-
-// maybe useful later or delete
-// func GetUserPortfolio(c *gin.Context) {
-// 	id := idToken
-
-// 	allData, err := allUserPortfolio(id)
-
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{
-// 			"code":    http.StatusInternalServerError,
-// 			"message": err.Error()})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"code":    http.StatusOK,
-// 		"message": "Successfully added user portfolio",
-// 		"data":    allData})
-// }

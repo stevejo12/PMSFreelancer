@@ -53,21 +53,21 @@ type DatabaseResetPassword struct {
 }
 
 type UserProfile struct {
-	ID               int                     `json:"id"`
-	FirstName        string                  `json:"firstName"`
-	LastName         string                  `json:"lastName"`
-	Email            string                  `json:"email"`
-	Description      string                  `json:"description"`
-	Education        []EducationReturnValue  `json:"education"`
-	Skill            []UserSkills            `json:"skill"`
-	Experience       []ExperienceReturnValue `json:"experience"`
-	Picture          string                  `json:"picture"`
-	Username         string                  `json:"username"`
-	Location         CountryDataProfile      `json:"location"`
-	Member           string                  `json:"member"`
-	Portfolio        []PortfolioDatabase     `json:"portfolio"`
-	Balance          float64                 `json:"balance"`
-	ProjectCompleted int                     `json:"projectCompleted"`
+	ID               int                        `json:"id"`
+	FirstName        string                     `json:"firstName"`
+	LastName         string                     `json:"lastName"`
+	Email            string                     `json:"email"`
+	Description      string                     `json:"description"`
+	Education        []EducationReturnValue     `json:"education"`
+	Skill            []UserSkills               `json:"skill"`
+	Experience       []ExperienceReturnValue    `json:"experience"`
+	Picture          string                     `json:"picture"`
+	Username         string                     `json:"username"`
+	Location         CountryDataProfile         `json:"location"`
+	Member           string                     `json:"member"`
+	Portfolio        []PortfolioReturnParameter `json:"portfolio"`
+	Balance          float64                    `json:"balance"`
+	ProjectCompleted int                        `json:"projectCompleted"`
 }
 
 type QueryUserProfile struct {

@@ -37,3 +37,14 @@ func IsEmptyData(object interface{}) bool {
 	}
 	return false
 }
+
+func IsYearConsistFourNumber(startYear int, endYear int) bool {
+	msg1 := startYear >= 1000 && startYear <= 9999
+	msg2 := endYear >= 1000 && endYear <= 9999
+
+	if !msg1 || !msg2 {
+		return false
+	}
+
+	return true
+}
