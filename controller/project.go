@@ -849,6 +849,8 @@ func SearchProject(c *gin.Context) {
 			query = query + " ORDER BY price DESC"
 		case "lowestprice":
 			query = query + " ORDER BY price ASC"
+		default:
+			query = query + " ORDER BY id DESC"
 		}
 
 		// include page and size
