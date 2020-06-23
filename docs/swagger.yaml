@@ -101,17 +101,6 @@ definitions:
       startYear:
         type: integer
     type: object
-  models.FilterProject:
-    properties:
-      filter:
-        items:
-          type: integer
-        type: array
-      keyword:
-        type: string
-      sort:
-        type: string
-    type: object
   models.GetUserProjectResponse:
     properties:
       description:
@@ -1103,16 +1092,15 @@ paths:
         name: keyword
         type: string
       - description: Sort
+        enum:
+        - newest
+        - highestprice
+        - lowestprice
         in: query
         name: sort
         type: string
-      - in: query
-        name: keyword
-        type: string
-      - in: query
-        name: sort
-        type: string
-      - in: query
+      - description: Filter Skills
+        in: query
         items:
           type: integer
         name: filter

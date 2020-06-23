@@ -990,18 +990,13 @@ var doc = `{
                         "in": "query"
                     },
                     {
+                        "enum": [
+                            "newest",
+                            "highestprice",
+                            "lowestprice"
+                        ],
                         "type": "string",
                         "description": "Sort",
-                        "name": "sort",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "keyword",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
                         "name": "sort",
                         "in": "query"
                     },
@@ -1010,6 +1005,7 @@ var doc = `{
                         "items": {
                             "type": "integer"
                         },
+                        "description": "Filter Skills",
                         "name": "filter",
                         "in": "query"
                     }
@@ -1673,23 +1669,6 @@ var doc = `{
                 },
                 "startYear": {
                     "type": "integer"
-                }
-            }
-        },
-        "models.FilterProject": {
-            "type": "object",
-            "properties": {
-                "filter": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "keyword": {
-                    "type": "string"
-                },
-                "sort": {
-                    "type": "string"
                 }
             }
         },

@@ -733,8 +733,8 @@ func getAllProjectForFilter() ([]models.FilterNeededData, error) {
 // @Param page query int64 true "page"
 // @Param size query int64 true "size"
 // @Param keyword query string false "Keyword"
-// @Param sort query string false "Sort"
-// @Param filter query models.FilterProject false "Filter Skills"
+// @Param sort query string false "Sort" Enums(newest, highestprice, lowestprice)
+// @Param filter query []int false "Filter Skills"
 // @Success 200 {object} models.ResponseOKSearchProject
 // @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody

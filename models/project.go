@@ -82,9 +82,3 @@ type ProjectAcceptMemberParameter struct {
 	FreelancerID int    `json:"freelancerID"`
 	TrelloKey    string `json:"trelloKey"`
 }
-
-type FilterProject struct {
-	Keyword string `json:"keyword"`
-	Sort    string `json:"sort"`
-	Filter  []int  `json:"filter"`
-}
