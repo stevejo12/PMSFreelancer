@@ -997,7 +997,19 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "Filter Skills",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
                         "name": "filter",
                         "in": "query"
                     }
@@ -1661,6 +1673,23 @@ var doc = `{
                 },
                 "startYear": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.FilterProject": {
+            "type": "object",
+            "properties": {
+                "filter": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "sort": {
+                    "type": "string"
                 }
             }
         },

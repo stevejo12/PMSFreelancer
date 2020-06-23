@@ -734,7 +734,7 @@ func getAllProjectForFilter() ([]models.FilterNeededData, error) {
 // @Param size query int64 true "size"
 // @Param keyword query string false "Keyword"
 // @Param sort query string false "Sort"
-// @Param filter query string false "Filter Skills"
+// @Param filter query models.FilterProject false "Filter Skills"
 // @Success 200 {object} models.ResponseOKSearchProject
 // @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
