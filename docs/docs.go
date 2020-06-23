@@ -960,7 +960,7 @@ var doc = `{
             }
         },
         "/searchProject": {
-            "post": {
+            "get": {
                 "produces": [
                     "application/json"
                 ],

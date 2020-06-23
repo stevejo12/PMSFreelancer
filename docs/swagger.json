@@ -944,7 +944,7 @@
             }
         },
         "/searchProject": {
-            "post": {
+            "get": {
                 "produces": [
                     "application/json"
                 ],

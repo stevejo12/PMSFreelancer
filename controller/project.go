@@ -738,7 +738,7 @@ func getAllProjectForFilter() ([]models.FilterNeededData, error) {
 // @Success 200 {object} models.ResponseOKSearchProject
 // @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
-// @Router /searchProject [post]
+// @Router /searchProject [get]
 func SearchProject(c *gin.Context) {
 	sortChoice := []string{"newest", "highestprice", "lowestprice"}
 	interfaceChoice := make([]interface{}, len(sortChoice))

@@ -1075,7 +1075,7 @@ paths:
       tags:
       - User
   /searchProject:
-    post:
+    get:
       parameters:
       - description: page
         in: query
