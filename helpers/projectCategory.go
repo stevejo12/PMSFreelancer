@@ -3,6 +3,8 @@ package helpers
 import (
 	// "PMSFreelancer/config"
 	"errors"
+
+	"github.com/stevejo12/PMSFreelancer/config"
 )
 
 // IsThisCategoryIDExist => Check if int value id exist in the category database
