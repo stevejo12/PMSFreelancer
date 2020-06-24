@@ -1,9 +1,10 @@
 package controller
 
 import (
-	"github.com/stevejo12/PMSFreelancer/models"
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/helpers"
+	"github.com/stevejo12/PMSFreelancer/models"
+
 	// "PMSFreelancer/config"
 	// "PMSFreelancer/helpers"
 	// "PMSFreelancer/models"
@@ -145,8 +146,6 @@ func AddUserReview(c *gin.Context) {
 	_, err = config.DB.Exec(query)
 
 	if err != nil {
-		fmt.Println(query)
-		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query to database"})

@@ -76,9 +76,6 @@ func ConvertStringToArrayInt(s string) ([]int, error) {
 	arrInt := strings.Split(s, ",")
 	arrIntSkill := make([]int, len(arrInt))
 
-	fmt.Println(arrInt)
-	fmt.Println(len(arrInt))
-
 	for i := 0; i < len(arrInt); i++ {
 		arrIntSkill[i], err = strconv.Atoi(arrInt[i])
 
