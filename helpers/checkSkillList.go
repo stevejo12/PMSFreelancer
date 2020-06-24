@@ -12,7 +12,7 @@ func SkillList(s []int) error {
 	rows, err := config.DB.Query("SELECT id from skills")
 
 	if err != nil {
-		return err
+		return errors.New("Server is unable to execute query to the database")
 	}
 
 	var skillid int

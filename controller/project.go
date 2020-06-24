@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/helpers"
@@ -41,14 +42,14 @@ func getProjectAttachments(projectID string) ([]models.ProjectLinksResponse, err
 	return result, nil
 }
 
-// AddProject => Add User Education
+// AddProject => Add User Project
 // AddProject godoc
 // @Summary Adding User Project
 // @Produce json
 // @Accept  json
 // @Tags Project
 // @Param token header string true "Token Header"
-// @Param Data body models.CreateProject true "Data Format to add education"
+// @Param Data body models.CreateProject true "Data Format to add project"
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /addProject [post]
@@ -82,9 +83,32 @@ func AddProject(c *gin.Context) {
 		return
 	}
 
+	// helper for category value
+	err = helpers.IsThisCategoryIDExist(param.Category)
+
+	if err != nil {
+		if err.Error() == "not exist" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "This category id does not exist in the database id"})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
 	skillDataQuery := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(param.Skills)), ","), "[]")
 
-	queryResult, err := config.DB.Exec("INSERT INTO project(title, description, skills, price, owner_id) VALUES(?,?,?,?,?)", param.Title, param.Description, skillDataQuery, param.Price, id)
+	// initialize time of creation of this project
+	locationIndonesia, _ := time.LoadLocation("Asia/Jakarta")
+	timeIndonesia := time.Now().In(locationIndonesia)
+
+	formattedDate := fmt.Sprintf("%d-%02d-%02d", timeIndonesia.Year(), timeIndonesia.Month(), timeIndonesia.Day())
+
+	queryResult, err := config.DB.Exec("INSERT INTO project(title, description, skills, price, owner_id, category_id, created_at) VALUES(?,?,?,?,?,?,?)", param.Title, param.Description, skillDataQuery, param.Price, id, param.Category, formattedDate)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -735,7 +759,7 @@ func getAllProjectForFilter() ([]models.FilterNeededData, error) {
 // @Param keyword query string false "Keyword"
 // @Param sort query string false "Sort" Enums(newest, highestprice, lowestprice)
 // @Param filter query []int false "Filter Skills"
-// @Success 200 {object} models.ResponseOKSearchProject
+// @Success 200 {object} models.SearchProjectResponse
 // @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /searchProject [get]
@@ -770,6 +794,11 @@ func SearchProject(c *gin.Context) {
 			"code":    http.StatusBadRequest,
 			"message": "Page value is not integer"})
 		return
+	}
+
+	// show first page if there is 0 or 1 value
+	if page <= 1 {
+		page = 1
 	}
 
 	size, err := strconv.Atoi(sizeParam[0])
@@ -830,7 +859,7 @@ func SearchProject(c *gin.Context) {
 	// get all the project where it has been filtered
 	if len(filteredID) > 0 {
 		stringID := strings.Trim(strings.Replace(fmt.Sprint(filteredID), " ", ",", -1), "[]")
-		query, err := helpers.SettingInQueryWithID("project", stringID, "id, title, description, price")
+		query, err := helpers.SettingInQueryWithID("project", stringID, "id, title, description, price, skills, created_at, category_id")
 
 		// get the project list that is listed
 		query = query + " AND status=\"Listed\""
@@ -846,15 +875,15 @@ func SearchProject(c *gin.Context) {
 		case "newest":
 			query = query + " ORDER BY id DESC"
 		case "highestprice":
-			query = query + " ORDER BY price DESC"
+			query = query + " ORDER BY price DESC, id DESC"
 		case "lowestprice":
-			query = query + " ORDER BY price ASC"
+			query = query + " ORDER BY price ASC, id DESC"
 		default:
 			query = query + " ORDER BY id DESC"
 		}
 
 		// include page and size
-		var startingRecordNumber = page * size
+		var startingRecordNumber = (page - 1) * size
 		var endingRecordNumber = startingRecordNumber + size
 		query = query + " LIMIT " + strconv.Itoa(startingRecordNumber) + "," + strconv.Itoa(endingRecordNumber)
 
@@ -867,18 +896,47 @@ func SearchProject(c *gin.Context) {
 			return
 		}
 
-		var project []models.SearchProjectQuery
+		project := []models.SearchProjectQuery{}
 
 		for filteredProjectData.Next() {
 			var row models.SearchProjectQuery
-			if err := filteredProjectData.Scan(&row.ID, &row.Title, &row.Description, &row.Price); err != nil {
+			var skillStr string
+			var categoryID int
+			if err := filteredProjectData.Scan(&row.ID, &row.Title, &row.Description, &row.Price, &skillStr, &row.CreatedAt, &categoryID); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"code":    http.StatusInternalServerError,
 					"message": "Something is wrong with the database data"})
 				return
 			}
-			project = append(project, row)
 
+			row.Skill, err = getSkillNames(skillStr)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
+			row.CreatedAt, err = helpers.ConvertDate(row.CreatedAt)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
+			row.Category, err = helpers.GetProjectCategory(categoryID)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
+			project = append(project, row)
 		}
 
 		if filteredProjectData.Err() != nil {
@@ -888,16 +946,30 @@ func SearchProject(c *gin.Context) {
 			return
 		}
 
+		// get skill names
+		arrIntSkill, err := helpers.ConvertStringToArrayInt(skillFilter)
+
+		// initialize return format
+		returnVal := models.SearchProjectResponse{}
+
+		returnVal.Project = project
+		returnVal.PageMeta.Page = page
+		returnVal.PageMeta.Size = size
+		returnVal.PageMeta.Total = len(filteredID)
+		returnVal.PageMeta.Keyword = wordFilter
+		returnVal.PageMeta.Sort = sortFilter
+		returnVal.PageMeta.Filter = arrIntSkill
+
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
 			"message": "Filter Successful",
-			"data":    project})
+			"data":    returnVal})
 	} else if sortFilter == "" && skillFilter == "" && wordFilter == "" {
 		// this is when the search only page and size
-		var startingRecordNumber = page * size
+		var startingRecordNumber = (page - 1) * size
 		var endingRecordNumber = startingRecordNumber + size
 
-		result, err := config.DB.Query("SELECT id, title, description, price FROM project WHERE status=? ORDER BY ID DESC LIMIT ?,?", "Listed", startingRecordNumber, endingRecordNumber)
+		result, err := config.DB.Query("SELECT id, title, description, price, skills, created_at, category_id FROM project WHERE status=? ORDER BY ID DESC LIMIT ?,?", "Listed", startingRecordNumber, endingRecordNumber)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -909,12 +981,42 @@ func SearchProject(c *gin.Context) {
 
 		for result.Next() {
 			var row models.SearchProjectQuery
-			if err := result.Scan(&row.ID, &row.Title, &row.Description, &row.Price); err != nil {
+			var skillStr string
+			var categoryID int
+			if err := result.Scan(&row.ID, &row.Title, &row.Description, &row.Price, &skillStr, &row.CreatedAt, &categoryID); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"code":    http.StatusInternalServerError,
 					"message": "Something is wrong with the database data"})
 				return
 			}
+
+			row.Skill, err = getSkillNames(skillStr)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
+			row.CreatedAt, err = helpers.ConvertDate(row.CreatedAt)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
+			row.Category, err = helpers.GetProjectCategory(categoryID)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
 			project = append(project, row)
 		}
 
@@ -925,12 +1027,34 @@ func SearchProject(c *gin.Context) {
 			return
 		}
 
+		// get count of total project in the database
+		var total int
+		err = config.DB.QueryRow("SELECT COUNT(*) FROM project WHERE status=\"Listed\"").Scan(&total)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server is unable to execute query to the database"})
+			return
+		}
+
+		// initialize return format
+		returnVal := models.SearchProjectResponse{}
+
+		returnVal.Project = project
+		returnVal.PageMeta.Page = page
+		returnVal.PageMeta.Size = size
+		returnVal.PageMeta.Total = total
+		returnVal.PageMeta.Keyword = wordFilter
+		returnVal.PageMeta.Sort = sortFilter
+		returnVal.PageMeta.Filter = []int{}
+
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
 			"message": "Filter Successful",
-			"data":    project})
-	} else if sortFilter != "" && wordFilter == "" {
-		query := "SELECT id, title, description, price FROM project"
+			"data":    returnVal})
+	} else if sortFilter != "" && wordFilter == "" && skillFilter == "" {
+		query := "SELECT id, title, description, price, skills, created_at, category_id FROM project WHERE status=\"Listed\""
 
 		switch sortFilter {
 		case "newest":
@@ -941,7 +1065,7 @@ func SearchProject(c *gin.Context) {
 			query = query + " ORDER BY price ASC"
 		}
 
-		var startingRecordNumber = page * size
+		var startingRecordNumber = (page - 1) * size
 		var endingRecordNumber = startingRecordNumber + size
 		query = query + " LIMIT " + strconv.Itoa(startingRecordNumber) + "," + strconv.Itoa(endingRecordNumber)
 
@@ -958,12 +1082,42 @@ func SearchProject(c *gin.Context) {
 
 		for filteredProjectData.Next() {
 			var row models.SearchProjectQuery
-			if err := filteredProjectData.Scan(&row.ID, &row.Title, &row.Description, &row.Price); err != nil {
+			var skillStr string
+			var categoryID int
+			if err := filteredProjectData.Scan(&row.ID, &row.Title, &row.Description, &row.Price, &skillStr, &row.CreatedAt, &categoryID); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"code":    http.StatusInternalServerError,
 					"message": "Something is wrong with the database data"})
 				return
 			}
+
+			row.Skill, err = getSkillNames(skillStr)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
+			row.CreatedAt, err = helpers.ConvertDate(row.CreatedAt)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
+			row.Category, err = helpers.GetProjectCategory(categoryID)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
 			project = append(project, row)
 
 		}
@@ -975,15 +1129,54 @@ func SearchProject(c *gin.Context) {
 			return
 		}
 
+		var total int
+		err = config.DB.QueryRow("SELECT COUNT(*) FROM project WHERE status=\"Listed\"").Scan(&total)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server is unable to execute query to the database"})
+			return
+		}
+
+		// initialize return format
+		returnVal := models.SearchProjectResponse{}
+
+		returnVal.Project = project
+		returnVal.PageMeta.Page = page
+		returnVal.PageMeta.Size = size
+		returnVal.PageMeta.Total = total
+		returnVal.PageMeta.Sort = sortFilter
+		returnVal.PageMeta.Keyword = wordFilter
+		returnVal.PageMeta.Filter = []int{}
+
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
 			"message": "Filter Successful",
-			"data":    project})
+			"data":    returnVal})
 	} else {
+		dataSkills, err := helpers.ConvertStringToArrayInt(skillFilter)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
+		returnVal := models.SearchProjectResponse{}
+		returnVal.Project = []models.SearchProjectQuery{}
+		returnVal.PageMeta.Page = page
+		returnVal.PageMeta.Size = size
+		returnVal.PageMeta.Total = 0
+		returnVal.PageMeta.Keyword = wordFilter
+		returnVal.PageMeta.Sort = sortFilter
+		returnVal.PageMeta.Filter = dataSkills
+
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
 			"message": "Filter Successful",
-			"data":    []models.SearchProjectQuery{}})
+			"data":    returnVal})
 	}
 }
 

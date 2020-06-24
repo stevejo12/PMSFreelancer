@@ -65,6 +65,11 @@ func GetAllSkills(c *gin.Context) {
 
 func getSkillNames(param string) ([]string, error) {
 	var result []string
+
+	if param == "" {
+		return []string{}, nil
+	}
+
 	initialQuery, err := helpers.SettingInQueryWithID("skills", param, "*")
 
 	if err != nil {

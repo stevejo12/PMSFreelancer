@@ -188,11 +188,10 @@ func UploadPicture(c *gin.Context) {
 // @Tags Project
 // @Accept multipart/form-data
 // @Param token header string true "Token Header"
-// @Param id path int64 true "Project ID"
 // @Param file formData file true "Upload File"
 // @Success 200 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
-// @Router /uploadAttachment/{id} [post]
+// @Router /uploadAttachment [post]
 func UploadAttachment(c *gin.Context) {
 	// accept the images and store it in the tempfile
 	c.Request.ParseMultipartForm(5 * 1024 * 1024)

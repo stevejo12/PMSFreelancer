@@ -246,7 +246,7 @@ var doc = `{
                         "required": true
                     },
                     {
-                        "description": "Data Format to add education",
+                        "description": "Data Format to add project",
                         "name": "Data",
                         "in": "body",
                         "required": true,
@@ -285,6 +285,40 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.ResponseOKGetAllCountries"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/allProjectCategory": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Get All Project Category List",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseOKProjectCategory"
                         }
                     },
                     "500": {
@@ -1014,7 +1048,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseOKSearchProject"
+                            "$ref": "#/definitions/models.SearchProjectResponse"
                         }
                     },
                     "400": {
@@ -1220,7 +1254,7 @@ var doc = `{
                 }
             }
         },
-        "/uploadAttachment/{id}": {
+        "/uploadAttachment": {
             "post": {
                 "consumes": [
                     "multipart/form-data"
@@ -1235,13 +1269,6 @@ var doc = `{
                         "description": "Token Header",
                         "name": "token",
                         "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Project ID",
-                        "name": "id",
-                        "in": "path",
                         "required": true
                     },
                     {
@@ -1581,6 +1608,9 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "category": {
+                    "type": "integer"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -1723,6 +1753,32 @@ var doc = `{
                 }
             }
         },
+        "models.PageInfoSchema": {
+            "type": "object",
+            "properties": {
+                "filter": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "keyword": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "sort": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.PortfolioRequestParameter": {
             "type": "object",
             "properties": {
@@ -1773,6 +1829,17 @@ var doc = `{
                     "type": "integer"
                 },
                 "trelloKey": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProjectCategoryData": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -1953,6 +2020,23 @@ var doc = `{
                 }
             }
         },
+        "models.ResponseOKProjectCategory": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ProjectCategoryData"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ResponseOKProjectDetail": {
             "type": "object",
             "properties": {
@@ -1963,23 +2047,6 @@ var doc = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.ProjectDetailResponse"
-                    }
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.ResponseOKSearchProject": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.SearchProjectQuery"
                     }
                 },
                 "message": {
@@ -2057,6 +2124,12 @@ var doc = `{
         "models.SearchProjectQuery": {
             "type": "object",
             "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -2066,8 +2139,29 @@ var doc = `{
                 "price": {
                     "type": "number"
                 },
+                "skill": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "models.SearchProjectResponse": {
+            "type": "object",
+            "properties": {
+                "PageMeta": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.PageInfoSchema"
+                },
+                "project": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SearchProjectQuery"
+                    }
                 }
             }
         },

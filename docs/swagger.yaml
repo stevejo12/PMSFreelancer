@@ -42,6 +42,8 @@ definitions:
         items:
           type: string
         type: array
+      category:
+        type: integer
       description:
         type: string
       price:
@@ -134,6 +136,23 @@ definitions:
       projectCompleted:
         type: integer
     type: object
+  models.PageInfoSchema:
+    properties:
+      filter:
+        items:
+          type: integer
+        type: array
+      keyword:
+        type: string
+      page:
+        type: integer
+      size:
+        type: integer
+      sort:
+        type: string
+      total:
+        type: integer
+    type: object
   models.PortfolioRequestParameter:
     properties:
       description:
@@ -167,6 +186,13 @@ definitions:
       freelancerID:
         type: integer
       trelloKey:
+        type: string
+    type: object
+  models.ProjectCategoryData:
+    properties:
+      id:
+        type: integer
+      name:
         type: string
     type: object
   models.ProjectDetailInterestedMember:
@@ -284,6 +310,17 @@ definitions:
       message:
         type: string
     type: object
+  models.ResponseOKProjectCategory:
+    properties:
+      code:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/models.ProjectCategoryData'
+        type: array
+      message:
+        type: string
+    type: object
   models.ResponseOKProjectDetail:
     properties:
       code:
@@ -291,17 +328,6 @@ definitions:
       data:
         items:
           $ref: '#/definitions/models.ProjectDetailResponse'
-        type: array
-      message:
-        type: string
-    type: object
-  models.ResponseOKSearchProject:
-    properties:
-      code:
-        type: string
-      data:
-        items:
-          $ref: '#/definitions/models.SearchProjectQuery'
         type: array
       message:
         type: string
@@ -352,14 +378,32 @@ definitions:
     type: object
   models.SearchProjectQuery:
     properties:
+      category:
+        type: string
+      createdAt:
+        type: string
       description:
         type: string
       id:
         type: integer
       price:
         type: number
+      skill:
+        items:
+          type: string
+        type: array
       title:
         type: string
+    type: object
+  models.SearchProjectResponse:
+    properties:
+      PageMeta:
+        $ref: '#/definitions/models.PageInfoSchema'
+        type: object
+      project:
+        items:
+          $ref: '#/definitions/models.SearchProjectQuery'
+        type: array
     type: object
   models.TokenResponse:
     properties:
@@ -605,7 +649,7 @@ paths:
         name: token
         required: true
         type: string
-      - description: Data Format to add education
+      - description: Data Format to add project
         in: body
         name: Data
         required: true
@@ -641,6 +685,28 @@ paths:
       summary: Getting all list of countries
       tags:
       - Location
+  /allProjectCategory:
+    get:
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKProjectCategory'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Get All Project Category List
+      tags:
+      - Project
   /allSkills:
     get:
       produces:
@@ -1111,7 +1177,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseOKSearchProject'
+            $ref: '#/definitions/models.SearchProjectResponse'
         "400":
           description: Bad Request
           schema:
@@ -1246,7 +1312,7 @@ paths:
       summary: Updating User Profile
       tags:
       - User
-  /uploadAttachment/{id}:
+  /uploadAttachment:
     post:
       consumes:
       - multipart/form-data
@@ -1256,11 +1322,6 @@ paths:
         name: token
         required: true
         type: string
-      - description: Project ID
-        in: path
-        name: id
-        required: true
-        type: integer
       - description: Upload File
         in: formData
         name: file

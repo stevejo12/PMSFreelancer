@@ -134,3 +134,17 @@ func GetUserCompletedProject(id string) (int, error) {
 
 	return count, nil
 }
+
+func GetProjectCategory(id int) (string, error) {
+	name := ""
+
+	err := config.DB.QueryRow("SELECT name FROM project_category WHERE id=?", id).Scan(&name)
+
+	if err == sql.ErrNoRows {
+		return "", errors.New("Category ID is not registered")
+	} else if err != nil {
+		return "", errors.New("Server unable to get information from database")
+	}
+
+	return name, nil
+}

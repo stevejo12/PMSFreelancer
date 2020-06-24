@@ -62,5 +62,10 @@ type ParamFilterProject struct {
 
 type ResponseOKSearchProject struct {
 	ResponseWithNoBody
-	data []SearchProjectQuery
+	data []SearchProjectResponse
+}
+
+type ResponseOKProjectCategory struct {
+	ResponseWithNoBody
+	data []ProjectCategoryData
 }

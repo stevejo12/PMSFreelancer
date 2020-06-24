@@ -22,15 +22,27 @@ type OwnerInfo struct {
 }
 
 type SearchProjectQuery struct {
-	ID          int     `json:"id"`
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
+	ID          int      `json:"id"`
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	Price       float64  `json:"price"`
+	Skill       []string `json:"skill"`
+	CreatedAt   string   `json:"createdAt"`
+	Category    string   `json:"category"`
 }
 
 type SearchProjectResponse struct {
-	Project     []SearchProjectQuery
-	TotalSearch int `json:"totalSearch"`
+	Project  []SearchProjectQuery `json:"project"`
+	PageMeta PageInfoSchema       `json:"PageMeta"`
+}
+
+type PageInfoSchema struct {
+	Page    int    `json:"page"`
+	Size    int    `json:"size"`
+	Total   int    `json:"total"`
+	Sort    string `json:"sort"`
+	Keyword string `json:"keyword"`
+	Filter  []int  `json:"filter"`
 }
 
 type ProjectLinksResponse struct {
@@ -44,6 +56,7 @@ type CreateProject struct {
 	Skills      []int
 	Price       float64
 	Attachment  []string
+	Category    int
 }
 
 type GetUserProjectResponse struct {
