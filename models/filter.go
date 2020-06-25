@@ -5,4 +5,5 @@ type FilterNeededData struct {
 	Title       string
 	Description string
 	Skill       string
+	Category    int
 }

@@ -37,12 +37,9 @@ type SearchProjectResponse struct {
 }
 
 type PageInfoSchema struct {
-	Page    int    `json:"page"`
-	Size    int    `json:"size"`
-	Total   int    `json:"total"`
-	Sort    string `json:"sort"`
-	Keyword string `json:"keyword"`
-	Filter  []int  `json:"filter"`
+	Page  int `json:"page"`
+	Size  int `json:"size"`
+	Total int `json:"total"`
 }
 
 type ProjectLinksResponse struct {

@@ -1042,6 +1042,12 @@ var doc = `{
                         "description": "Filter Skills",
                         "name": "filter",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter Category",
+                        "name": "category",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1756,23 +1762,11 @@ var doc = `{
         "models.PageInfoSchema": {
             "type": "object",
             "properties": {
-                "filter": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "keyword": {
-                    "type": "string"
-                },
                 "page": {
                     "type": "integer"
                 },
                 "size": {
                     "type": "integer"
-                },
-                "sort": {
-                    "type": "string"
                 },
                 "total": {
                     "type": "integer"
