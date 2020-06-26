@@ -208,7 +208,7 @@ func ProjectDetail(c *gin.Context) {
 	// project id
 	id := c.Param("id")
 
-	result, err := config.DB.Query("SELECT id, title, skills, price, owner_id, interested_members FROM project WHERE id=?", id)
+	result, err := config.DB.Query("SELECT id, title, skills, price, owner_id, interested_members, description, category_id FROM project WHERE id=?", id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -222,7 +222,8 @@ func ProjectDetail(c *gin.Context) {
 		var dbResult models.ProjectDetailRequest
 		var data models.ProjectDetailResponse
 
-		if err = result.Scan(&dbResult.ID, &dbResult.Title, &dbResult.Skills, &dbResult.Price, &dbResult.OwnerID, &dbResult.InterestedMembers); err != nil {
+		if err = result.Scan(&dbResult.ID, &dbResult.Title, &dbResult.Skills, &dbResult.Price, &dbResult.OwnerID, &dbResult.InterestedMembers, &dbResult.Description, &dbResult.Category); err != nil {
+			fmt.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
 				"message": "Something is wrong with the database data"})
@@ -302,6 +303,16 @@ func ProjectDetail(c *gin.Context) {
 			return
 		}
 
+		// get category name
+		categoryName, err := helpers.GetCategoryNameByID(dbResult.Category)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
 		// construct the response to user
 		data.ID = dbResult.ID
 		data.Title = dbResult.Title
@@ -310,6 +321,8 @@ func ProjectDetail(c *gin.Context) {
 		data.Owner = ownerInfo
 		data.Attachment = dataLink
 		data.InterestedMembers = interestedMembers
+		data.Description = dbResult.Description
+		data.Category = categoryName
 
 		allData = append(allData, data)
 	}
@@ -1075,4 +1088,122 @@ func filterData(data []models.FilterNeededData, keyword string, skill string, ca
 	id = helpers.RemoveDuplicateIntegerArray(id)
 
 	return id, nil
+}
+
+// EditProject => Edit User Project
+// EditProject godoc
+// @Summary Edit User Project
+// @Produce json
+// @Accept  json
+// @Tags Project
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Param Data body models.EditProject true "Data Format to edit project"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /editProject/{id} [put]
+func EditProject(c *gin.Context) {
+	id := c.Param("id")
+
+	data := models.EditProject{}
+
+	err = c.BindJSON(&data)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Data format is invalid"})
+		return
+	}
+
+	// skill list
+	err = helpers.SkillList(data.Skills)
+
+	if err != nil {
+		if err.Error() == "not exist" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "There is skill id does not exist in the database id"})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// helper for category value
+	err = helpers.IsThisCategoryIDExist(data.Category)
+
+	if err != nil {
+		if err.Error() == "not exist" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "This category id does not exist in the database id"})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	skillDataQuery := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(data.Skills)), ","), "[]")
+
+	query := "UPDATE project SET description=\"" + data.Description + "\""
+	query = query + ", title=\"" + data.Title + "\""
+	query = query + ", skills=\"" + skillDataQuery + "\""
+	query = query + ", price=" + fmt.Sprintf("%f", data.Price)
+	query = query + ", category_id=" + strconv.Itoa(data.Category)
+	query = query + " WHERE id=" + id
+
+	_, err = config.DB.Exec(query)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to update the data in the database"})
+		return
+	}
+
+	// remove existing attachment db that is not in updated attachment anymore
+	err = helpers.RemoveAttachmentThatIsDeletedByUser(data.Attachment, id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
+	// add new attachment to the database
+	// keep the existing ones
+	for i := 0; i < len(data.Attachment); i++ {
+		attachmentID, err := helpers.IsThisAttachmentAlreadyExistInDatabase(data.Attachment[i])
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
+		if attachmentID == -1 {
+			_, err = config.DB.Exec("INSERT INTO project_links(project_link, project_id) VALUES(?,?)", data.Attachment[i], id)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": "Server unable to execute query to database"})
+				return
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully update project"})
 }

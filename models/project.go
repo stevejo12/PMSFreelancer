@@ -56,6 +56,15 @@ type CreateProject struct {
 	Category    int
 }
 
+type EditProject struct {
+	Title       string
+	Description string
+	Skills      []int
+	Price       float64
+	Attachment  []string
+	Category    int
+}
+
 type GetUserProjectResponse struct {
 	ID          int    `json:"id"`
 	Title       string `json:"title"`
@@ -70,6 +79,8 @@ type ProjectDetailRequest struct {
 	Price             float64
 	OwnerID           int
 	InterestedMembers sql.NullString
+	Description       string
+	Category          int
 }
 
 type ProjectDetailResponse struct {
@@ -80,6 +91,8 @@ type ProjectDetailResponse struct {
 	Price             float64                         `json:"price"`
 	Owner             OwnerInfo                       `json:"owner"`
 	InterestedMembers []ProjectDetailInterestedMember `json:"interestedMembers"`
+	Description       string                          `json:"description"`
+	Category          string                          `json:"category"`
 }
 
 type ProjectDetailInterestedMember struct {

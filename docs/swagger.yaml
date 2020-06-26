@@ -55,6 +55,25 @@ definitions:
       title:
         type: string
     type: object
+  models.EditProject:
+    properties:
+      attachment:
+        items:
+          type: string
+        type: array
+      category:
+        type: integer
+      description:
+        type: string
+      price:
+        type: number
+      skills:
+        items:
+          type: integer
+        type: array
+      title:
+        type: string
+    type: object
   models.EducationParameters:
     properties:
       endYear:
@@ -202,6 +221,10 @@ definitions:
         items:
           $ref: '#/definitions/models.ProjectLinksResponse'
         type: array
+      category:
+        type: string
+      description:
+        type: string
       id:
         type: integer
       interestedMembers:
@@ -975,6 +998,45 @@ paths:
       summary: Updating User Portfolio
       tags:
       - Portfolio
+  /editProject/{id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Data Format to edit project
+        in: body
+        name: Data
+        required: true
+        schema:
+          $ref: '#/definitions/models.EditProject'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Edit User Project
+      tags:
+      - Project
   /editSkills:
     put:
       consumes:

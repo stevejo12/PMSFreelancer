@@ -74,6 +74,7 @@ func main() {
 		v1.PUT("/editExperience/:id", controller.AuthenticationToken, controller.EditExperience)
 		v1.DELETE("/deleteExperience/:id", controller.AuthenticationToken, controller.DeleteExperience)
 		v1.POST("/addProject", controller.AuthenticationToken, controller.AddProject)
+		v1.PUT("/editProject/:id", controller.AuthenticationToken, controller.EditProject)
 		v1.GET("/userProjects", controller.AuthenticationToken, controller.GetAllUserProjects)
 		v1.GET("/projectDetail/:id", controller.ProjectDetail)
 		v1.POST("/submitProjectInterest/:id", controller.AuthenticationToken, controller.SubmitProjectInterest)

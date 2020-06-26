@@ -1,5 +1,11 @@
 package helpers
 
+import (
+	"github.com/stevejo12/PMSFreelancer/config"
+	// "PMSFreelancer/config"
+	"errors"
+)
+
 // Contains => helper to find if string value is in the array
 // arr => array for checking
 // s => the string you want to check
@@ -64,4 +70,64 @@ func FindDuplicateInteger(a []int, b []int) []int {
 	}
 
 	return diff
+}
+
+func IsThisAttachmentAlreadyExistInDatabase(link string) (int, error) {
+	querySelect := "SELECT id FROM project_links WHERE project_link=\"" + link + "\""
+	data, err := config.DB.Query(querySelect)
+
+	if err != nil {
+		return -1, errors.New("Server is unable to execute query to the database")
+	}
+
+	for data.Next() {
+		var dataID int
+		if err := data.Scan(&dataID); err != nil {
+			return -1, errors.New("Server is unable to execute query to the database")
+		}
+		return dataID, nil
+	}
+
+	return -1, nil
+}
+
+func RemoveAttachmentThatIsDeletedByUser(attachment []string, projectID string) error {
+	var allLinks []string
+
+	query := "SELECT project_link FROM project_links WHERE project_id=" + projectID
+
+	allProjectAttachment, err := config.DB.Query(query)
+
+	if err != nil {
+		return errors.New("Server is unable to execute query to the database")
+	}
+
+	for allProjectAttachment.Next() {
+		var dataLink string
+		if err := allProjectAttachment.Scan(&dataLink); err != nil {
+			return errors.New("Server is unable to retrieve database data")
+		}
+
+		allLinks = append(allLinks, dataLink)
+	}
+
+	interfaceChoice := make([]interface{}, len(attachment))
+	for i, v := range attachment {
+		interfaceChoice[i] = v
+	}
+
+	for i := 0; i < len(allLinks); i++ {
+		stillExist := Contains(interfaceChoice, allLinks[i])
+
+		if !stillExist {
+			queryDelete := "DELETE FROM project_links WHERE project_link=\"" + allLinks[i] + "\""
+			_, err = config.DB.Exec(queryDelete)
+
+			if err != nil {
+				return errors.New("Server is unable to execute query to the database")
+			}
+		}
+	}
+
+	return nil
 }
