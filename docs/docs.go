@@ -2025,6 +2025,12 @@ var doc = `{
                 "password": {
                     "type": "string"
                 },
+                "phoneCode": {
+                    "type": "integer"
+                },
+                "phoneNumber": {
+                    "type": "integer"
+                },
                 "skills": {
                     "type": "array",
                     "items": {
@@ -2359,6 +2365,12 @@ var doc = `{
                 },
                 "member": {
                     "type": "string"
+                },
+                "phoneCode": {
+                    "type": "integer"
+                },
+                "phoneNumber": {
+                    "type": "integer"
                 },
                 "picture": {
                     "type": "string"

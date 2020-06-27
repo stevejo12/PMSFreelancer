@@ -21,8 +21,8 @@ import (
 var (
 	googleOauthConfigLogin = &oauth2.Config{
 		RedirectURL:  "http://159.89.202.223:8080/v1/signin-callback",
-		ClientID:     "776281301027-aincdrlljhjdmu39lfq2aunqeofn1hi8.apps.googleusercontent.com",
-		ClientSecret: "5q_niwCvO1dAFEzT2QkcQkok",
+		ClientID:     "149260447643-kpqpukphmhj907876qg6q1rmhhit7831.apps.googleusercontent.com",
+		ClientSecret: "0OWYl4x5-74O2Mx5AiZgndC_",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
 	}

@@ -56,7 +56,6 @@ func RegisterUserWithPassword(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Error binding new user"})
-
 		return
 	}
 
@@ -138,7 +137,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 
 		formattedDate := fmt.Sprintf("%d-%02d-%02d", timeIndonesia.Year(), timeIndonesia.Month(), timeIndonesia.Day())
 
-		selDB, err := config.DB.Prepare("INSERT INTO login(email, password, created_at, status, username, description,first_name, last_name, location, skill) VALUES(?,?,?,?,?,?,?,?,?,?)")
+		selDB, err := config.DB.Prepare("INSERT INTO login(email, password, created_at, status, username, description,first_name, last_name, location, skill, phone_code, phone_number) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)")
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -150,7 +149,7 @@ func RegisterUserWithPassword(c *gin.Context) {
 		skillDataQuery := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(newUser.Skills)), ","), "[]")
 
 		// status at first created should be active
-		_, err = selDB.Exec(newUser.Email, hashedPassword, formattedDate, "active", newUser.Username, newUser.Description, newUser.FirstName, newUser.LastName, newUser.Location, skillDataQuery)
+		_, err = selDB.Exec(newUser.Email, hashedPassword, formattedDate, "active", newUser.Username, newUser.Description, newUser.FirstName, newUser.LastName, newUser.Location, skillDataQuery, newUser.PhoneCode, newUser.PhoneNumber)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -277,7 +276,7 @@ func RegisterUserWithGoogle(c *gin.Context) {
 
 		formattedDate := fmt.Sprintf("%d-%02d-%02d", timeIndonesia.Year(), timeIndonesia.Month(), timeIndonesia.Day())
 
-		selDB, err := config.DB.Prepare("INSERT INTO login(email, google_id, created_at, status, username, description,first_name, last_name, location, skill) VALUES(?,?,?,?,?,?,?,?,?,?)")
+		selDB, err := config.DB.Prepare("INSERT INTO login(email, google_id, created_at, status, username, description,first_name, last_name, location, skill, phone_code, phone_number) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)")
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -289,7 +288,7 @@ func RegisterUserWithGoogle(c *gin.Context) {
 		skillDataQuery := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(newUser.Skills)), ","), "[]")
 
 		// status at first created should be active
-		_, err = selDB.Exec(newUser.Email, newUser.GoogleID, formattedDate, "active", newUser.Username, newUser.Description, newUser.FirstName, newUser.LastName, newUser.Location, skillDataQuery)
+		_, err = selDB.Exec(newUser.Email, newUser.GoogleID, formattedDate, "active", newUser.Username, newUser.Description, newUser.FirstName, newUser.LastName, newUser.Location, skillDataQuery, newUser.PhoneCode, newUser.PhoneNumber)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -733,7 +732,7 @@ func GetUserProfile(c *gin.Context) {
 	var dataQuery models.QueryUserProfile
 	var picData sql.NullString
 
-	err = config.DB.QueryRow("SELECT id, first_name, last_name, email, description, picture, created_at, username, location, skill, balance FROM login WHERE id=?", id).Scan(&dataQuery.ID, &dataQuery.Firstname, &dataQuery.LastName, &dataQuery.Email, &dataQuery.Description, &picData, &dataQuery.CreatedAt, &dataQuery.Username, &dataQuery.Location, &dataQuery.Skills, &dataQuery.Balance)
+	err = config.DB.QueryRow("SELECT id, first_name, last_name, email, description, picture, created_at, username, location, skill, balance, phone_code, phone_number FROM login WHERE id=?", id).Scan(&dataQuery.ID, &dataQuery.Firstname, &dataQuery.LastName, &dataQuery.Email, &dataQuery.Description, &picData, &dataQuery.CreatedAt, &dataQuery.Username, &dataQuery.Location, &dataQuery.Skills, &dataQuery.Balance, &dataQuery.PhoneCode, &dataQuery.PhoneNumber)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -806,6 +805,8 @@ func GetUserProfile(c *gin.Context) {
 	data.Location = country
 	data.Portfolio = userPortfolio
 	data.Balance = dataQuery.Balance
+	data.PhoneCode = dataQuery.PhoneCode
+	data.PhoneNumber = dataQuery.PhoneNumber
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,

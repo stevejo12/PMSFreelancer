@@ -10,6 +10,8 @@ type RegistrationUserUsingPassword struct {
 	Description string
 	Skills      []int
 	Username    string
+	PhoneCode   int
+	PhoneNumber int
 }
 
 type RegistrationUserUsingGoogle struct {
@@ -21,6 +23,8 @@ type RegistrationUserUsingGoogle struct {
 	Description string
 	Skills      []int
 	Username    string
+	PhoneCode   int
+	PhoneNumber int
 }
 
 // LoginUserPassword => Parameter login
@@ -68,6 +72,8 @@ type UserProfile struct {
 	Portfolio        []PortfolioReturnParameter `json:"portfolio"`
 	Balance          float64                    `json:"balance"`
 	ProjectCompleted int                        `json:"projectCompleted"`
+	PhoneCode        int                        `json:"phoneCode"`
+	PhoneNumber      int                        `json:"phoneNumber"`
 }
 
 type QueryUserProfile struct {
@@ -82,6 +88,8 @@ type QueryUserProfile struct {
 	Location    int
 	Skills      string
 	Balance     float64
+	PhoneCode   int
+	PhoneNumber int
 }
 
 type UpdateProfile struct {

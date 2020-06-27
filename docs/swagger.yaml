@@ -271,6 +271,10 @@ definitions:
         type: integer
       password:
         type: string
+      phoneCode:
+        type: integer
+      phoneNumber:
+        type: integer
       skills:
         items:
           type: integer
@@ -490,6 +494,10 @@ definitions:
         type: object
       member:
         type: string
+      phoneCode:
+        type: integer
+      phoneNumber:
+        type: integer
       picture:
         type: string
       portfolio:

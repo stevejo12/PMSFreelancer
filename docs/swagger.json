@@ -2009,6 +2009,12 @@
                 "password": {
                     "type": "string"
                 },
+                "phoneCode": {
+                    "type": "integer"
+                },
+                "phoneNumber": {
+                    "type": "integer"
+                },
                 "skills": {
                     "type": "array",
                     "items": {
@@ -2343,6 +2349,12 @@
                 },
                 "member": {
                     "type": "string"
+                },
+                "phoneCode": {
+                    "type": "integer"
+                },
+                "phoneNumber": {
+                    "type": "integer"
                 },
                 "picture": {
                     "type": "string"
