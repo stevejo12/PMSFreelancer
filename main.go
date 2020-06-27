@@ -83,6 +83,7 @@ func main() {
 		v1.POST("/rejectReviewProject/:id", controller.AuthenticationToken, controller.RejectReviewProject)
 		v1.POST("/completeProject/:id", controller.AuthenticationToken, controller.CompleteProject)
 		v1.GET("/allProjectCategory", controller.AuthenticationToken, controller.GetAllProjectCategory)
+		// v1.GET("/mootaProfile", controller.GetMootaProfile)
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

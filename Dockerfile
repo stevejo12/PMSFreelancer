@@ -28,6 +28,8 @@ RUN go get github.com/adlio/trello
 RUN go get github.com/dgrijalva/jwt-go
 RUN go get golang.org/x/oauth2
 RUN go get cloud.google.com/go
+RUN go get gopkg.in/gomail.v2
+RUN go get golang.org/x/crypto/bcrypt
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 

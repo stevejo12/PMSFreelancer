@@ -592,6 +592,7 @@ func ResetPassword(c *gin.Context) {
 	// Send the email to user
 	d := gomail.NewPlainDialer(CONFIG_SMTP_HOST, CONFIG_SMTP_PORT, CONFIG_EMAIL, CONFIG_PASSWORD)
 	if err := d.DialAndSend(m); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to send email to user"})
