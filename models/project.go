@@ -13,7 +13,7 @@ type OwnerInfoQuery struct {
 }
 
 type OwnerInfo struct {
-	ID               string `json:"id"`
+	ID               int    `json:"id"`
 	FirstName        string `json:"firstName"`
 	LastName         string `json:"lastName"`
 	Location         string `json:"location"`
