@@ -1,27 +1,24 @@
 package controller
 
 import (
+	// "PMSFreelancer/config"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/adlio/trello"
 	"github.com/gin-gonic/gin"
+	"github.com/stevejo12/PMSFreelancer/config"
 )
 
 // how to open a trello board
 // https://www.trello.com/b/{id}
 
-// key token pribadi
+// user key
 var key = "d8370c65b1067ab8f964c7102544080f"
 
-var token = "1761f2e9417b6855adf4f50dc00d4721086d6fad6c079a966b673f6c8e927432"
-
-// token pinjeman
-// var token = "51ee616bd00d17e7615e2aca0dc0d849211863855567446935478143a96c4115"
-var client = trello.NewClient(key, token)
-
-func createTrelloBoard(title string, trelloToken string) (string, error) {
+func manageTrelloBoard(title string, trelloToken string, freelancerID int) (string, error) {
 	client := trello.NewClient(key, trelloToken)
 
 	boardName := title
@@ -37,7 +34,12 @@ func createTrelloBoard(title string, trelloToken string) (string, error) {
 		return "", errors.New("Server is unable to create trello board")
 	}
 
-	allBoards := GetUserTrelloBoard()
+	allBoards, err := getUserTrelloBoard(key, trelloToken)
+
+	if err != nil {
+		fmt.Println(err)
+		return "", errors.New("Server is unable to create trello board")
+	}
 
 	var boardIDCreated string
 
@@ -51,6 +53,26 @@ func createTrelloBoard(title string, trelloToken string) (string, error) {
 		return boardIDCreated, errors.New("Server is unable to find trello board")
 	}
 
+	// invite freelancers
+	var email string
+	err = config.DB.QueryRow("SELECT email FROM login WHERE id=?", freelancerID).Scan(&email)
+
+	if err != nil {
+		return boardIDCreated, errors.New("Server is unable to retrieve user email")
+	}
+
+	userBoard, err := client.GetBoard(boardIDCreated, trello.Defaults())
+	if err != nil {
+		return boardIDCreated, errors.New("Server is unable to get the user board with id")
+	}
+
+	member := trello.Member{Email: email}
+	_, err = userBoard.AddMember(&member, trello.Defaults())
+
+	if err != nil {
+		return boardIDCreated, errors.New("Server is unable to add freelancer to the trello board")
+	}
+
 	return boardIDCreated, nil
 }
 
@@ -58,6 +80,8 @@ func createTrelloBoard(title string, trelloToken string) (string, error) {
 // This function is used to create a new board in trello using user's token
 // this target the endpoints of trello public api for creating a board.
 func CreateNewBoard(c *gin.Context) {
+	var token = "1761f2e9417b6855adf4f50dc00d4721086d6fad6c079a966b673f6c8e927432"
+
 	client := trello.NewClient(key, token)
 
 	boardName := "testing with auth"
@@ -74,7 +98,14 @@ func CreateNewBoard(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	allBoards := GetUserTrelloBoard()
+	allBoards, err := getUserTrelloBoard(key, token)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server can't get user trello board"})
+		return
+	}
 
 	var boardIDCreated string
 
@@ -87,8 +118,7 @@ func CreateNewBoard(c *gin.Context) {
 	fmt.Println(boardIDCreated)
 }
 
-// GetUserTrelloBoard => Fetching all the users' boards using token and key
-func GetUserTrelloBoard() []*trello.Board {
+func getUserTrelloBoard(key string, token string) ([]*trello.Board, error) {
 	client := trello.NewClient(key, token)
 	//https://api.trello.com/1/members/me/boards?key={yourKey}&token={yourToken}
 	args := map[string]string{
@@ -99,8 +129,8 @@ func GetUserTrelloBoard() []*trello.Board {
 	allBoards, err := client.GetMyBoards(args)
 
 	if err != nil {
-		log.Fatal(err)
+		return allBoards, errors.New("Server is unable to retrieve user boards")
 	}
 
-	return allBoards
+	return allBoards, nil
 }

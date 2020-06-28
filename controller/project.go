@@ -520,7 +520,8 @@ func AcceptProjectInterest(c *gin.Context) {
 				return
 			}
 
-			trelloBoardID, err := createTrelloBoard(boardTitle, param.TrelloKey)
+			// create trello board
+			trelloBoardID, err := manageTrelloBoard(boardTitle, param.TrelloKey, param.FreelancerID)
 
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
