@@ -269,10 +269,19 @@ func ProjectDetail(c *gin.Context) {
 				return
 			}
 
+			country, err := helpers.GetCountryName(queryResult.Location)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
+				return
+			}
+
 			ownerInfo.ID = queryResult.ID
 			ownerInfo.FirstName = queryResult.FirstName
 			ownerInfo.LastName = queryResult.LastName
-			ownerInfo.Location = queryResult.Location
+			ownerInfo.Location = country
 			memberInfo := helpers.SplitDash(queryResult.CreatedAt)
 			if len(memberInfo) == 3 {
 				ownerInfo.Member = memberInfo[0]

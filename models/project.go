@@ -5,10 +5,10 @@ import (
 )
 
 type OwnerInfoQuery struct {
-	ID        string
+	ID        int
 	FirstName string
 	LastName  string
-	Location  string
+	Location  int
 	CreatedAt string
 }
 

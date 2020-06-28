@@ -780,6 +780,13 @@ func GetUserProfile(c *gin.Context) {
 	// get user location name
 	country, err := helpers.GetCountryInformation(dataQuery.Location)
 
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
 	// get # of completed project
 	projectCompleted, err := helpers.GetUserCompletedProject(id)
 

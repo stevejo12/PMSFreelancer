@@ -21,3 +21,15 @@ func GetCountryInformation(id int) (models.CountryDataProfile, error) {
 
 	return countryInfo, nil
 }
+
+func GetCountryName(id int) (string, error) {
+	var countryName string
+
+	err := config.DB.QueryRow("SELECT country_name FROM app_countries WHERE id=?", id).Scan(&countryName)
+
+	if err != nil {
+		return "", errors.New("Server is unable to execute query to the database")
+	}
+
+	return countryName, nil
+}
