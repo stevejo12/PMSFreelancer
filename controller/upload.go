@@ -24,7 +24,8 @@ func uploadFile(file multipart.File, header *multipart.FileHeader) (string, erro
 		// take the second part since it is the extension file
 		fileExt = arr[1]
 	} else {
-		return "", errors.New("File format is not correct ex: *.pdf or *.txt")
+		// set default png to upload file become picture
+		fileExt = "png"
 	}
 
 	// make it in the same folder as this file

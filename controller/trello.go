@@ -33,7 +33,8 @@ func createTrelloBoard(title string, trelloToken string) (string, error) {
 	err := client.CreateBoard(&board, trello.Defaults())
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return "", errors.New("Server is unable to create trello board")
 	}
 
 	allBoards := GetUserTrelloBoard()
