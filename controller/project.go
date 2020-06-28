@@ -217,10 +217,9 @@ func ProjectDetail(c *gin.Context) {
 		return
 	}
 
-	allData := []models.ProjectDetailResponse{}
+	data := models.ProjectDetailResponse{}
 	for result.Next() {
 		var dbResult models.ProjectDetailRequest
-		var data models.ProjectDetailResponse
 
 		if err = result.Scan(&dbResult.ID, &dbResult.Title, &dbResult.Skills, &dbResult.Price, &dbResult.OwnerID, &dbResult.InterestedMembers, &dbResult.Description, &dbResult.Category); err != nil {
 			fmt.Println(err)
@@ -323,21 +322,12 @@ func ProjectDetail(c *gin.Context) {
 		data.InterestedMembers = interestedMembers
 		data.Description = dbResult.Description
 		data.Category = categoryName
-
-		allData = append(allData, data)
-	}
-
-	if len(allData) != 1 {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Server unable to execute query to database"})
-		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "Project data have been retrieved",
-		"data":    allData})
+		"data":    data})
 }
 
 // SubmitProjectInterest => Potential Freelancer submit their interest before accepted by project owner
