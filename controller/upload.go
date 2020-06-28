@@ -254,12 +254,12 @@ func UploadAttachment(c *gin.Context) {
 	// filename itu extension nya
 
 	var url string
-	if fileExt == "pdf" {
-		url, err = config.CloudinaryService.Upload(fileName, nil, "", true, 1)
-	} else {
-		url, err = config.CloudinaryService.Upload(fileName, nil, "", true, 3)
-	}
-	// url, err = config.CloudinaryService.Upload(fileName, nil, "", true, 3)
+	// if fileExt == "pdf" {
+	// 	url, err = config.CloudinaryService.Upload(fileName, nil, "", true, 1)
+	// } else {
+	// 	url, err = config.CloudinaryService.Upload(fileName, nil, "", true, 3)
+	// }
+	url, err = config.CloudinaryService.Upload(fileName, nil, "", true, 3)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -271,12 +271,12 @@ func UploadAttachment(c *gin.Context) {
 
 	// 0 represent the iota or code for image in go-cloudinary
 	var urlFile string
-	if fileExt == "pdf" {
-		urlFile = config.CloudinaryService.Url(url, 1)
-	} else {
-		urlFile = config.CloudinaryService.Url(url, 3)
-	}
-	// urlFile = config.CloudinaryService.Url(url, 3)
+	// if fileExt == "pdf" {
+	// 	urlFile = config.CloudinaryService.Url(url, 1)
+	// } else {
+	// 	urlFile = config.CloudinaryService.Url(url, 3)
+	// }
+	urlFile = config.CloudinaryService.Url(url, 3)
 
 	// remove the file after using
 	err = tempFile.Close()

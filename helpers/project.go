@@ -5,10 +5,11 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/stevejo12/PMSFreelancer/config"
-	"github.com/stevejo12/PMSFreelancer/models"
 	// "PMSFreelancer/config"
 	// "PMSFreelancer/models"
+
+	"github.com/stevejo12/PMSFreelancer/config"
+	"github.com/stevejo12/PMSFreelancer/models"
 )
 
 // IsThisIDProjectOwner => Check if the user id is the project owner
@@ -94,7 +95,7 @@ func GetInterestedMemberNames(id string) ([]models.ProjectDetailInterestedMember
 		return []models.ProjectDetailInterestedMember{}, nil
 	}
 
-	query, err := SettingInQueryWithID("login", imID, "id, first_name, last_name")
+	query, err := SettingInQueryWithID("login", imID, "id, first_name, last_name, picture")
 
 	if err != nil {
 		return []models.ProjectDetailInterestedMember{}, errors.New("Server has issues generating query")
@@ -108,15 +109,9 @@ func GetInterestedMemberNames(id string) ([]models.ProjectDetailInterestedMember
 
 	for data.Next() {
 		interestedMember := models.ProjectDetailInterestedMember{}
-		var dbID int
-		var dbFirstName, dbLastName string
-		if err := data.Scan(&dbID, &dbFirstName, &dbLastName); err != nil {
+		if err := data.Scan(&interestedMember.ID, &interestedMember.FirstName, &interestedMember.LastName, &interestedMember.Picture); err != nil {
 			return []models.ProjectDetailInterestedMember{}, errors.New("Something is wrong with the database data")
 		}
-
-		interestedMember.ID = dbID
-		interestedMember.FirstName = dbFirstName
-		interestedMember.LastName = dbLastName
 
 		allInterestedMember = append(allInterestedMember, interestedMember)
 	}

@@ -43,8 +43,8 @@ type PageInfoSchema struct {
 }
 
 type ProjectLinksResponse struct {
-	ID           int
-	Project_link string
+	ID           int    `json:"id"`
+	Project_link string `json:"projectLink"`
 }
 
 type CreateProject struct {
@@ -96,9 +96,10 @@ type ProjectDetailResponse struct {
 }
 
 type ProjectDetailInterestedMember struct {
-	ID        int
-	FirstName string
-	LastName  string
+	ID        int    `json:"id"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Picture   string `json:"picture"`
 }
 
 type ProjectAcceptMemberParameter struct {

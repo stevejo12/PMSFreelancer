@@ -1831,7 +1831,7 @@ var doc = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "lastName": {
                     "type": "string"
@@ -1937,6 +1937,9 @@ var doc = `{
                 },
                 "lastName": {
                     "type": "string"
+                },
+                "picture": {
+                    "type": "string"
                 }
             }
         },
@@ -1999,7 +2002,7 @@ var doc = `{
                 "id": {
                     "type": "integer"
                 },
-                "project_link": {
+                "projectLink": {
                     "type": "string"
                 }
             }
