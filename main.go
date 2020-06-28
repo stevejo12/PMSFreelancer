@@ -21,7 +21,6 @@ var err error
 
 func init() {
 	config.ConnectToDB()
-	config.LoadConfig()
 	config.ConnectToCloudinary()
 }
 
