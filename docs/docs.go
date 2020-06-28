@@ -2138,10 +2138,8 @@ var doc = `{
                     "type": "string"
                 },
                 "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.ProjectDetailResponse"
-                    }
+                    "type": "object",
+                    "$ref": "#/definitions/models.ProjectDetailResponse"
                 },
                 "message": {
                     "type": "string"

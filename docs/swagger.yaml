@@ -345,9 +345,8 @@ definitions:
       code:
         type: string
       data:
-        items:
-          $ref: '#/definitions/models.ProjectDetailResponse'
-        type: array
+        $ref: '#/definitions/models.ProjectDetailResponse'
+        type: object
       message:
         type: string
     type: object

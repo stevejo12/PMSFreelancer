@@ -42,7 +42,7 @@ type ResponseOKGetUserProject struct {
 
 type ResponseOKProjectDetail struct {
 	ResponseWithNoBody
-	data []ProjectDetailResponse
+	data ProjectDetailResponse
 }
 
 type ParamSearchProject struct {
