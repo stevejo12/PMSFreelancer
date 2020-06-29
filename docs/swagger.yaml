@@ -152,6 +152,10 @@ definitions:
         type: string
       member:
         type: string
+      phoneCode:
+        type: integer
+      phoneNumber:
+        type: integer
       projectCompleted:
         type: integer
     type: object

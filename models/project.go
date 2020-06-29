@@ -4,14 +4,6 @@ import (
 	"database/sql"
 )
 
-type OwnerInfoQuery struct {
-	ID        int
-	FirstName string
-	LastName  string
-	Location  int
-	CreatedAt string
-}
-
 type OwnerInfo struct {
 	ID               int    `json:"id"`
 	FirstName        string `json:"firstName"`
@@ -19,6 +11,8 @@ type OwnerInfo struct {
 	Location         string `json:"location"`
 	Member           string `json:"member"`
 	ProjectCompleted int    `json:"projectCompleted"`
+	PhoneCode        int    `json:"phoneCode"`
+	PhoneNumber      int    `json:"phoneNumber"`
 }
 
 type SearchProjectQuery struct {

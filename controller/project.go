@@ -250,8 +250,8 @@ func ProjectDetail(c *gin.Context) {
 		}
 
 		// get the detail about the owner
-		var ownerInfo models.OwnerInfo
-		ownerData, err := config.DB.Query("SELECT id, first_name, last_name, location, created_at FROM login WHERE id=?", dbResult.OwnerID)
+		ownerInfo := models.OwnerInfo{}
+		ownerData, err := config.DB.Query("SELECT id, first_name, last_name, location, created_at, phone_code, phone_number FROM login WHERE id=?", dbResult.OwnerID)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -261,15 +261,16 @@ func ProjectDetail(c *gin.Context) {
 		}
 
 		for ownerData.Next() {
-			var queryResult models.OwnerInfoQuery
-			if err := ownerData.Scan(&queryResult.ID, &queryResult.FirstName, &queryResult.LastName, &queryResult.Location, &queryResult.CreatedAt); err != nil {
+			var location int
+			var member string
+			if err := ownerData.Scan(&ownerInfo.ID, &ownerInfo.FirstName, &ownerInfo.LastName, &location, &member, &ownerInfo.PhoneCode, &ownerInfo.PhoneNumber); err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"code":    http.StatusInternalServerError,
 					"message": "Something is wrong with the database data"})
 				return
 			}
 
-			country, err := helpers.GetCountryName(queryResult.Location)
+			country, err := helpers.GetCountryName(location)
 
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
@@ -278,11 +279,8 @@ func ProjectDetail(c *gin.Context) {
 				return
 			}
 
-			ownerInfo.ID = queryResult.ID
-			ownerInfo.FirstName = queryResult.FirstName
-			ownerInfo.LastName = queryResult.LastName
 			ownerInfo.Location = country
-			memberInfo := helpers.SplitDash(queryResult.CreatedAt)
+			memberInfo := helpers.SplitDash(member)
 			if len(memberInfo) == 3 {
 				ownerInfo.Member = memberInfo[0]
 			} else {

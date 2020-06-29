@@ -1842,6 +1842,12 @@ var doc = `{
                 "member": {
                     "type": "string"
                 },
+                "phoneCode": {
+                    "type": "integer"
+                },
+                "phoneNumber": {
+                    "type": "integer"
+                },
                 "projectCompleted": {
                     "type": "integer"
                 }
