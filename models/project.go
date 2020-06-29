@@ -6,6 +6,7 @@ import (
 
 type OwnerInfo struct {
 	ID               int    `json:"id"`
+	Email            string `json:"email"`
 	FirstName        string `json:"firstName"`
 	LastName         string `json:"lastName"`
 	Location         string `json:"location"`
