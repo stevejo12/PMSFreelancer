@@ -7,7 +7,7 @@ type GetTransactionMutationRequest struct {
 	AccountNumber int    `json:"account_number"`
 	BankType      string `json:"bank_type"`
 	Date          string `json:"date"`
-	Amount        int    `json:"amount"`
+	Amount        string `json:"amount"`
 	Description   string `json:"description"`
 	Type          string `json:"type"`
 	Balance       int    `json:"balance"`
