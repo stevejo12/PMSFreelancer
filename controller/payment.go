@@ -204,10 +204,10 @@ func TestFunction(c *gin.Context) {
 
 	singleData.ID = ""
 	singleData.BankID = ""
-	singleData.AccountNumber = 0
+	singleData.AccountNumber = ""
 	singleData.BankType = "bca"
 	singleData.Date = "30/06/2020"
-	singleData.Amount = "20887"
+	singleData.Amount = 20887
 	singleData.Description = "TRSF E-BANKING"
 	singleData.Type = "CR"
 	singleData.Balance = 1900000
