@@ -83,7 +83,9 @@ func main() {
 		v1.POST("/rejectReviewProject/:id", controller.AuthenticationToken, controller.RejectReviewProject)
 		v1.POST("/completeProject/:id", controller.AuthenticationToken, controller.CompleteProject)
 		v1.GET("/allProjectCategory", controller.AuthenticationToken, controller.GetAllProjectCategory)
+		v1.POST("/depositMoney", controller.AuthenticationToken, controller.DepositMoney)
 		v1.POST("/checkMutationMoota", controller.GetTransactionMutation)
+		// v1.GET("/testAPI", controller.TestFunction)
 		// v1.GET("/mootaProfile", controller.GetMootaProfile)
 	}
 

@@ -69,3 +69,8 @@ type ResponseOKProjectCategory struct {
 	ResponseWithNoBody
 	data []ProjectCategoryData
 }
+
+type ResponseOKDepositMoney struct {
+	ResponseWithNoBody
+	data ResponseDeposit
+}

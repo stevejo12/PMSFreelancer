@@ -12,3 +12,14 @@ type GetTransactionMutationRequest struct {
 	Type          string `json:"type"`
 	Balance       int    `json:"balance"`
 }
+
+type DepositParameter struct {
+	AccountName   string  `json:"accountName"`
+	AccountNumber int     `json:"accountNumber"`
+	Amount        float64 `json:"amount"`
+}
+
+type ResponseDeposit struct {
+	Amount          int    `json:"amount"`
+	TransferAccount string `json:"transferAccount"`
+}
