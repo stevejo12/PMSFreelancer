@@ -4,6 +4,7 @@ import (
 	// "PMSFreelancer/config"
 	// "PMSFreelancer/helpers"
 	// "PMSFreelancer/models"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -157,9 +158,10 @@ func GetAllUserProjects(c *gin.Context) {
 	// user id
 	id := idToken
 
-	result, err := config.DB.Query("SELECT id, title, description, status FROM project WHERE owner_id=?", id)
+	result, err := config.DB.Query("SELECT id, title, description, status, owner_id, accepted_memberid FROM project WHERE owner_id=? OR accepted_memberid=?", id, id)
 
 	if err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Something is wrong with query to get the project list"})
@@ -170,12 +172,27 @@ func GetAllUserProjects(c *gin.Context) {
 
 	for result.Next() {
 		var project models.GetUserProjectResponse
+		var ownerID, freelancerID string
+		var acceptedMember sql.NullString
 
-		if err = result.Scan(&project.ID, &project.Title, &project.Description, &project.Status); err != nil {
+		if err = result.Scan(&project.ID, &project.Title, &project.Description, &project.Status, &ownerID, &acceptedMember); err != nil {
+			fmt.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
 				"message": "Something is wrong with the database data"})
 			return
+		}
+
+		if acceptedMember.Valid {
+			freelancerID = acceptedMember.String
+		} else {
+			freelancerID = ""
+		}
+
+		if ownerID == id {
+			project.IsOwner = true
+		} else if freelancerID != "" && freelancerID == id {
+			project.IsOwner = false
 		}
 
 		allData = append(allData, project)
@@ -192,6 +209,56 @@ func GetAllUserProjects(c *gin.Context) {
 		"code":    http.StatusOK,
 		"message": "All Project data have been retrieved",
 		"data":    allData})
+}
+
+// DeleteProject => Deleting User Project
+// DeleteProject godoc
+// @Summary Deleting User Project
+// @Accept  json
+// @Tags Project
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /deleteProject/{id} [delete]
+func DeleteProject(c *gin.Context) {
+	userID := idToken
+	projectID := c.Param("id")
+	var ownerID, status string
+
+	// check if the portfolio id exist
+	// get the owner id and status for verification
+	err := config.DB.QueryRow("SELECT owner_id, status FROM project WHERE id=?", projectID).Scan(&ownerID, &status)
+
+	// check if the project owner is the one executing the delete
+	if ownerID != userID {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "This project doesn't belong to the user"})
+		return
+	}
+
+	// only project with status listed can be deleted
+	if status != "Listed" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Only Listed project can be deleted"})
+		return
+	}
+
+	_, err = config.DB.Exec("DELETE FROM project WHERE id=?", projectID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to delete the data in the database"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully deleted user project"})
 }
 
 // ProjectDetail => Project Detail

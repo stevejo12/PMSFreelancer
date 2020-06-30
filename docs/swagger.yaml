@@ -128,6 +128,8 @@ definitions:
         type: string
       id:
         type: integer
+      isOwner:
+        type: boolean
       status:
         type: string
       title:
@@ -142,6 +144,8 @@ definitions:
     type: object
   models.OwnerInfo:
     properties:
+      email:
+        type: string
       firstName:
         type: string
       id:
@@ -904,6 +908,37 @@ paths:
       summary: Deleting User Portfolio
       tags:
       - Portfolio
+  /deleteProject/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Deleting User Project
+      tags:
+      - Project
   /editEducation/{id}:
     put:
       consumes:

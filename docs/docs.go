@@ -588,6 +588,53 @@ var doc = `{
                 }
             }
         },
+        "/deleteProject/{id}": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Deleting User Project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
         "/editEducation/{id}": {
             "put": {
                 "consumes": [
@@ -1805,6 +1852,9 @@ var doc = `{
                 "id": {
                     "type": "integer"
                 },
+                "isOwner": {
+                    "type": "boolean"
+                },
                 "status": {
                     "type": "string"
                 },
@@ -1827,6 +1877,9 @@ var doc = `{
         "models.OwnerInfo": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "firstName": {
                     "type": "string"
                 },

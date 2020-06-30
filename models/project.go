@@ -65,6 +65,7 @@ type GetUserProjectResponse struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Status      string `json:"status"`
+	IsOwner     bool   `json:"isOwner"`
 }
 
 type ProjectDetailRequest struct {
