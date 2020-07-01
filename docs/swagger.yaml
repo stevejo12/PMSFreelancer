@@ -55,6 +55,15 @@ definitions:
       title:
         type: string
     type: object
+  models.DepositParameter:
+    properties:
+      accountName:
+        type: string
+      accountNumber:
+        type: integer
+      amount:
+        type: number
+    type: object
   models.EditProject:
     properties:
       attachment:
@@ -306,6 +315,17 @@ definitions:
       transferAccount:
         type: string
     type: object
+  models.ResponseOKAllWithdrawRequest:
+    properties:
+      code:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/models.WithdrawListData'
+        type: array
+      message:
+        type: string
+    type: object
   models.ResponseOKDepositMoney:
     properties:
       code:
@@ -376,6 +396,13 @@ definitions:
       data:
         $ref: '#/definitions/models.ProjectDetailResponse'
         type: object
+      message:
+        type: string
+    type: object
+  models.ResponseOKWithdrawMoney:
+    properties:
+      code:
+        type: string
       message:
         type: string
     type: object
@@ -546,6 +573,26 @@ definitions:
         type: string
       updatedAt:
         type: string
+    type: object
+  models.WithdrawListData:
+    properties:
+      accountNumber:
+        type: integer
+      amount:
+        type: number
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.WithdrawParameter:
+    properties:
+      accountName:
+        type: string
+      accountNumber:
+        type: integer
+      amount:
+        type: number
     type: object
 info:
   contact:
@@ -769,6 +816,28 @@ paths:
       summary: Getting all list of skills
       tags:
       - Skills
+  /allWithdrawRequests:
+    get:
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKAllWithdrawRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: 'Admin: Getting all pending withdraw requests'
+      tags:
+      - Payment
   /change-password:
     put:
       consumes:
@@ -829,6 +898,33 @@ paths:
       summary: Review Done For Project Owner
       tags:
       - Project
+  /completeWithdrawRequest/{id}:
+    put:
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Withdraw Request ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: 'Admin: Complete Withdraw Request By ID'
+      tags:
+      - Payment
   /deleteEducation/{id}:
     delete:
       consumes:
@@ -953,6 +1049,37 @@ paths:
       summary: Deleting User Project
       tags:
       - Project
+  /deleteUserWithdrawRequest/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Withdraw Request ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Deleting User Education
+      tags:
+      - Payment
   /depositMoney:
     post:
       consumes:
@@ -963,12 +1090,12 @@ paths:
         name: token
         required: true
         type: string
-      - description: Data Format to add project
+      - description: Data Format to deposit money
         in: body
         name: Data
         required: true
         schema:
-          $ref: '#/definitions/models.CreateProject'
+          $ref: '#/definitions/models.DepositParameter'
       produces:
       - application/json
       responses:
@@ -984,7 +1111,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
-      summary: Adding User Project
+      summary: Deposit Money
       tags:
       - Payment
   /editEducation/{id}:
@@ -1261,6 +1388,37 @@ paths:
       summary: Register new user using email and password
       tags:
       - User
+  /rejectReviewProject/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Reject Freelancer Review
+      tags:
+      - Project
   /resetPassword:
     post:
       consumes:
@@ -1405,6 +1563,40 @@ paths:
       summary: Submit Project Interest
       tags:
       - Project
+  /submitWithdrawRequest:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Data Format to withdraw money
+        in: body
+        name: Data
+        required: true
+        schema:
+          $ref: '#/definitions/models.WithdrawParameter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKWithdrawMoney'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Withdraw money
+      tags:
+      - Payment
   /updateNewPassword:
     post:
       consumes:
@@ -1631,4 +1823,26 @@ paths:
       summary: Add User Review
       tags:
       - User
+  /userWithdrawRequest:
+    get:
+      parameters:
+      - description: Token Header
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseOKAllWithdrawRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: All user pending withdraw requests
+      tags:
+      - Payment
 swagger: "2.0"

@@ -74,3 +74,12 @@ type ResponseOKDepositMoney struct {
 	ResponseWithNoBody
 	data ResponseDeposit
 }
+
+type ResponseOKWithdrawMoney struct {
+	ResponseWithNoBody
+}
+
+type ResponseOKAllWithdrawRequest struct {
+	ResponseWithNoBody
+	data []WithdrawListData
+}

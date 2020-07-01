@@ -84,6 +84,11 @@ func main() {
 		v1.GET("/allProjectCategory", controller.AuthenticationToken, controller.GetAllProjectCategory)
 		v1.POST("/depositMoney", controller.AuthenticationToken, controller.DepositMoney)
 		v1.POST("/checkMutationMoota", controller.GetTransactionMutation)
+		v1.POST("/submitWithdrawRequest", controller.AuthenticationToken, controller.WithdrawMoney)
+		v1.GET("/allWithdrawRequests", controller.AuthenticationToken, controller.GetAllWithdrawRequest)
+		v1.GET("/userWithdrawRequest", controller.AuthenticationToken, controller.GetUserWithdrawRequest)
+		v1.DELETE("/deleteUserWithdrawRequest/:id", controller.AuthenticationToken, controller.DeleteWithdrawRequest)
+		v1.PUT("/completeWithdrawRequest/:id", controller.AuthenticationToken, controller.CompleteWithdrawRequest)
 		// v1.GET("/testAPI", controller.TestFunction)
 		// v1.GET("/mootaProfile", controller.GetMootaProfile)
 	}

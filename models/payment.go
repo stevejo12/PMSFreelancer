@@ -13,6 +13,19 @@ type GetTransactionMutationRequest struct {
 	Balance       float64 `json:"balance"`
 }
 
+type WithdrawListData struct {
+	ID            int     `json:"id"`
+	Amount        float64 `json:"amount"`
+	Name          string  `json:"name"`
+	AccountNumber int     `json:"accountNumber"`
+}
+
+type WithdrawParameter struct {
+	AccountName   string  `json:"accountName"`
+	AccountNumber int     `json:"accountNumber"`
+	Amount        float64 `json:"amount"`
+}
+
 type DepositParameter struct {
 	AccountName   string  `json:"accountName"`
 	AccountNumber int     `json:"accountNumber"`

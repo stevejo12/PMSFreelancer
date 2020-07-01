@@ -813,6 +813,16 @@ func CompleteProject(c *gin.Context) {
 	}
 }
 
+// RejectReviewProject godoc
+// @Summary Reject Freelancer Review
+// @Accept  json
+// @Tags Project
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Project ID"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /rejectReviewProject/{id} [post]
 func RejectReviewProject(c *gin.Context) {
 	// project id
 	id := c.Param("id")
@@ -852,13 +862,13 @@ func RejectReviewProject(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
-				"message": "Server is unable to execute query to the database"})
+				"message": "Server is unable to get project status"})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
-			"message": "Successfully updating project to On Going"})
+			"message": "Successfully reject freelancer review"})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"code":    http.StatusUnauthorized,

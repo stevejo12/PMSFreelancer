@@ -3,6 +3,7 @@ package controller
 import (
 	// "PMSFreelancer/config"
 	// "PMSFreelancer/models"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -125,12 +126,12 @@ func callbackTransaction(req string) ([]models.GetTransactionMutationRequest, er
 
 // DepositMoney => User will request to top up balance
 // DepositMoney godoc
-// @Summary Adding User Project
+// @Summary Deposit Money
 // @Produce json
 // @Accept  json
 // @Tags Payment
 // @Param token header string true "Token Header"
-// @Param Data body models.CreateProject true "Data Format to add project"
+// @Param Data body models.DepositParameter true "Data Format to deposit money"
 // @Success 200 {object} models.ResponseOKDepositMoney
 // @Failure 400 {object} models.ResponseWithNoBody
 // @Failure 500 {object} models.ResponseWithNoBody
@@ -198,31 +199,6 @@ func DepositMoney(c *gin.Context) {
 		"data":    resp})
 }
 
-func TestFunction(c *gin.Context) {
-	singleData := models.GetTransactionMutationRequest{}
-	data := []models.GetTransactionMutationRequest{}
-
-	singleData.ID = ""
-	singleData.BankID = ""
-	singleData.AccountNumber = ""
-	singleData.BankType = "bca"
-	singleData.Date = "30/06/2020"
-	singleData.Amount = 20887
-	singleData.Description = "TRSF E-BANKING"
-	singleData.Type = "CR"
-	singleData.Balance = 1900000
-
-	data = append(data, singleData)
-	err := checkDepositHistory(data)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": err.Error()})
-		return
-	}
-}
-
 func checkDepositHistory(data []models.GetTransactionMutationRequest) error {
 	for i := 0; i < len(data); i++ {
 		amount := data[i].Amount
@@ -285,4 +261,321 @@ func updateUserBalance(id int, userID int, amount int) error {
 	}
 
 	return nil
+}
+
+// GetUserWithdrawRequest => User Withdraw Request
+// GetUserWithdrawRequest godoc
+// @Summary All user pending withdraw requests
+// @Produce json
+// @Tags Payment
+// @Param token header string true "Token Header"
+// @Success 200 {object} models.ResponseOKAllWithdrawRequest
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /userWithdrawRequest [get]
+func GetUserWithdrawRequest(c *gin.Context) {
+	id := idToken
+
+	query := "SELECT id, amount, name, account_number FROM payment_request WHERE type=\"Withdraw\" AND status=\"Pending\" AND user_id=" + id
+
+	resp, err := config.DB.Query(query)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to retrieve withdraw list"})
+		return
+	}
+
+	allData := []models.WithdrawListData{}
+
+	for resp.Next() {
+		data := models.WithdrawListData{}
+		if err := resp.Scan(&data.ID, &data.Amount, &data.Name, &data.AccountNumber); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Something is wrong with the database data"})
+			return
+		}
+
+		allData = append(allData, data)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully get user withdraw requests",
+		"data":    allData})
+}
+
+// DeleteWithdrawRequest => Deleting User Education
+// DeleteWithdrawRequest godoc
+// @Summary Deleting User Education
+// @Accept  json
+// @Tags Payment
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Withdraw Request ID"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /deleteUserWithdrawRequest/{id} [delete]
+func DeleteWithdrawRequest(c *gin.Context) {
+	id := idToken
+	requestID := c.Param("id")
+
+	var userID, requestType, status string
+	var amount float64
+
+	query := "SELECT amount, user_id, type, status FROM payment_request WHERE id=" + requestID
+
+	err := config.DB.QueryRow(query).Scan(&amount, &userID, &requestType, &status)
+
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to get withdraw request data"})
+		return
+	}
+
+	// make sure the real user logged in that request the withdraw
+	if userID != id {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "This is not the owner who request the withdraw"})
+		return
+	}
+
+	if requestType != "Withdraw" {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "This is not the withdraw request"})
+		return
+	}
+
+	if status != "Pending" {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "This withdraw has been done"})
+		return
+	}
+
+	var balance float64
+	queryBalance := "SELECT balance FROM login WHERE id=" + id
+	err = config.DB.QueryRow(queryBalance).Scan(&balance)
+
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "User ID doesn't exist"})
+		return
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to retrieve user balance"})
+		return
+	}
+
+	// return the money to user balance
+	balance = balance + amount
+
+	updateBalanceQuery := "UPDATE login SET balance=" + fmt.Sprintf("%f", balance) + " WHERE id=" + id
+
+	_, err = config.DB.Exec(updateBalanceQuery)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to update user balance"})
+		return
+	}
+
+	// delete withdraw request
+	queryDelete := "DELETE FROM payment_request WHERE id=" + requestID
+	_, err = config.DB.Exec(queryDelete)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to delete withdraw request"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully remove withdraw request"})
+}
+
+// GetAllWithdrawRequest => List of Pending Withdraw Request
+// GetAllWithdrawRequest godoc
+// @Summary Admin: Getting all pending withdraw requests
+// @Produce json
+// @Tags Payment
+// @Param token header string true "Token Header"
+// @Success 200 {object} models.ResponseOKAllWithdrawRequest
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /allWithdrawRequests [get]
+func GetAllWithdrawRequest(c *gin.Context) {
+	query := "SELECT id, amount, name, account_number FROM payment_request WHERE type=\"Withdraw\" AND status=\"Pending\""
+
+	resp, err := config.DB.Query(query)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to retrieve withdraw list"})
+		return
+	}
+
+	allData := []models.WithdrawListData{}
+
+	for resp.Next() {
+		data := models.WithdrawListData{}
+		if err := resp.Scan(&data.ID, &data.Amount, &data.Name, &data.AccountNumber); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Something is wrong with the database data"})
+			return
+		}
+
+		allData = append(allData, data)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully get all withdraw request",
+		"data":    allData})
+}
+
+// CompleteWithdrawRequest => Complete Withdraw Request By ID
+// CompleteWithdrawRequest godoc
+// @Summary Admin: Complete Withdraw Request By ID
+// @Produce json
+// @Tags Payment
+// @Param token header string true "Token Header"
+// @Param id path int64 true "Withdraw Request ID"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /completeWithdrawRequest/{id} [put]
+func CompleteWithdrawRequest(c *gin.Context) {
+	requestID := c.Param("id")
+	query := "SELECT type, status FROM payment_request WHERE id=" + requestID
+
+	var reqType, status string
+	err := config.DB.QueryRow(query).Scan(&reqType, &status)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to retrieve request information"})
+		return
+	}
+
+	if reqType != "Withdraw" {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "This is not the withdraw request"})
+		return
+	}
+
+	if status != "Pending" {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "This withdraw has been done"})
+		return
+	}
+
+	updateBalanceQuery := "UPDATE payment_request SET status=\"Done\" WHERE id=" + requestID
+
+	_, err = config.DB.Exec(updateBalanceQuery)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to update payment request to done"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully complete withdraw request"})
+}
+
+// WithdrawMoney => User request to withdraw balance
+// WithdrawMoney godoc
+// @Summary Withdraw money
+// @Produce json
+// @Accept  json
+// @Tags Payment
+// @Param token header string true "Token Header"
+// @Param Data body models.WithdrawParameter true "Data Format to withdraw money"
+// @Success 200 {object} models.ResponseOKWithdrawMoney
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /submitWithdrawRequest [post]
+func WithdrawMoney(c *gin.Context) {
+	id := idToken
+
+	param := models.WithdrawParameter{}
+
+	err := c.BindJSON(&param)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Data format is invalid"})
+		return
+	}
+
+	var balance float64
+	getBalanceQuery := "SELECT balance FROM login WHERE id=" + id
+	err = config.DB.QueryRow(getBalanceQuery).Scan(&balance)
+
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "User ID doesn't exist"})
+		return
+	} else if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to retrieve user balance"})
+		return
+	}
+
+	if balance < param.Amount {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Balance is not enough"})
+		return
+	}
+
+	// deduct the balance
+	balance = balance - param.Amount
+
+	query := "UPDATE login SET balance=" + fmt.Sprintf("%f", balance) + " WHERE id=" + id
+
+	_, err = config.DB.Exec(query)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to update user balance"})
+		return
+	}
+
+	withdrawQuery := "INSERT INTO payment_request(amount, type, name, account_number, user_id) VALUES"
+	withdrawQuery = withdrawQuery + "(" + fmt.Sprintf("%f", param.Amount) + ", \"Withdraw\", \"" + param.AccountName + "\", " + strconv.Itoa(param.AccountNumber) + ", " + id + ")"
+
+	_, err = config.DB.Exec(withdrawQuery)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to create withdraw request"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Successfully submit withdraw request"})
 }
