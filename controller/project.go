@@ -578,6 +578,13 @@ func AcceptProjectInterest(c *gin.Context) {
 		return
 	}
 
+	if param.TrelloKey == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    4001,
+			"message": "Trello Key should not be empty"})
+		return
+	}
+
 	// check if status is currently Listed
 	var status string
 	var price float64
@@ -620,7 +627,7 @@ func AcceptProjectInterest(c *gin.Context) {
 
 		if !enoughBalance {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"code":    http.StatusBadRequest,
+				"code":    4002,
 				"message": "Effective balance is not enough. Please top up first"})
 			return
 		}
