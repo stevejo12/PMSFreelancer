@@ -1821,6 +1821,12 @@ var doc = `{
                         "name": "token",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Status Project Filter",
+                        "name": "status",
+                        "in": "query"
                     }
                 ],
                 "responses": {

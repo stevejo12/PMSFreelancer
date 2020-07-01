@@ -151,17 +151,48 @@ func AddProject(c *gin.Context) {
 // @Accept  json
 // @Tags Project
 // @Param token header string true "Token Header"
+// @Param status query string false "Status Project Filter"
 // @Success 200 {object} models.ResponseOKGetUserProject
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /userProjects [get]
 func GetAllUserProjects(c *gin.Context) {
+	statusChoice := []string{"listed", "on going", "on review", "done"}
+	interfaceChoice := make([]interface{}, len(statusChoice))
+	for i, v := range statusChoice {
+		interfaceChoice[i] = v
+	}
 	// user id
 	id := idToken
 
-	result, err := config.DB.Query("SELECT id, title, description, status, owner_id, accepted_memberid, trello_url FROM project WHERE owner_id=? OR accepted_memberid=?", id, id)
+	var status string
+	statusParam, okStatus := c.Request.URL.Query()["status"]
+
+	if !okStatus || len(statusParam) < 1 {
+		status = ""
+	} else {
+		status = strings.ToLower(statusParam[0])
+	}
+
+	if status != "" {
+		correctStatusFilter := helpers.Contains(interfaceChoice, status)
+
+		if !correctStatusFilter {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "Status filter name not recognized"})
+			return
+		}
+	}
+
+	query := "SELECT id, title, description, status, owner_id, accepted_memberid, trello_url FROM project WHERE"
+	if status != "" {
+		query = query + " status=\"" + status + "\" AND"
+	}
+	query = query + "(owner_id=" + id + " OR accepted_memberid=" + id + ") ORDER BY id DESC"
+
+	result, err := config.DB.Query(query)
 
 	if err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Something is wrong with query to get the project list"})

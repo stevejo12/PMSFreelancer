@@ -20,6 +20,11 @@ type WithdrawListData struct {
 	AccountNumber int     `json:"accountNumber"`
 }
 
+type AllWithdrawListData struct {
+	WithdrawListData
+	Username string `json:"username"`
+}
+
 type WithdrawParameter struct {
 	AccountName   string  `json:"accountName"`
 	AccountNumber int     `json:"accountNumber"`

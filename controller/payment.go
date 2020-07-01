@@ -414,7 +414,7 @@ func DeleteWithdrawRequest(c *gin.Context) {
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /allWithdrawRequests [get]
 func GetAllWithdrawRequest(c *gin.Context) {
-	query := "SELECT id, amount, name, account_number FROM payment_request WHERE type=\"Withdraw\" AND status=\"Pending\""
+	query := "SELECT id, amount, name, account_number, user_id FROM payment_request WHERE type=\"Withdraw\" AND status=\"Pending\""
 
 	resp, err := config.DB.Query(query)
 
@@ -425,16 +425,34 @@ func GetAllWithdrawRequest(c *gin.Context) {
 		return
 	}
 
-	allData := []models.WithdrawListData{}
+	allData := []models.AllWithdrawListData{}
 
 	for resp.Next() {
-		data := models.WithdrawListData{}
-		if err := resp.Scan(&data.ID, &data.Amount, &data.Name, &data.AccountNumber); err != nil {
+		data := models.AllWithdrawListData{}
+		var userID int
+		if err := resp.Scan(&data.ID, &data.Amount, &data.Name, &data.AccountNumber, &userID); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
 				"message": "Something is wrong with the database data"})
 			return
 		}
+
+		var username string
+		err := config.DB.QueryRow("SELECT username FROM login WHERE id=?", userID).Scan(&username)
+
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server can't find the user id who requested the withdraw"})
+			return
+		} else if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server can't find username of the user"})
+			return
+		}
+
+		data.Username = username
 
 		allData = append(allData, data)
 	}
