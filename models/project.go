@@ -66,6 +66,7 @@ type GetUserProjectResponse struct {
 	Description string `json:"description"`
 	Status      string `json:"status"`
 	IsOwner     bool   `json:"isOwner"`
+	TrelloURL   string `json:"trelloUrl"`
 }
 
 type ProjectDetailRequest struct {

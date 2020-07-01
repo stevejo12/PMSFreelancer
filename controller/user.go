@@ -734,7 +734,12 @@ func GetUserProfile(c *gin.Context) {
 
 	err = config.DB.QueryRow("SELECT id, first_name, last_name, email, description, picture, created_at, username, location, skill, balance, phone_code, phone_number FROM login WHERE id=?", id).Scan(&dataQuery.ID, &dataQuery.Firstname, &dataQuery.LastName, &dataQuery.Email, &dataQuery.Description, &picData, &dataQuery.CreatedAt, &dataQuery.Username, &dataQuery.Location, &dataQuery.Skills, &dataQuery.Balance, &dataQuery.PhoneCode, &dataQuery.PhoneNumber)
 
-	if err != nil {
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server can't find user with that id"})
+		return
+	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query to the database"})
@@ -797,6 +802,16 @@ func GetUserProfile(c *gin.Context) {
 		return
 	}
 
+	// get user reviews
+	userReviews, err := getUserReviews(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
 	// arrange all data
 	data.Education = educationData
 	data.Experience = experienceData
@@ -814,6 +829,7 @@ func GetUserProfile(c *gin.Context) {
 	data.Balance = dataQuery.Balance
 	data.PhoneCode = dataQuery.PhoneCode
 	data.PhoneNumber = dataQuery.PhoneNumber
+	data.Review = userReviews
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
@@ -938,7 +954,12 @@ func GetUserProfileByID(c *gin.Context) {
 
 	err = config.DB.QueryRow("SELECT id, first_name, last_name, email, description, picture, created_at, username, location, skill, balance FROM login WHERE id=?", id).Scan(&dataQuery.ID, &dataQuery.Firstname, &dataQuery.LastName, &dataQuery.Email, &dataQuery.Description, &picData, &dataQuery.CreatedAt, &dataQuery.Username, &dataQuery.Location, &dataQuery.Skills, &dataQuery.Balance)
 
-	if err != nil {
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server can't find user with that id"})
+		return
+	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to execute query to the database"})
@@ -994,6 +1015,16 @@ func GetUserProfileByID(c *gin.Context) {
 		return
 	}
 
+	// get user reviews
+	userReviews, err := getUserReviews(id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
 	// arrange all data
 	data.Education = educationData
 	data.Experience = experienceData
@@ -1009,6 +1040,7 @@ func GetUserProfileByID(c *gin.Context) {
 	data.Location = country
 	data.Portfolio = userPortfolio
 	data.Balance = dataQuery.Balance
+	data.Review = userReviews
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,

@@ -635,6 +635,58 @@ var doc = `{
                 }
             }
         },
+        "/depositMoney": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment"
+                ],
+                "summary": "Adding User Project",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token Header",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Data Format to add project",
+                        "name": "Data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateProject"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseOKDepositMoney"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
         "/editEducation/{id}": {
             "put": {
                 "consumes": [
@@ -1567,41 +1619,6 @@ var doc = `{
             }
         },
         "/userReview": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "Get User Review",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Token Header",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseOKUserReviews"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ResponseWithNoBody"
-                        }
-                    }
-                }
-            },
             "post": {
                 "consumes": [
                     "application/json"
@@ -1658,6 +1675,9 @@ var doc = `{
         "models.AddReview": {
             "type": "object",
             "properties": {
+                "isOwner": {
+                    "type": "boolean"
+                },
                 "message": {
                     "type": "string"
                 },
@@ -1665,9 +1685,6 @@ var doc = `{
                     "type": "integer"
                 },
                 "starRating": {
-                    "type": "integer"
-                },
-                "userID": {
                     "type": "integer"
                 }
             }
@@ -1859,6 +1876,9 @@ var doc = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "trelloUrl": {
                     "type": "string"
                 }
             }
@@ -2112,6 +2132,32 @@ var doc = `{
                 }
             }
         },
+        "models.ResponseDeposit": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "transferAccount": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ResponseOKDepositMoney": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.ResponseDeposit"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ResponseOKGetAllCountries": {
             "type": "object",
             "properties": {
@@ -2202,23 +2248,6 @@ var doc = `{
                 "data": {
                     "type": "object",
                     "$ref": "#/definitions/models.ProjectDetailResponse"
-                },
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.ResponseOKUserReviews": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/models.ReviewInfo"
-                    }
                 },
                 "message": {
                     "type": "string"
@@ -2381,6 +2410,9 @@ var doc = `{
                 "id": {
                     "type": "integer"
                 },
+                "isOwner": {
+                    "type": "boolean"
+                },
                 "lastName": {
                     "type": "string"
                 }
@@ -2443,6 +2475,12 @@ var doc = `{
                 },
                 "projectCompleted": {
                     "type": "integer"
+                },
+                "review": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ReviewInfo"
+                    }
                 },
                 "skill": {
                     "type": "array",

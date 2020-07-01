@@ -74,6 +74,7 @@ type UserProfile struct {
 	ProjectCompleted int                        `json:"projectCompleted"`
 	PhoneCode        int                        `json:"phoneCode"`
 	PhoneNumber      int                        `json:"phoneNumber"`
+	Review           []ReviewInfo               `json:"review"`
 }
 
 type QueryUserProfile struct {

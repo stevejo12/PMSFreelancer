@@ -158,7 +158,7 @@ func GetAllUserProjects(c *gin.Context) {
 	// user id
 	id := idToken
 
-	result, err := config.DB.Query("SELECT id, title, description, status, owner_id, accepted_memberid FROM project WHERE owner_id=? OR accepted_memberid=?", id, id)
+	result, err := config.DB.Query("SELECT id, title, description, status, owner_id, accepted_memberid, trello_url FROM project WHERE owner_id=? OR accepted_memberid=?", id, id)
 
 	if err != nil {
 		fmt.Println(err)
@@ -173,9 +173,9 @@ func GetAllUserProjects(c *gin.Context) {
 	for result.Next() {
 		var project models.GetUserProjectResponse
 		var ownerID, freelancerID string
-		var acceptedMember sql.NullString
+		var acceptedMember, trelloURL sql.NullString
 
-		if err = result.Scan(&project.ID, &project.Title, &project.Description, &project.Status, &ownerID, &acceptedMember); err != nil {
+		if err = result.Scan(&project.ID, &project.Title, &project.Description, &project.Status, &ownerID, &acceptedMember, &trelloURL); err != nil {
 			fmt.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
@@ -187,6 +187,12 @@ func GetAllUserProjects(c *gin.Context) {
 			freelancerID = acceptedMember.String
 		} else {
 			freelancerID = ""
+		}
+
+		if trelloURL.Valid {
+			project.TrelloURL = trelloURL.String
+		} else {
+			project.TrelloURL = ""
 		}
 
 		if ownerID == id {
@@ -543,7 +549,15 @@ func AcceptProjectInterest(c *gin.Context) {
 
 	// check if status is currently Listed
 	var status string
-	err = config.DB.QueryRow("SELECT status FROM project WHERE id=?", id).Scan(&status)
+	var price float64
+	err = config.DB.QueryRow("SELECT status, price FROM project WHERE id=?", id).Scan(&status, &price)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server is unable to retrieve project information"})
+		return
+	}
 
 	if status != "Listed" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -563,6 +577,23 @@ func AcceptProjectInterest(c *gin.Context) {
 	}
 
 	if owner {
+		// check user balance
+		enoughBalance, err := helpers.IsUserEffectiveBalanceEnough(ownerID, price)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
+		if !enoughBalance {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    http.StatusBadRequest,
+				"message": "Effective balance is not enough. Please top up first"})
+			return
+		}
+
 		// check if the member is registered
 		member, err := helpers.IsThisMemberRegistered(id, param.FreelancerID)
 
@@ -604,6 +635,16 @@ func AcceptProjectInterest(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"code":    http.StatusInternalServerError,
 					"message": "Server is unable to execute query to the database"})
+				return
+			}
+
+			// freeze the money
+			err = helpers.MoveBalanceToFreezeBalance(ownerID, price)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": err.Error()})
 				return
 			}
 
@@ -702,7 +743,7 @@ func CompleteProject(c *gin.Context) {
 	// project id
 	id := c.Param("id")
 
-	ownerID, err := strconv.Atoi(idToken)
+	tokenID, err := strconv.Atoi(idToken)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -713,7 +754,8 @@ func CompleteProject(c *gin.Context) {
 
 	// check if status is currently On Review
 	var status string
-	err = config.DB.QueryRow("SELECT status FROM project WHERE id=?", id).Scan(&status)
+	var ownerID, freelancerID int
+	err = config.DB.QueryRow("SELECT status, owner_id, accepted_memberid FROM project WHERE id=?", id).Scan(&status, &ownerID, &freelancerID)
 
 	if status != "On Review" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -722,6 +764,15 @@ func CompleteProject(c *gin.Context) {
 		return
 	}
 
+	// check owner credentials based on token id
+	if ownerID != tokenID {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "This is not the owner"})
+		return
+	}
+
+	// check owner credentials based on owner id info in the database
 	owner, err := helpers.IsThisIDProjectOwner(id, ownerID)
 
 	if err != nil {
@@ -733,6 +784,16 @@ func CompleteProject(c *gin.Context) {
 
 	if owner {
 		_, err = config.DB.Exec("UPDATE project SET status=? WHERE id=?", "Done", id)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Server is unable to execute query to the database"})
+			return
+		}
+
+		// deduct balance and freeze balance from owner and send it to freelancer
+		err = helpers.UpdateUserBalanceAfterProject(id)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{

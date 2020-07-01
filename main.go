@@ -49,7 +49,6 @@ func main() {
 		v1.GET("/allCountries", controller.GetAllCountries)
 		v1.GET("/userProfile/:id", controller.AuthenticationToken, controller.GetUserProfileByID)
 		v1.GET("/userProfile", controller.AuthenticationToken, controller.GetUserProfile)
-		v1.GET("/userReview", controller.AuthenticationToken, controller.GetUserReviews)
 		v1.POST("/userReview", controller.AuthenticationToken, controller.AddUserReview)
 		v1.PUT("/updateProfile", controller.AuthenticationToken, controller.UpdateUserProfile)
 		v1.POST("/addPortfolio", controller.AuthenticationToken, controller.AddUserPortfolio)
