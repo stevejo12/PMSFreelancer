@@ -16,8 +16,7 @@ RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN ssh-keyscan 13.229.188.59 >> /root/.ssh/known_hosts
 
-RUN git config --global --add url."git@github.com:".insteadOf "https://github.com/"
-RUN git config --global http.sslVerify false
+RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
 
 RUN go get github.com/stevejo12/PMSFreelancer
 RUN go get github.com/gin-gonic/gin
