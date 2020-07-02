@@ -2203,6 +2203,10 @@ var doc = `{
                 "isOwner": {
                     "type": "boolean"
                 },
+                "reviewee": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.UserReviewInfo"
+                },
                 "status": {
                     "type": "string"
                 },
@@ -2846,6 +2850,23 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/models.UserSkills"
                     }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserReviewInfo": {
+            "type": "object",
+            "properties": {
+                "firstName": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "picture": {
+                    "type": "string"
                 },
                 "username": {
                     "type": "string"

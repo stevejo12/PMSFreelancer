@@ -202,8 +202,9 @@ func GetAllUserProjects(c *gin.Context) {
 	allData := []models.GetUserProjectResponse{}
 
 	for result.Next() {
-		var project models.GetUserProjectResponse
-		var ownerID, freelancerID string
+		project := models.GetUserProjectResponse{}
+		targetReview := models.UserReviewInfo{}
+		var ownerID, freelancerID, targetID string
 		var acceptedMember, trelloURL sql.NullString
 
 		if err = result.Scan(&project.ID, &project.Title, &project.Description, &project.Status, &ownerID, &acceptedMember, &trelloURL); err != nil {
@@ -228,8 +229,22 @@ func GetAllUserProjects(c *gin.Context) {
 
 		if ownerID == id {
 			project.IsOwner = true
+			targetID = freelancerID
 		} else if freelancerID != "" && freelancerID == id {
 			project.IsOwner = false
+			targetID = ownerID
+		}
+
+		// get reviewee information
+		if targetID != "" {
+			err = config.DB.QueryRow("SELECT first_name, last_name, username, picture FROM login WHERE id=?", targetID).Scan(&targetReview.FirstName, &targetReview.LastName, &targetReview.Username, &targetReview.Picture)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"code":    http.StatusInternalServerError,
+					"message": "Server unable to get reviewee information"})
+				return
+			}
 		}
 
 		// enable isComment
@@ -243,6 +258,7 @@ func GetAllUserProjects(c *gin.Context) {
 		}
 
 		project.IsComment = ableToComment
+		project.Reviewee = targetReview
 
 		allData = append(allData, project)
 	}

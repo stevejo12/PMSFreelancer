@@ -60,14 +60,22 @@ type EditProject struct {
 	Category    int
 }
 
+type UserReviewInfo struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Username  string `json:"username"`
+	Picture   string `json:"picture"`
+}
+
 type GetUserProjectResponse struct {
-	ID          int    `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Status      string `json:"status"`
-	IsOwner     bool   `json:"isOwner"`
-	TrelloURL   string `json:"trelloUrl"`
-	IsComment   bool   `json:"isComment"`
+	ID          int            `json:"id"`
+	Title       string         `json:"title"`
+	Description string         `json:"description"`
+	Status      string         `json:"status"`
+	IsOwner     bool           `json:"isOwner"`
+	TrelloURL   string         `json:"trelloUrl"`
+	IsComment   bool           `json:"isComment"`
+	Reviewee    UserReviewInfo `json:"reviewee"`
 }
 
 type ProjectDetailRequest struct {

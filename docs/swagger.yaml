@@ -146,6 +146,9 @@ definitions:
         type: boolean
       isOwner:
         type: boolean
+      reviewee:
+        $ref: '#/definitions/models.UserReviewInfo'
+        type: object
       status:
         type: string
       title:
@@ -567,6 +570,17 @@ definitions:
         items:
           $ref: '#/definitions/models.UserSkills'
         type: array
+      username:
+        type: string
+    type: object
+  models.UserReviewInfo:
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+      picture:
+        type: string
       username:
         type: string
     type: object
