@@ -18,7 +18,6 @@ RUN ssh-keyscan 13.229.188.59 >> /root/.ssh/known_hosts
 
 RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
 
-RUN go get github.com/stevejo12/PMSFreelancer
 RUN go get github.com/gin-gonic/gin
 RUN go get github.com/swaggo/files
 RUN go get github.com/swaggo/gin-swagger
@@ -30,6 +29,7 @@ RUN go get golang.org/x/oauth2
 RUN go get cloud.google.com/go
 RUN go get gopkg.in/gomail.v2
 RUN go get golang.org/x/crypto/bcrypt
+RUN go get github.com/stevejo12/PMSFreelancer
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
