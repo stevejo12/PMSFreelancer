@@ -1831,6 +1831,10 @@ paths:
         in: query
         name: status
         type: string
+      - description: Status Project Filter
+        in: query
+        name: isOwner
+        type: boolean
       produces:
       - application/json
       responses:

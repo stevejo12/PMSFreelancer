@@ -1872,6 +1872,12 @@ var doc = `{
                         "description": "Status Project Filter",
                         "name": "status",
                         "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Status Project Filter",
+                        "name": "isOwner",
+                        "in": "query"
                     }
                 ],
                 "responses": {

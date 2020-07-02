@@ -152,6 +152,7 @@ func AddProject(c *gin.Context) {
 // @Tags Project
 // @Param token header string true "Token Header"
 // @Param status query string false "Status Project Filter"
+// @Param isOwner query bool false "Status Project Filter"
 // @Success 200 {object} models.ResponseOKGetUserProject
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /userProjects [get]
@@ -164,13 +165,18 @@ func GetAllUserProjects(c *gin.Context) {
 	// user id
 	id := idToken
 
-	var status string
+	var status, isOwnerFilter string
 	statusParam, okStatus := c.Request.URL.Query()["status"]
+	isOwnerParam, _ := c.Request.URL.Query()["isOwner"]
 
 	if !okStatus || len(statusParam) < 1 {
 		status = ""
 	} else {
 		status = strings.ToLower(statusParam[0])
+	}
+
+	if len(isOwnerParam) >= 1 {
+		isOwnerFilter = isOwnerParam[0]
 	}
 
 	if status != "" {
@@ -260,7 +266,11 @@ func GetAllUserProjects(c *gin.Context) {
 		project.IsComment = ableToComment
 		project.Reviewee = targetReview
 
-		allData = append(allData, project)
+		if isOwnerFilter == "" {
+			allData = append(allData, project)
+		} else if strconv.FormatBool(project.IsOwner) == isOwnerFilter {
+			allData = append(allData, project)
+		}
 	}
 
 	if result.Err() != nil {
