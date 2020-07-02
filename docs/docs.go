@@ -2394,6 +2394,9 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "status": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 }

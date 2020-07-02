@@ -31,7 +31,7 @@ func getUserReviews(id string) ([]models.ReviewInfo, error) {
 		returnData := models.ReviewInfo{}
 		var isOwner, projectID, userID, memberID int
 		var dateCreated string
-		if err := result.Scan(&returnData.ID, &returnData.Message, &returnData.StarRating, &projectID, &userID, &memberID, &dateCreated, &isOwner); err != nil {
+		if err := result.Scan(&returnData.ID, &returnData.Message, &returnData.StarRating, &projectID, &memberID, &userID, &dateCreated, &isOwner); err != nil {
 			return []models.ReviewInfo{}, errors.New("Something is wrong with the database data")
 		}
 

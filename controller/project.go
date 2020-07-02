@@ -340,7 +340,7 @@ func ProjectDetail(c *gin.Context) {
 	// project id
 	id := c.Param("id")
 
-	result, err := config.DB.Query("SELECT id, title, skills, price, owner_id, interested_members, description, category_id FROM project WHERE id=?", id)
+	result, err := config.DB.Query("SELECT id, title, skills, price, owner_id, interested_members, description, category_id, status FROM project WHERE id=?", id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -353,7 +353,7 @@ func ProjectDetail(c *gin.Context) {
 	for result.Next() {
 		var dbResult models.ProjectDetailRequest
 
-		if err = result.Scan(&dbResult.ID, &dbResult.Title, &dbResult.Skills, &dbResult.Price, &dbResult.OwnerID, &dbResult.InterestedMembers, &dbResult.Description, &dbResult.Category); err != nil {
+		if err = result.Scan(&dbResult.ID, &dbResult.Title, &dbResult.Skills, &dbResult.Price, &dbResult.OwnerID, &dbResult.InterestedMembers, &dbResult.Description, &dbResult.Category, &dbResult.Status); err != nil {
 			fmt.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    http.StatusInternalServerError,
@@ -461,6 +461,7 @@ func ProjectDetail(c *gin.Context) {
 		data.InterestedMembers = interestedMembers
 		data.Description = dbResult.Description
 		data.Category = categoryName
+		data.Status = dbResult.Status
 	}
 
 	c.JSON(http.StatusOK, gin.H{

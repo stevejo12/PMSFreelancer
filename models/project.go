@@ -87,6 +87,7 @@ type ProjectDetailRequest struct {
 	InterestedMembers sql.NullString
 	Description       string
 	Category          int
+	Status            string
 }
 
 type ProjectDetailResponse struct {
@@ -99,6 +100,7 @@ type ProjectDetailResponse struct {
 	InterestedMembers []ProjectDetailInterestedMember `json:"interestedMembers"`
 	Description       string                          `json:"description"`
 	Category          string                          `json:"category"`
+	Status            string                          `json:"status"`
 }
 
 type ProjectDetailInterestedMember struct {
