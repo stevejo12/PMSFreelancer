@@ -40,6 +40,7 @@ func main() {
 	v1 := r.Group("/v1")
 	{
 		v1.GET("/", handleHome)
+		v1.POST("/checkEmail", controller.CheckEmail)
 		v1.POST("/register", controller.RegisterUserWithPassword)
 		v1.GET("/googleRegister", controller.HandleRegisterGoogle)
 		v1.GET("/registerCallback", controller.HandleCallbackRegisterGoogle)

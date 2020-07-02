@@ -20,6 +20,11 @@ definitions:
       oldPassword:
         type: string
     type: object
+  models.CheckEmail:
+    properties:
+      email:
+        type: string
+    type: object
   models.CountryData:
     properties:
       countryCode:
@@ -137,6 +142,8 @@ definitions:
         type: string
       id:
         type: integer
+      isComment:
+        type: boolean
       isOwner:
         type: boolean
       status:
@@ -865,6 +872,35 @@ paths:
           schema:
             $ref: '#/definitions/models.ResponseWithNoBody'
       summary: Register new user using email and password
+      tags:
+      - User
+  /checkEmail:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Data Format to check email existence
+        in: body
+        name: Data
+        required: true
+        schema:
+          $ref: '#/definitions/models.CheckEmail'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ResponseWithNoBody'
+      summary: Check If Email exists in DB
       tags:
       - User
   /completeProject/{id}:

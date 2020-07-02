@@ -100,3 +100,7 @@ type UpdateProfile struct {
 	Location    int    `json:"location"`
 	Description string `json:"description"`
 }
+
+type CheckEmail struct {
+	Email string `json:"email"`
+}

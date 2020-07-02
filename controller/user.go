@@ -1047,3 +1047,39 @@ func GetUserProfileByID(c *gin.Context) {
 		"message": "All User Profile data have been successfully retrieved",
 		"data":    data})
 }
+
+// CheckEmail => Check if Email is already registered in database
+// CheckEmail godoc
+// @Summary Check If Email exists in DB
+// @Produce json
+// @Accept  json
+// @Tags User
+// @Param Data body models.CheckEmail true "Data Format to check email existence"
+// @Success 200 {object} models.ResponseWithNoBody
+// @Failure 400 {object} models.ResponseWithNoBody
+// @Failure 500 {object} models.ResponseWithNoBody
+// @Router /checkEmail [post]
+func CheckEmail(c *gin.Context) {
+	param := models.CheckEmail{}
+
+	err := c.BindJSON(&param)
+
+	var email string
+	err = config.DB.QueryRow("SELECT email FROM login WHERE email=?", param.Email).Scan(&email)
+
+	if err == sql.ErrNoRows {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    http.StatusOK,
+			"message": "Registration can continue"})
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "Server unable to get information from database"})
+		return
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": "Email is already registered in our database"})
+		return
+	}
+}

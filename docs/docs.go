@@ -434,6 +434,51 @@ var doc = `{
                 }
             }
         },
+        "/checkEmail": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Check If Email exists in DB",
+                "parameters": [
+                    {
+                        "description": "Data Format to check email existence",
+                        "name": "Data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CheckEmail"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ResponseWithNoBody"
+                        }
+                    }
+                }
+            }
+        },
         "/completeProject/{id}": {
             "post": {
                 "consumes": [
@@ -1964,6 +2009,14 @@ var doc = `{
                 }
             }
         },
+        "models.CheckEmail": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CountryData": {
             "type": "object",
             "properties": {
@@ -2143,6 +2196,9 @@ var doc = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "isComment": {
+                    "type": "boolean"
                 },
                 "isOwner": {
                     "type": "boolean"
