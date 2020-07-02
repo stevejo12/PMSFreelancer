@@ -232,6 +232,18 @@ func GetAllUserProjects(c *gin.Context) {
 			project.IsOwner = false
 		}
 
+		// enable isComment
+		ableToComment, err := helpers.CheckCommentProjectExist(project.ID, ownerID, freelancerID, project.IsOwner)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
+		project.IsComment = ableToComment
+
 		allData = append(allData, project)
 	}
 

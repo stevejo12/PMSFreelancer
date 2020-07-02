@@ -36,3 +36,30 @@ func GetUserInformationForReview(id int) (models.UserInformationForReview, error
 
 	return result, nil
 }
+
+// CheckCommentProjectExist => check if the user has commented before
+func CheckCommentProjectExist(projectID int, ownerID string, freelancerID string, isOwner bool) (bool, error) {
+	var writer, recipient, isOwnerVal string
+
+	if isOwner {
+		writer = ownerID
+		recipient = freelancerID
+		isOwnerVal = "1"
+	} else {
+		writer = freelancerID
+		recipient = ownerID
+		isOwnerVal = "0"
+	}
+
+	data, err := config.DB.Query("SELECT * FROM comment WHERE project_id=? AND member_id=? AND user_id=? AND is_owner=?", projectID, writer, recipient, isOwnerVal)
+
+	if err != nil {
+		return false, errors.New("Server unable to retrieve comment information")
+	}
+
+	if !data.Next() {
+		return false, nil
+	}
+
+	return true, nil
+}
