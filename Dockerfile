@@ -15,6 +15,7 @@ RUN chmod 0700 /root/.ssh/id_rsa && \
 RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN ssh-keyscan 13.229.188.59 >> /root/.ssh/known_hosts
+RUN ssh-keyscan 13.250.177.223 >> /root/.ssh/known_hosts
 
 RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
 
