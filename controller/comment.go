@@ -90,7 +90,7 @@ func getUserReviews(id string) ([]models.ReviewInfo, error) {
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /userReview [post]
 func AddUserReview(c *gin.Context) {
-	id := idToken
+	id, err := strconv.Atoi(idToken)
 	param := models.AddReview{}
 
 	if err != nil {
@@ -110,12 +110,19 @@ func AddUserReview(c *gin.Context) {
 	}
 
 	var ownerID, freelancerID int
-	err := config.DB.QueryRow("SELECT owner_id, accepted_memberid FROM project WHERE id=?", id).Scan(&ownerID, &freelancerID)
+	err = config.DB.QueryRow("SELECT owner_id, accepted_memberid FROM project WHERE id=?", param.ProjectID).Scan(&ownerID, &freelancerID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "Server unable to get owner and freelancer information"})
+		return
+	}
+
+	if ownerID != id && freelancerID != id {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": "This user is neither owner nor freelancer on the project"})
 		return
 	}
 
