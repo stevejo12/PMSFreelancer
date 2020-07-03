@@ -43,6 +43,8 @@ func userEducation(id string) ([]models.EducationReturnValue, error) {
 		return []models.EducationReturnValue{}, errors.New("Something is wrong with the data retrieved")
 	}
 
+	defer resp.Close()
+
 	return returnData, nil
 }
 
@@ -161,6 +163,8 @@ func DeleteEducation(c *gin.Context) {
 			"message": "The education ID doesn't exist in the database"})
 		return
 	}
+
+	defer dataID.Close()
 
 	_, err = config.DB.Exec("DELETE FROM education WHERE id=?", id)
 

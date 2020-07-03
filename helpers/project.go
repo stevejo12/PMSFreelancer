@@ -103,6 +103,7 @@ func GetInterestedMemberNames(id string) ([]models.ProjectDetailInterestedMember
 	}
 
 	data, err := config.DB.Query(query)
+	defer data.Close()
 
 	if err != nil {
 		return []models.ProjectDetailInterestedMember{}, errors.New("Server has issues executing query to the database")

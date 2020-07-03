@@ -74,6 +74,8 @@ func getUserReviews(id string) ([]models.ReviewInfo, error) {
 		allData = append(allData, returnData)
 	}
 
+	defer result.Close()
+
 	return allData, nil
 }
 

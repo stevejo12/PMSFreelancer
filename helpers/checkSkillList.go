@@ -10,6 +10,7 @@ func SkillList(s []int) error {
 	var allSkills []interface{}
 
 	rows, err := config.DB.Query("SELECT id from skills")
+	defer rows.Close()
 
 	if err != nil {
 		return errors.New("Server is unable to execute query to the database")

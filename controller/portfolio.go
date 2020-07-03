@@ -123,6 +123,7 @@ func DeleteUserPortfolio(c *gin.Context) {
 
 	// check if the portfolio id exist
 	dataID, err := config.DB.Query("SELECT * FROM portfolio WHERE id=?", id)
+	defer dataID.Close()
 
 	if !dataID.Next() {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -147,6 +148,7 @@ func DeleteUserPortfolio(c *gin.Context) {
 
 func allUserPortfolio(id string) ([]models.PortfolioReturnParameter, error) {
 	data, err := config.DB.Query("SELECT id, title, description, link, start_year, end_year  FROM portfolio WHERE user_id=? ORDER BY start_year DESC, end_year DESC, id DESC", id)
+	defer data.Close()
 
 	if err != nil {
 		return []models.PortfolioReturnParameter{}, errors.New(err.Error())

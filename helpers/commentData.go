@@ -3,6 +3,7 @@ package helpers
 import (
 	"github.com/stevejo12/PMSFreelancer/config"
 	"github.com/stevejo12/PMSFreelancer/models"
+
 	// "PMSFreelancer/config"
 	// "PMSFreelancer/models"
 	"database/sql"
@@ -52,6 +53,7 @@ func CheckCommentProjectExist(projectID int, ownerID string, freelancerID string
 	}
 
 	data, err := config.DB.Query("SELECT * FROM comment WHERE project_id=? AND member_id=? AND user_id=? AND is_owner=?", projectID, writer, recipient, isOwnerVal)
+	defer data.Close()
 
 	if err != nil {
 		return false, errors.New("Server unable to retrieve comment information")

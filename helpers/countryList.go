@@ -8,6 +8,7 @@ import (
 
 func CountryList(country_id int) error {
 	rows, err := config.DB.Query("SELECT id from app_countries")
+	defer rows.Close()
 
 	if err != nil {
 		return err

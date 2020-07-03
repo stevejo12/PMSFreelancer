@@ -19,6 +19,7 @@ import (
 
 func getAllSkills() ([]models.UserSkills, error) {
 	data, err := config.DB.Query("SELECT * FROM skills")
+	defer data.Close()
 	var allData []models.UserSkills
 
 	if err != nil {
@@ -77,6 +78,7 @@ func getSkillNames(param string) ([]string, error) {
 	}
 
 	data, err := config.DB.Query(initialQuery)
+	defer data.Close()
 
 	if err != nil {
 		return result, errors.New("Server unable to execute query to database")
@@ -105,6 +107,7 @@ func userSkills(id string) ([]models.UserSkills, error) {
 	}
 
 	resp, err := config.DB.Query(query)
+	defer resp.Close()
 
 	if err != nil {
 		return []models.UserSkills{}, errors.New(err.Error())

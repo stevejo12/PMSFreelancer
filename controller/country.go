@@ -42,6 +42,8 @@ func GetAllCountries(c *gin.Context) {
 		allCountries = append(allCountries, country)
 	}
 
+	defer rows.Close()
+
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "Country List has been retrieved",

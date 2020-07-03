@@ -75,6 +75,7 @@ func FindDuplicateInteger(a []int, b []int) []int {
 func IsThisAttachmentAlreadyExistInDatabase(link string) (int, error) {
 	querySelect := "SELECT id FROM project_links WHERE project_link=\"" + link + "\""
 	data, err := config.DB.Query(querySelect)
+	defer data.Close()
 
 	if err != nil {
 		return -1, errors.New("Server is unable to execute query to the database")
@@ -97,6 +98,7 @@ func RemoveAttachmentThatIsDeletedByUser(attachment []string, projectID string) 
 	query := "SELECT project_link FROM project_links WHERE project_id=" + projectID
 
 	allProjectAttachment, err := config.DB.Query(query)
+	defer allProjectAttachment.Close()
 
 	if err != nil {
 		return errors.New("Server is unable to execute query to the database")

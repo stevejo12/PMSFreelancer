@@ -12,6 +12,7 @@ func IsThisCategoryIDExist(id int) error {
 	var allCategories []interface{}
 
 	rows, err := config.DB.Query("SELECT id from project_category")
+	defer rows.Close()
 
 	if err != nil {
 		return errors.New("Server is unable to execute query to the database")

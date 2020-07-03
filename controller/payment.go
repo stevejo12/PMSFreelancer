@@ -160,6 +160,7 @@ func DepositMoney(c *gin.Context) {
 	notUnique := true
 	for notUnique {
 		data, err := config.DB.Query("SELECT * FROM payment_request WHERE amount=? && type=\"Deposit\" && status=\"Pending\"", amountPaid)
+		defer data.Close()
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -205,6 +206,7 @@ func checkDepositHistory(data []models.GetTransactionMutationRequest) error {
 		// date := data[i].Date
 
 		data, err := config.DB.Query("SELECT id, user_id, amount FROM payment_request WHERE amount=? AND type=\"Deposit\" AND status=\"Pending\"", amount)
+		defer data.Close()
 
 		if err != nil {
 			return errors.New("Server is unable to delete the data in the database")
@@ -278,6 +280,7 @@ func GetUserWithdrawRequest(c *gin.Context) {
 	query := "SELECT id, amount, name, account_number FROM payment_request WHERE type=\"Withdraw\" AND status=\"Pending\" AND user_id=" + id
 
 	resp, err := config.DB.Query(query)
+	defer resp.Close()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -417,6 +420,7 @@ func GetAllWithdrawRequest(c *gin.Context) {
 	query := "SELECT id, amount, name, account_number, user_id FROM payment_request WHERE type=\"Withdraw\" AND status=\"Pending\""
 
 	resp, err := config.DB.Query(query)
+	defer resp.Close()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

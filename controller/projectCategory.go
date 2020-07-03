@@ -22,6 +22,7 @@ import (
 func GetAllProjectCategory(c *gin.Context) {
 	allData := []models.ProjectCategoryData{}
 	result, err := config.DB.Query("SELECT * FROM project_category")
+	defer result.Close()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

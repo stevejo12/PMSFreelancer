@@ -18,6 +18,8 @@ import (
 func userExperience(id string) ([]models.ExperienceReturnValue, error) {
 	resp, err := config.DB.Query("SELECT * FROM experience WHERE user_id=? ORDER BY starting_year DESC, ending_year DESC, id DESC", id)
 
+	defer resp.Close()
+
 	if err != nil {
 		return []models.ExperienceReturnValue{}, errors.New("Server unable to execute query to database")
 	}
@@ -163,6 +165,7 @@ func DeleteExperience(c *gin.Context) {
 
 	// check if the Experience id exist
 	dataID, err := config.DB.Query("SELECT * FROM experience WHERE id=?", id)
+	defer dataID.Close()
 
 	if !dataID.Next() {
 		c.JSON(http.StatusBadRequest, gin.H{

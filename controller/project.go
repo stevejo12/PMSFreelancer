@@ -23,6 +23,7 @@ func getProjectAttachments(projectID string) ([]models.ProjectLinksResponse, err
 	result := []models.ProjectLinksResponse{}
 
 	data, err := config.DB.Query("SELECT id, project_link FROM project_links WHERE project_id=?", projectID)
+	defer data.Close()
 
 	if err != nil {
 		return nil, errors.New("Server unable to execute query to database")
@@ -197,6 +198,7 @@ func GetAllUserProjects(c *gin.Context) {
 	query = query + "(owner_id=" + id + " OR accepted_memberid=" + id + ") ORDER BY id DESC"
 
 	result, err := config.DB.Query(query)
+	defer result.Close()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -351,6 +353,7 @@ func ProjectDetail(c *gin.Context) {
 	id := c.Param("id")
 
 	result, err := config.DB.Query("SELECT id, title, skills, price, owner_id, interested_members, description, category_id, status FROM project WHERE id=?", id)
+	defer result.Close()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -394,6 +397,7 @@ func ProjectDetail(c *gin.Context) {
 		// get the detail about the owner
 		ownerInfo := models.OwnerInfo{}
 		ownerData, err := config.DB.Query("SELECT id, email, first_name, last_name, location, created_at, phone_code, phone_number FROM login WHERE id=?", dbResult.OwnerID)
+		defer ownerData.Close()
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -958,6 +962,7 @@ func getAllProjectForFilter() ([]models.FilterNeededData, error) {
 	var allData []models.FilterNeededData
 
 	data, err := config.DB.Query("SELECT id, title, description, skills, category_id FROM project")
+	defer data.Close()
 
 	if err != nil {
 		return []models.FilterNeededData{}, errors.New("Server is unable to execute query to the database")
@@ -1121,6 +1126,7 @@ func SearchProject(c *gin.Context) {
 		query = query + " LIMIT " + strconv.Itoa(startingRecordNumber) + "," + strconv.Itoa(endingRecordNumber)
 
 		filteredProjectData, err := config.DB.Query(query)
+		defer filteredProjectData.Close()
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
