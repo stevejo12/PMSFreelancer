@@ -435,7 +435,7 @@ func ProjectDetail(c *gin.Context) {
 		}
 
 		// get # of completed project
-		projectCompleted, err := helpers.GetUserCompletedProject(id)
+		projectCompleted, err := helpers.GetUserCompletedProject(strconv.Itoa(ownerInfo.ID))
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
