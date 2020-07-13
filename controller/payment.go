@@ -152,12 +152,12 @@ func DepositMoney(c *gin.Context) {
 
 func checkDepositHistory(data []models.GetTransactionMutationRequest) error {
 	for i := 0; i < len(data); i++ {
-		intAmount, err := strconv.Atoi(data[i].Amount)
-		if err != nil {
-			fmt.Println("err convertion: ", err.Error())
+		floatAmount, errAmount := strconv.ParseFloat(data[i].Amount, 64)
+		if errAmount != nil {
+			fmt.Println("data amount convertion error: ", errAmount.Error())
 		}
 
-		fmt.Println("amount: ", intAmount)
+		intAmount := int(floatAmount)
 		amount := intAmount
 		// date := data[i].Date
 
