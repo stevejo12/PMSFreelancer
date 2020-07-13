@@ -831,6 +831,15 @@ func GetUserProfile(c *gin.Context) {
 	data.PhoneNumber = dataQuery.PhoneNumber
 	data.Review = userReviews
 
+	// id admin only
+	// change id number
+	// TO DO: change the id number to id admin
+	if dataQuery.ID == 100 {
+		data.IsAdmin = true
+	} else {
+		data.IsAdmin = false
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,
 		"message": "All User Profile data have been successfully retrieved",

@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -19,59 +17,11 @@ import (
 	"github.com/stevejo12/PMSFreelancer/models"
 )
 
-type testResponse struct {
-	Name    string
-	Email   string
-	Address string
-	City    string
-	Join_at string
-}
-
 var accNumber = "2440277481"
 
 var mootaAPIToken = "aWC0mYOl1njZ5Owu2ItnMCgVty6OId6CFVCWrOs2z1eSTu31iy"
 
 const baseAPIMoota = "https://app.moota.co/"
-
-func GetMootaProfile(c *gin.Context) {
-	url := baseAPIMoota + "api/v1/profile"
-
-	fmt.Println(url)
-
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+mootaAPIToken)
-	res, err := client.Do(req)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": "Something is wrong with the request"})
-		return
-	}
-
-	if res.StatusCode == http.StatusOK {
-		body, readErr := ioutil.ReadAll(res.Body)
-		if readErr != nil {
-			log.Fatal(readErr)
-		}
-
-		userInfo := testResponse{}
-		jsonErr := json.Unmarshal(body, &userInfo)
-		if jsonErr != nil {
-			log.Fatal(jsonErr)
-		}
-
-		fmt.Println(userInfo.Name)
-		fmt.Println(userInfo.Email)
-		fmt.Println(userInfo.Address)
-		fmt.Println(userInfo.City)
-		fmt.Println(userInfo.Join_at)
-	}
-
-	fmt.Println(res)
-}
 
 // GetTransactionMutation get payment detail
 func GetTransactionMutation(c *gin.Context) {
@@ -93,7 +43,7 @@ func GetTransactionMutation(c *gin.Context) {
 	err = checkDepositHistory(respData)
 
 	if err != nil {
-		fmt.Println("error depositting money")
+		fmt.Println("error depositing money")
 		fmt.Println(err.Error())
 	}
 
@@ -202,14 +152,20 @@ func DepositMoney(c *gin.Context) {
 
 func checkDepositHistory(data []models.GetTransactionMutationRequest) error {
 	for i := 0; i < len(data); i++ {
-		amount := data[i].Amount
+		intAmount, err := strconv.Atoi(data[i].Amount)
+		if err != nil {
+			fmt.Println("err convertion: ", err.Error())
+		}
+
+		fmt.Println("amount: ", intAmount)
+		amount := intAmount
 		// date := data[i].Date
 
 		data, err := config.DB.Query("SELECT id, user_id, amount FROM payment_request WHERE amount=? AND type=\"Deposit\" AND status=\"Pending\"", amount)
 		defer data.Close()
 
 		if err != nil {
-			return errors.New("Server is unable to delete the data in the database")
+			return errors.New("Server is unable to retrieve data from the database")
 		}
 
 		var dataID, dataUserID, dataAmount int

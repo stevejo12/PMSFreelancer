@@ -75,6 +75,7 @@ type UserProfile struct {
 	PhoneCode        int                        `json:"phoneCode"`
 	PhoneNumber      int                        `json:"phoneNumber"`
 	Review           []ReviewInfo               `json:"review"`
+	IsAdmin          bool                       `json:"isAdmin"`
 }
 
 type QueryUserProfile struct {

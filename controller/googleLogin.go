@@ -20,7 +20,7 @@ import (
 
 var (
 	googleOauthConfigLogin = &oauth2.Config{
-		RedirectURL:  "http://159.89.202.223:8080/v1/signin-callback",
+		RedirectURL:  "http://api.spirits.id:8080/v1/signin-callback",
 		ClientID:     "149260447643-kpqpukphmhj907876qg6q1rmhhit7831.apps.googleusercontent.com",
 		ClientSecret: "0OWYl4x5-74O2Mx5AiZgndC_",
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
@@ -47,6 +47,7 @@ func HandleCallbackLoginGoogle(c *gin.Context) {
 	token, err := googleOauthConfigLogin.Exchange(oauth2.NoContext, c.Request.FormValue("code"))
 
 	if err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
 			"message": "There is a problem exchanging token with google",
