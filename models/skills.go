@@ -11,3 +11,8 @@ type UserSkills struct {
 type UpdateSkills struct {
 	Skills []int
 }
+
+type SkillRaw struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}

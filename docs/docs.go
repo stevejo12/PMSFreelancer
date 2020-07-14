@@ -2001,6 +2001,17 @@ var doc = `{
                 }
             }
         },
+        "models.CategoryRaw": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ChangePassword": {
             "type": "object",
             "properties": {
@@ -2375,6 +2386,10 @@ var doc = `{
                 "category": {
                     "type": "string"
                 },
+                "categoryRaw": {
+                    "type": "object",
+                    "$ref": "#/definitions/models.CategoryRaw"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -2393,6 +2408,12 @@ var doc = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "skillRaw": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SkillRaw"
+                    }
                 },
                 "skills": {
                     "type": "array",
@@ -2720,6 +2741,17 @@ var doc = `{
                 }
             }
         },
+        "models.SkillRaw": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "models.TokenResponse": {
             "type": "object",
             "properties": {
@@ -2793,6 +2825,9 @@ var doc = `{
         "models.UserProfile": {
             "type": "object",
             "properties": {
+                "averageRating": {
+                    "type": "number"
+                },
                 "balance": {
                     "type": "number"
                 },
@@ -2819,6 +2854,9 @@ var doc = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "isAdmin": {
+                    "type": "boolean"
                 },
                 "lastName": {
                     "type": "string"

@@ -101,6 +101,8 @@ type ProjectDetailResponse struct {
 	Description       string                          `json:"description"`
 	Category          string                          `json:"category"`
 	Status            string                          `json:"status"`
+	CategoryRaw       CategoryRaw                     `json:"categoryRaw"`
+	SkillRaw          []SkillRaw                      `json:"skillRaw"`
 }
 
 type ProjectDetailInterestedMember struct {

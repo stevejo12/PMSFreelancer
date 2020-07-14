@@ -812,6 +812,16 @@ func GetUserProfile(c *gin.Context) {
 		return
 	}
 
+	// get average rating
+	averageRating, err := helpers.GetAverageUserRating(userReviews)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
 	// arrange all data
 	data.Education = educationData
 	data.Experience = experienceData
@@ -830,11 +840,12 @@ func GetUserProfile(c *gin.Context) {
 	data.PhoneCode = dataQuery.PhoneCode
 	data.PhoneNumber = dataQuery.PhoneNumber
 	data.Review = userReviews
+	data.AverageRating = averageRating
 
 	// id admin only
-	// change id number
+	// change id number admin =  43
 	// TO DO: change the id number to id admin
-	if dataQuery.ID == 100 {
+	if dataQuery.ID == 43 {
 		data.IsAdmin = true
 	} else {
 		data.IsAdmin = false
@@ -1034,6 +1045,16 @@ func GetUserProfileByID(c *gin.Context) {
 		return
 	}
 
+	// get average rating
+	averageRating, err := helpers.GetAverageUserRating(userReviews)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    http.StatusInternalServerError,
+			"message": err.Error()})
+		return
+	}
+
 	// arrange all data
 	data.Education = educationData
 	data.Experience = experienceData
@@ -1050,6 +1071,7 @@ func GetUserProfileByID(c *gin.Context) {
 	data.Portfolio = userPortfolio
 	data.Balance = dataQuery.Balance
 	data.Review = userReviews
+	data.AverageRating = averageRating
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    http.StatusOK,

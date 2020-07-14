@@ -465,6 +465,26 @@ func ProjectDetail(c *gin.Context) {
 			return
 		}
 
+		// get category raw
+		categoryRaw, err := helpers.GetCategoryRaw(dbResult.Category)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
+		// get skill raw
+		skillRaw, err := helpers.GetSkillRaw(dbResult.Skills)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": err.Error()})
+			return
+		}
+
 		// construct the response to user
 		data.ID = dbResult.ID
 		data.Title = dbResult.Title
@@ -476,6 +496,8 @@ func ProjectDetail(c *gin.Context) {
 		data.Description = dbResult.Description
 		data.Category = categoryName
 		data.Status = dbResult.Status
+		data.CategoryRaw = categoryRaw
+		data.SkillRaw = skillRaw
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -622,7 +644,7 @@ func AcceptProjectInterest(c *gin.Context) {
 	}
 
 	if param.TrelloKey == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"code":    4001,
 			"message": "Trello Key should not be empty"})
 		return
@@ -669,7 +691,7 @@ func AcceptProjectInterest(c *gin.Context) {
 		}
 
 		if !enoughBalance {
-			c.JSON(http.StatusBadRequest, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"code":    4002,
 				"message": "Effective balance is not enough. Please top up first"})
 			return

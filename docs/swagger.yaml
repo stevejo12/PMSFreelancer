@@ -11,6 +11,13 @@ definitions:
       starRating:
         type: integer
     type: object
+  models.CategoryRaw:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   models.ChangePassword:
     properties:
       email:
@@ -254,6 +261,9 @@ definitions:
         type: array
       category:
         type: string
+      categoryRaw:
+        $ref: '#/definitions/models.CategoryRaw'
+        type: object
       description:
         type: string
       id:
@@ -267,6 +277,10 @@ definitions:
         type: object
       price:
         type: number
+      skillRaw:
+        items:
+          $ref: '#/definitions/models.SkillRaw'
+        type: array
       skills:
         items:
           type: string
@@ -480,6 +494,13 @@ definitions:
           $ref: '#/definitions/models.SearchProjectQuery'
         type: array
     type: object
+  models.SkillRaw:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   models.TokenResponse:
     properties:
       expire:
@@ -527,6 +548,8 @@ definitions:
     type: object
   models.UserProfile:
     properties:
+      averageRating:
+        type: number
       balance:
         type: number
       description:
@@ -545,6 +568,8 @@ definitions:
         type: string
       id:
         type: integer
+      isAdmin:
+        type: boolean
       lastName:
         type: string
       location:
