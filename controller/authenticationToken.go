@@ -10,6 +10,7 @@ import (
 )
 
 var idToken string
+var isAdmin bool
 
 // AuthenticationToken => authentication to get a token for login into SPIRITS
 func AuthenticationToken(c *gin.Context) {
@@ -54,6 +55,7 @@ func AuthenticationToken(c *gin.Context) {
 		}
 
 		idToken = claimsSwagger.Username
+		isAdmin = claimsSwagger.IsAdmin
 		err = nil
 	}
 

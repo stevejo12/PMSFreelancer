@@ -373,6 +373,14 @@ func DeleteWithdrawRequest(c *gin.Context) {
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /allWithdrawRequests [get]
 func GetAllWithdrawRequest(c *gin.Context) {
+	if !isAdmin {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code":    http.StatusUnauthorized,
+			"message": "This is not the admin",
+			"data":    []models.AllWithdrawListData{}})
+		return
+	}
+
 	query := "SELECT id, amount, name, account_number, user_id FROM payment_request WHERE type=\"Withdraw\" AND status=\"Pending\""
 
 	resp, err := config.DB.Query(query)
@@ -434,6 +442,14 @@ func GetAllWithdrawRequest(c *gin.Context) {
 // @Failure 500 {object} models.ResponseWithNoBody
 // @Router /completeWithdrawRequest/{id} [put]
 func CompleteWithdrawRequest(c *gin.Context) {
+	if !isAdmin {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code":    http.StatusUnauthorized,
+			"message": "This is not the admin",
+			"data":    []models.AllWithdrawListData{}})
+		return
+	}
+
 	requestID := c.Param("id")
 	query := "SELECT type, status FROM payment_request WHERE id=" + requestID
 

@@ -11,8 +11,17 @@ import (
 
 func generateToken(userID string) (string, time.Time, error) {
 	expirationTime := time.Now().Add(30 * time.Minute)
+
+	var isAdmin bool
+	if userID == "43" {
+		isAdmin = true
+	} else {
+		isAdmin = false
+	}
+
 	claims := &models.TokenClaims{
 		Username: userID,
+		IsAdmin:  isAdmin,
 		StandardClaims: jwt.StandardClaims{
 			// In JWT, the expiry time is expressed as unix milliseconds
 			ExpiresAt: expirationTime.Unix(),
