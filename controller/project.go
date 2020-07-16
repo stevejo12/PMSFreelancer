@@ -983,7 +983,7 @@ func RejectReviewProject(c *gin.Context) {
 func getAllProjectForFilter() ([]models.FilterNeededData, error) {
 	var allData []models.FilterNeededData
 
-	data, err := config.DB.Query("SELECT id, title, description, skills, category_id FROM project")
+	data, err := config.DB.Query("SELECT id, title, description, skills, category_id FROM project WHERE status=\"Listed\"")
 	defer data.Close()
 
 	if err != nil {
