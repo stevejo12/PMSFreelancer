@@ -32,6 +32,7 @@ func init() {
 // @contact.name API Support
 // @BasePath /v1
 func main() {
+	// test branch
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Logger())
